@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:rich="http://richfaces.org/rich" template="/WEB-INF/templates/default.xhtml">
+  <ui:define name="content">
+    <h1>Upload a File</h1>
+
+    <h:form enctype="multipart/form-data" prependId="false">
+      <h:panelGrid columns="3">
+        <h:outputLabel for="description" value="Description:"/>
+        <h:inputText id="description" value="#{fileUpload.description}" />
+        <h:message for="description" />
+        
+        <h:outputLabel for="file" value="Input File:"/>
+        <rich:fileUpload id="file" maxFilesQuantity="1"/>
+        <h:message for="file" />
+      </h:panelGrid>
+      
+      <h:commandButton value="submit" action="#{fileUpload.save}" />
+    </h:form>
+  </ui:define>
+</ui:composition>
