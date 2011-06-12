@@ -38,6 +38,7 @@
       <artifactId>weld-servlet</artifactId>
       <version>1.0.1-Final</version>
     </dependency>
+    
     <dependency>
       <groupId>org.glassfish.web</groupId>
       <artifactId>el-impl</artifactId>
