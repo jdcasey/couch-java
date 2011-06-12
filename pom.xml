@@ -38,7 +38,6 @@
       <artifactId>weld-servlet</artifactId>
       <version>1.0.1-Final</version>
     </dependency>
-    
     <dependency>
       <groupId>org.glassfish.web</groupId>
       <artifactId>el-impl</artifactId>
@@ -71,7 +70,6 @@
           </dependencies> -->
           <configuration>
             <contextPathSpec>file-depot</contextPathSpec>
-            <jettyEnvXml>${project.basedir}/src/test/resources/jetty-env.xml</jettyEnvXml>
             <scanIntervalSeconds>3</scanIntervalSeconds>
           </configuration>
         </plugin>
@@ -79,6 +77,7 @@
           <artifactId>maven-war-plugin</artifactId>
           <version>2.1.1</version>
           <configuration>
+            <archiveClasses>false</archiveClasses>
             <webResources>
               <webResource>
                 <directory>src/main/webapp</directory>

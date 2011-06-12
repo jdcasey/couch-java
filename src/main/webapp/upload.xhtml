@@ -13,7 +13,7 @@
         <h:message for="description" />
         
         <h:outputLabel for="file" value="Input File:"/>
-        <rich:fileUpload id="file" maxFilesQuantity="1"/>
+        <rich:fileUpload id="file" maxFilesQuantity="1" fileUploadListener="#{fileUpload.listener}" />
         <h:message for="file" />
       </h:panelGrid>
       

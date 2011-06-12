@@ -2,21 +2,33 @@ package org.commonjava.web.fd.controller;
 
 import java.io.File;
 
-import javax.enterprise.inject.Model;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 
-@Model
+import org.commonjava.util.logging.Logger;
+import org.richfaces.event.FileUploadEvent;
+import org.richfaces.model.UploadedFile;
+
+@RequestScoped
+@ManagedBean( name = "fileUpload" )
 public class FileUpload
 {
 
-    // private final Logger log = new Logger( getClass() );
+    private final Logger log = new Logger( getClass() );
 
     private String description;
 
     private File file;
 
+    public void listener( final FileUploadEvent uploadEvent )
+    {
+        final UploadedFile f = uploadEvent.getUploadedFile();
+        log.info( "\n\n\nSaved: " + f.getName() + "\nSize: " + f.getSize() + "\n\n\n" );
+    }
+
     public void save()
     {
-        System.out.println( "\n\n\nSaved: " + file.getAbsolutePath() + "\nDescription: '" + description + "'\n\n\n" );
+        log.info( "\n\n\nSaved: " + file.getAbsolutePath() + "\nDescription: '" + description + "'\n\n\n" );
     }
 
     public File getFile()
@@ -26,7 +38,7 @@ public class FileUpload
 
     public void setFile( final File file )
     {
-        System.out.println( "binding file: '" + file + "'" );
+        log.info( "binding file: '" + file + "'" );
         this.file = file;
     }
 
@@ -37,7 +49,7 @@ public class FileUpload
 
     public void setDescription( final String description )
     {
-        System.out.println( "binding '" + description + "'" );
+        log.info( "binding '" + description + "'" );
         this.description = description;
     }
 }
