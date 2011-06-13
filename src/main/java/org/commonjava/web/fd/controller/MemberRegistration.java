@@ -7,7 +7,6 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
-import javax.transaction.UserTransaction;
 
 import org.commonjava.web.fd.data.MemberRepository;
 import org.commonjava.web.fd.model.Member;
@@ -25,8 +24,8 @@ public class MemberRegistration
     @MemberRepository
     private EntityManager em;
 
-    @Inject
-    private UserTransaction utx;
+    // @Inject
+    // private UserTransaction utx;
 
     @Inject
     private Event<Member> memberEventSrc;
@@ -45,10 +44,10 @@ public class MemberRegistration
     {
         // log.info( "Registering " + newMember.getFirstName() + " " + newMember.getLastName() );
         // UserTransaction only needed when bean is not an EJB
-        utx.begin();
+        // utx.begin();
         em.joinTransaction();
         em.persist( newMember );
-        utx.commit();
+        // utx.commit();
         memberEventSrc.fire( newMember );
         initNewMember();
     }

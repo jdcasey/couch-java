@@ -13,7 +13,6 @@ import org.richfaces.model.UploadedFile;
 @ManagedBean( name = "fileUpload" )
 public class FileUpload
 {
-
     private final Logger log = new Logger( getClass() );
 
     private String description;
@@ -23,6 +22,7 @@ public class FileUpload
     public void listener( final FileUploadEvent uploadEvent )
     {
         final UploadedFile f = uploadEvent.getUploadedFile();
+        f.getInputStream();
         log.info( "\n\n\nSaved: " + f.getName() + "\nSize: " + f.getSize() + "\n\n\n" );
     }
 
