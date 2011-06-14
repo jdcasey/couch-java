@@ -7,29 +7,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import javax.inject.Named;
 
 import org.commonjava.util.logging.Logger;
 
 @Named( "standalone" )
 @ApplicationScoped
-@ManagedBean
 public class StandaloneFileDepotConfiguration implements FileDepotConfiguration
 {
 
-    private static final String CONFIG_PATH = "file-depot.properties";
+    protected static final String CONFIG_PATH = "file-depot.properties";
 
-    private static final String KEY_UPLOAD_DIR = "upload.directory";
+    protected static final String KEY_UPLOAD_DIR = "upload.directory";
 
-    private static final String DEFAULT_UPLOAD_DIR = System.getProperty( "java.io.tmpdir", "/tmp" ) + "/uploads";
+    protected static final String DEFAULT_UPLOAD_DIR = System.getProperty( "java.io.tmpdir", "/tmp" ) + "/uploads";
 
     private final Logger logger = new Logger( getClass() );
 
     private File uploadDir;
 
-    /* (non-Javadoc)
+    /**
      * @see org.commonjava.web.fd.config.FileDepotConfiguration#getUploadDir()
      */
     @Override
@@ -38,7 +37,8 @@ public class StandaloneFileDepotConfiguration implements FileDepotConfiguration
         return uploadDir;
     }
 
-    public void loadConfiguration()
+    @PostConstruct
+    protected void loadConfiguration()
     {
         final Properties props = new Properties();
 

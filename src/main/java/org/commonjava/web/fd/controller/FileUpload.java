@@ -11,7 +11,6 @@ import java.io.InputStream;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
@@ -25,7 +24,6 @@ public class FileUpload
     private final Logger log = new Logger( getClass() );
 
     @Inject
-    @Named( "standalone" )
     private FileDepotConfiguration config;
 
     private String description;
@@ -36,10 +34,16 @@ public class FileUpload
     {
         final UploadedFile f = uploadEvent.getUploadedFile();
 
-        final File dest = new File( config.getUploadDir(), f.getName() );
-        dest.mkdirs();
+        final File dir = config.getUploadDir();
+        if ( ( !dir.exists() || !dir.isDirectory() ) && !dir.mkdirs() )
+        {
+            log.error( "\n\n\nFailed to create directory: %s", dir );
+            return;
+        }
 
-        log.info( "\n\n\nSaved: %s\nSize: %s\nTo: %s\n\n\n", f.getName(), f.getSize(), dest );
+        final File dest = new File( config.getUploadDir(), f.getName() );
+
+        log.info( "\n\n\nSaving: %s\nSize: %s\nTo: %s\n\n\n", f.getName(), f.getSize(), dest );
 
         final InputStream in = f.getInputStream();
         FileOutputStream out = null;
