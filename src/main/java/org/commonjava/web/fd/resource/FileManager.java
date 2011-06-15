@@ -41,7 +41,7 @@ public class FileManager
     public String list()
     {
         SecurityUtils.getSubject()
-                     .checkPermission( "file:read" );
+                     .checkPermission( "view:file-info" );
 
         final StringBuilder sb = new StringBuilder();
         for ( final String name : config.getUploadDir()
@@ -93,7 +93,7 @@ public class FileManager
     private FileInfo getFileInfo( final String filename )
     {
         SecurityUtils.getSubject()
-                     .checkPermission( "file:read" );
+                     .checkPermission( "view:file-info" );
 
         File f;
         try
@@ -122,7 +122,7 @@ public class FileManager
     public Response getFile( @PathParam( "name" ) final String filename )
     {
         SecurityUtils.getSubject()
-                     .checkPermission( "file:read" );
+                     .checkPermission( "view:file" );
 
         logger.info( "\n\nDOWNLOAD: %s. Configuration is: %s\n\n", filename, config );
 

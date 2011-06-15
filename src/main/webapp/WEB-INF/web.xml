@@ -29,6 +29,31 @@
           <param-value>enable</param-value>
     </context-param>
  -->    
+ 
+<!--     <filter>
+      <filter-name>HTTP Basic</filter-name>
+      <filter-class>org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter</filter-class>
+    </filter>
+    
+    <filter>
+      <filter-name>Shiro</filter-name>
+      <filter-class>org.apache.shiro.web.servlet.IniShiroFilter</filter-class>
+      <init-param>
+        <param-name>configPath</param-name>
+        <param-value>classpath:shiro.ini</param-value>
+      </init-param>
+    </filter>
+    
+    <filter-mapping>
+      <filter-name>HTTP Basic</filter-name>
+      <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>Shiro</filter-name>
+      <url-pattern>/*</url-pattern>
+    </filter-mapping>
+ --> 
     <!-- JSF 2.0 Servlet activates automatically when the WEB-INF/faces-config.xml descriptor is present -->
     <servlet>
       <servlet-name>Faces Servlet</servlet-name>
