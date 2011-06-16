@@ -4,22 +4,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.apache.shiro.crypto.hash.Sha256Hash;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.apache.shiro.crypto.hash.SimpleHash;
 
-@Ignore
 public class PasswordBuilder
 {
-
-    @Test
-    public void generatePassword()
+    public static void main( final String[] args )
         throws IOException
     {
         final BufferedReader reader = new BufferedReader( new InputStreamReader( System.in ) );
-        System.out.print( "Plaintext: " );
+        System.out.print( "Password: " );
         final String line = reader.readLine();
-        System.out.println( "Encrypted: " + new Sha256Hash( line ).toString() );
+        final SimpleHash hash = new SimpleHash( "SHA-512", line, null, 1 );
+        System.out.println( "Encrypted: " + hash.toBase64() );
     }
 
 }

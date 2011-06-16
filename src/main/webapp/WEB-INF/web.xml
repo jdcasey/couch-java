@@ -13,47 +13,6 @@
         <param-value>Development</param-value>
     </context-param>
     
-<!--     <context-param>
-       <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-       <param-value>server</param-value>
-    </context-param>
-
-    <context-param>
-       <param-name>org.richfaces.SKIN</param-name>
-       <param-value>blueSky</param-value>
-    </context-param>
- -->    
-    <!-- Making the RichFaces skin spread to standard HTML controls -->
-<!--     <context-param>
-          <param-name>org.richfaces.CONTROL_SKINNING</param-name>
-          <param-value>enable</param-value>
-    </context-param>
- -->    
- 
-<!--     <filter>
-      <filter-name>HTTP Basic</filter-name>
-      <filter-class>org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter</filter-class>
-    </filter>
-    
-    <filter>
-      <filter-name>Shiro</filter-name>
-      <filter-class>org.apache.shiro.web.servlet.IniShiroFilter</filter-class>
-      <init-param>
-        <param-name>configPath</param-name>
-        <param-value>classpath:shiro.ini</param-value>
-      </init-param>
-    </filter>
-    
-    <filter-mapping>
-      <filter-name>HTTP Basic</filter-name>
-      <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    
-    <filter-mapping>
-      <filter-name>Shiro</filter-name>
-      <url-pattern>/*</url-pattern>
-    </filter-mapping>
- --> 
     <!-- JSF 2.0 Servlet activates automatically when the WEB-INF/faces-config.xml descriptor is present -->
     <servlet>
       <servlet-name>Faces Servlet</servlet-name>
@@ -67,19 +26,9 @@
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
     
-    <!-- <listener>
-      <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
-    </listener>
-    
-    <resource-env-ref>
-      <description>Object factory for the CDI Bean Manager</description>
-      <resource-env-ref-name>BeanManager</resource-env-ref-name>
-      <resource-env-ref-type>javax.enterprise.inject.spi.BeanManager</resource-env-ref-type>
-    </resource-env-ref> -->
-  	
     <!-- This section is optional. We are allowing index.jsf to handle the root URL (i.e., /). -->
     <welcome-file-list>
         <!-- Add additional files here, if desired, for example: <welcome-file>index.html</welcome-file> -->
-        <welcome-file>index.jsf</welcome-file>
+        <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
 </web-app>

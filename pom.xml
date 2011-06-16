@@ -2,14 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.web</groupId>
-  <artifactId>file-depot</artifactId>
+  <artifactId>workspaces</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>File Depot</name>
+  <name>Workspaces</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jetty.version>6.1.26</jetty.version>
   </properties>
   
   <dependencyManagement>
@@ -66,13 +65,6 @@
       <scope>provided</scope>
     </dependency>
     
-    <!-- CDI Dependencies -->
-    <!-- <dependency>
-      <groupId>org.jboss.weld.servlet</groupId>
-      <artifactId>weld-servlet</artifactId>
-      <version>1.1.1.Final</version>
-    </dependency> -->
-    
     <!-- Bean Validation Dependencies -->
     <dependency>
       <groupId>javax.validation</groupId>
@@ -103,11 +95,6 @@
       <artifactId>hibernate-jpa-2.0-api</artifactId>
       <version>1.0.0.Final</version>
     </dependency>
-    <!-- <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>1.8.0.10</version>
-    </dependency> -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
@@ -151,39 +138,6 @@
       <groupId>org.richfaces.ui</groupId>
       <artifactId>richfaces-components-ui</artifactId>
     </dependency>
-    <!-- <dependency>
-      <groupId>org.richfaces.ui.validator</groupId>
-      <artifactId>richfaces-ui-validator-ui</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.richfaces.ui.validator</groupId>
-      <artifactId>richfaces-ui-validator-api</artifactId>
-    </dependency> -->
-    
-    <!-- <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>r09</version>
-    </dependency> -->
-
-    <!-- <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jstl</artifactId>
-      <version>1.2</version>
-      <scope>runtime</scope>
-    </dependency> -->
-    <!-- <dependency>
-      <groupId>org.glassfish.web</groupId>
-      <artifactId>el-impl</artifactId>
-      <version>2.1.2-b04</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.el</groupId>
-          <artifactId>el-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency> -->
     <dependency>
     	<groupId>commons-io</groupId>
     	<artifactId>commons-io</artifactId>
@@ -267,107 +221,4 @@
       </plugins>
     </pluginManagement>
   </build>
-  <profiles>
-    <profile>
-      <id>run</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>2.5</version>
-            <executions>
-              <execution>
-                <id>copy-webapp-dir</id>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <phase>process-resources</phase>
-                <configuration>
-                  <outputDirectory>${project.build.directory}/war-inplace</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>src/main/webapp</directory>
-                      <excludes>
-                        <exclude>**/*.properties</exclude>
-                        <exclude>**/web.xml</exclude>
-                      </excludes>
-                    </resource>
-                    <resource>
-                      <directory>src/main/webapp</directory>
-                      <includes>
-                        <include>**/*.properties</include>
-                        <include>**/web.xml</include>
-                      </includes>
-                      <filtering>true</filtering>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-war-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>war-inplace</id>
-                <goals>
-                  <goal>inplace</goal>
-                </goals>
-                <phase>prepare-package</phase>
-                <configuration>
-                  <warSourceDirectory>${project.build.directory}/war-inplace</warSourceDirectory>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>jetty-run-fix</id>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                  <tasks>
-                    <move todir="${project.build.directory}/war-inplace.MOVED/WEB-INF/lib">
-                      <fileset dir="${project.build.directory}/war-inplace/WEB-INF/lib" />
-                    </move>
-                  </tasks>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>maven-jetty-plugin</artifactId>
-            <version>${jetty.version}</version>
-            <!-- <dependencies>
-              <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-webapp</artifactId>
-                <version>${jetty.version}</version>
-              </dependency>
-            </dependencies> -->
-            <executions>
-              <execution>
-                <id>jetty-run</id>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                  <webAppSourceDirectory>${project.build.directory}/war-inplace</webAppSourceDirectory>
-                  <classesDirectory>${project.build.directory}war-inplace/WEB-INF/classes</classesDirectory>
-                  <contextPathSpec>${project.artifactId}</contextPathSpec>
-                  <reload>manual</reload>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

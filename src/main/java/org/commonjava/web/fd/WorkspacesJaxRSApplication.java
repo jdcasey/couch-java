@@ -3,8 +3,8 @@ package org.commonjava.web.fd;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-@ApplicationPath( "/files" )
-public class FileDepotApplication
+@ApplicationPath( "/api/1.0" )
+public class WorkspacesJaxRSApplication
     extends Application
 {
 
