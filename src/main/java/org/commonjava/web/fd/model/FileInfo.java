@@ -62,4 +62,14 @@ public class FileInfo
         return String.format( "name=%s\nsize=%s\nlastModified=%s", name, size, lastModified );
     }
 
+    public Long length()
+    {
+        return getSize();
+    }
+
+    public Long lastModified()
+    {
+        return getLastModified().getTime();
+    }
+
 }

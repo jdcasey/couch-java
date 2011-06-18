@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -34,7 +36,7 @@ import org.commonjava.web.fd.model.FileInfo;
 import org.jboss.resteasy.annotations.LinkHeaderParam;
 
 @Path( "/files" )
-@ApplicationScoped
+@RequestScoped
 @RequiresAuthentication
 public class FileManager
 {
@@ -42,7 +44,6 @@ public class FileManager
     private final Logger logger = new Logger( getClass() );
 
     @Inject
-    @ApplicationScoped
     private FileDepotConfiguration config;
 
     @PUT
@@ -140,6 +141,19 @@ public class FileManager
         }
     }
 
+    public List<FileInfo> getFiles()
+    {
+        final List<FileInfo> result = new ArrayList<FileInfo>();
+        for ( final String name : config.getUploadDir()
+                                        .list() )
+        {
+            final File f = new File( config.getUploadDir(), name );
+            result.add( new FileInfo( f ) );
+        }
+
+        return result;
+    }
+
     @GET
     @Path( "list" )
     @Produces( MediaType.TEXT_PLAIN )
@@ -149,10 +163,8 @@ public class FileManager
                      .checkPermission( "view:file-info" );
 
         final StringBuilder sb = new StringBuilder();
-        for ( final String name : config.getUploadDir()
-                                        .list() )
+        for ( final FileInfo f : getFiles() )
         {
-            final File f = new File( config.getUploadDir(), name );
             if ( sb.length() > 0 )
             {
                 sb.append( "\n" );

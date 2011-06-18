@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.Reception;
 import javax.enterprise.inject.Produces;
@@ -21,6 +22,7 @@ import javax.persistence.criteria.Root;
 
 import org.commonjava.web.fd.model.Workspace;
 
+@RequestScoped
 public class WorkspaceManager
 {
     @Inject

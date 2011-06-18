@@ -7,28 +7,42 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedBean;
+import javax.enterprise.inject.Model;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
+import org.commonjava.web.fd.model.FileInfo;
+import org.commonjava.web.fd.rest.FileManager;
 import org.richfaces.event.FileUploadEvent;
 import org.richfaces.model.UploadedFile;
 
-@RequestScoped
-@ManagedBean( name = "fileUpload" )
-public class FileUploader
+@Model
+public class FileAdmin
 {
     private final Logger log = new Logger( getClass() );
 
     @Inject
     private FileDepotConfiguration config;
 
+    @Inject
+    private FileManager fileManager;
+
     private String description;
 
     private File file;
+
+    @Produces
+    @Named
+    public List<FileInfo> getFiles()
+    {
+        final List<FileInfo> files = fileManager.getFiles();
+        return files;
+    }
 
     public void listener( final FileUploadEvent uploadEvent )
     {

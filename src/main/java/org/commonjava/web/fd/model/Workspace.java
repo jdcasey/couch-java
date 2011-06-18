@@ -2,31 +2,31 @@ package org.commonjava.web.fd.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
-@Table( name = "workspaces" )
 public class Workspace
 {
 
     @Id
-    @Column( nullable = false, unique = true, length = 50 )
-    @NotBlank
-    private String id;
+    @Column( nullable = false )
+    @GeneratedValue( strategy = GenerationType.AUTO )
+    private Long id;
 
     @Column( nullable = false, unique = true, length = 128 )
-    @NotBlank
     private String name;
 
-    public String getId()
+    @Column( nullable = false, unique = true, length = 128 )
+    private String pathName;
+
+    public Long getId()
     {
         return id;
     }
 
-    public void setId( final String id )
+    public void setId( final Long id )
     {
         this.id = id;
     }
@@ -39,6 +39,22 @@ public class Workspace
     public void setName( final String name )
     {
         this.name = name;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "Workspace [id=%s, name='%s']", id, name );
+    }
+
+    public String getPathName()
+    {
+        return pathName;
+    }
+
+    public void setPathName( final String pathName )
+    {
+        this.pathName = pathName;
     }
 
 }
