@@ -1,4 +1,4 @@
-package org.commonjava.web.fd.resource;
+package org.commonjava.web.fd.rest;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 

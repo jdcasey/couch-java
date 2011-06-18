@@ -19,7 +19,7 @@ import org.richfaces.model.UploadedFile;
 
 @RequestScoped
 @ManagedBean( name = "fileUpload" )
-public class FileUpload
+public class FileUploader
 {
     private final Logger log = new Logger( getClass() );
 
