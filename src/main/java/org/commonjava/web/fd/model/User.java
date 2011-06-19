@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
@@ -11,6 +12,7 @@ public class User
 {
 
     @Id
+    @Length( min = 4, max = 15 )
     private String username;
 
     @NotBlank
