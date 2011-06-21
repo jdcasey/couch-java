@@ -17,7 +17,7 @@ import javax.inject.Named;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
 import org.commonjava.web.fd.model.FileInfo;
-import org.commonjava.web.fd.rest.FileManager;
+import org.commonjava.web.fd.rest.FileRESTManager;
 import org.richfaces.event.FileUploadEvent;
 import org.richfaces.model.UploadedFile;
 
@@ -30,7 +30,7 @@ public class FileAdmin
     private FileDepotConfiguration config;
 
     @Inject
-    private FileManager fileManager;
+    private FileRESTManager fileManager;
 
     private String description;
 

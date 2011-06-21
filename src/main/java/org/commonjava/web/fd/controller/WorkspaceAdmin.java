@@ -15,7 +15,7 @@ import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.fd.data.WorkspaceManager.WorkspaceRepository;
+import org.commonjava.web.fd.data.WorkspaceDataManager.WorkspaceRepository;
 import org.commonjava.web.fd.model.Workspace;
 
 @Model

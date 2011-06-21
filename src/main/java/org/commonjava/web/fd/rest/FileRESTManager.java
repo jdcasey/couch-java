@@ -38,7 +38,7 @@ import org.jboss.resteasy.annotations.LinkHeaderParam;
 @Path( "/files" )
 @RequestScoped
 @RequiresAuthentication
-public class FileManager
+public class FileRESTManager
 {
 
     private final Logger logger = new Logger( getClass() );

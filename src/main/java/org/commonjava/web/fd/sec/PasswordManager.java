@@ -16,7 +16,7 @@ public class PasswordManager
 
     private final SecureRandom randomGenerator = new SecureRandom();
 
-    public String generateOneTimePassword()
+    public String generatePassword()
     {
         final StringBuilder sb = new StringBuilder();
         for ( int i = 0; i < ONETIME_PASSWORD_LENGTH; i++ )

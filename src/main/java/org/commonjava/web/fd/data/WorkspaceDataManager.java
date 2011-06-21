@@ -23,7 +23,7 @@ import javax.persistence.criteria.Root;
 import org.commonjava.web.fd.model.Workspace;
 
 @RequestScoped
-public class WorkspaceManager
+public class WorkspaceDataManager
 {
     @Inject
     @WorkspaceRepository

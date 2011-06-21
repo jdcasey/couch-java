@@ -15,7 +15,11 @@ import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.fd.data.UserManager.UserRepository;
+import org.commonjava.web.fd.data.UserDataManager.UserRepository;
+import org.commonjava.web.fd.mail.MailException;
+import org.commonjava.web.fd.mail.PostOffice;
+import org.commonjava.web.fd.mail.MailMessage;
+import org.commonjava.web.fd.mail.MailTemplate;
 import org.commonjava.web.fd.model.User;
 import org.commonjava.web.fd.sec.PasswordManager;
 
@@ -35,6 +39,9 @@ public class UserAdmin
     @Inject
     private UserTransaction tx;
 
+    @Inject
+    private PostOffice mailManager;
+
     private PasswordManager passwordManager;
 
     private User newUser;
@@ -48,19 +55,28 @@ public class UserAdmin
 
     public void createUser()
         throws NotSupportedException, SystemException, RollbackException, HeuristicMixedException,
-        HeuristicRollbackException
+        HeuristicRollbackException, MailException
     {
         logger.info( "\n\nSaving user: %s\n\n", newUser );
 
+        logger.info( "Generating password." );
+        final String password = passwordManager.generatePassword();
+
+        final MailMessage message = new MailMessage( MailTemplate.NEW_USER, newUser.getEmail() );
+        message.property( "user", newUser );
+        message.property( "password", password );
+
+        mailManager.sendMessage( message );
+
         logger.info( "Encrypting password." );
-        newUser.setPassword( passwordManager.digestPassword( newUser.getPassword() ) );
+        newUser.setPassword( passwordManager.digestPassword( password ) );
 
         tx.begin();
         em.joinTransaction();
         em.persist( newUser );
         tx.commit();
         eventSrc.fire( newUser );
-        createUserInstance();
+        createNewUserInstance();
     }
 
     public void generateUsername()
@@ -86,7 +102,7 @@ public class UserAdmin
     }
 
     @PostConstruct
-    private void createUserInstance()
+    private void createNewUserInstance()
     {
         newUser = new User();
     }

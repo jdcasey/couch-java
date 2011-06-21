@@ -23,7 +23,7 @@ import javax.persistence.criteria.Root;
 import org.commonjava.web.fd.model.User;
 
 @RequestScoped
-public class UserManager
+public class UserDataManager
 {
     @Inject
     @UserRepository
