@@ -14,15 +14,10 @@ public class FDShiroFilter
     private FileDepotConfiguration config;
 
     @Override
-    public String getConfig()
-    {
-        return config.getSecurityConfiguration();
-    }
-
-    @Override
     public String getConfigPath()
     {
-        return config.getSecurityConfigurationIni();
+        return config.getSecurityConfigurationFile()
+                     .getAbsolutePath();
     }
 
 }

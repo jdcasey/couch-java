@@ -20,48 +20,48 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.commonjava.web.fd.model.User;
+import org.commonjava.web.fd.model.Workspace;
 
 @RequestScoped
-public class UserDataManager
+public class FileDataManager
 {
     @Inject
-    @UserRepository
+    @FileRepository
     private EntityManager em;
 
-    private List<User> users;
+    private List<Workspace> workspaces;
 
     @Produces
     @Named
-    public List<User> getUsers()
+    public List<Workspace> getWorkspaces()
     {
-        return users;
+        return workspaces;
     }
 
-    public void onUserChanged( @Observes( notifyObserver = Reception.IF_EXISTS ) final User user )
+    public void onWorkspacesChanged( @Observes( notifyObserver = Reception.IF_EXISTS ) final Workspace workspace )
     {
-        loadAllUsersOrderedByLastNameThenFirstName();
+        loadAllWorkspacesOrderedByName();
     }
 
     @PostConstruct
-    public void loadAllUsersOrderedByLastNameThenFirstName()
+    public void loadAllWorkspacesOrderedByName()
     {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<User> query = cb.createQuery( User.class );
-        final Root<User> root = query.from( User.class );
+        final CriteriaQuery<Workspace> query = cb.createQuery( Workspace.class );
+        final Root<Workspace> root = query.from( Workspace.class );
 
         query.select( root )
-             .orderBy( cb.asc( root.get( "lastName" ) ), cb.asc( root.get( "firstName" ) ) );
+             .orderBy( cb.asc( root.get( "name" ) ) );
 
-        users = em.createQuery( query )
-                  .getResultList();
+        workspaces = em.createQuery( query )
+                       .getResultList();
     }
 
-    public static final class UserRepositoryProducer
+    public static final class FileRepositoryProducer
     {
         @SuppressWarnings( "unused" )
         @Produces
-        @UserRepository
+        @FileRepository
         @PersistenceContext
         private EntityManager em;
     }
@@ -69,7 +69,7 @@ public class UserDataManager
     @Qualifier
     @Target( { ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD } )
     @Retention( RetentionPolicy.RUNTIME )
-    public @interface UserRepository
+    public @interface FileRepository
     {
     }
 
