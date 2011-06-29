@@ -10,8 +10,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
-import javax.inject.Named;
 
 import org.commonjava.web.config.ConfigurationException;
 import org.commonjava.web.config.ConfigurationListener;
@@ -21,7 +21,7 @@ import org.commonjava.web.config.dotconf.DotConfConfigurationReader;
 import org.commonjava.web.config.section.BeanSectionListener;
 
 @ApplicationScoped
-public class FileDepotConfigurationReader
+public class FileDepotConfigurationFactory
     implements ConfigurationListener
 {
 
@@ -54,7 +54,7 @@ public class FileDepotConfigurationReader
     }
 
     @Produces
-    @Named
+    @Default
     public FileDepotConfiguration getConfiguration()
     {
         return configuration;

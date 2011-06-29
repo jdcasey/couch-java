@@ -35,7 +35,7 @@ import org.commonjava.web.fd.config.FileDepotConfiguration;
 import org.commonjava.web.fd.model.FileInfo;
 import org.jboss.resteasy.annotations.LinkHeaderParam;
 
-@Path( "/files" )
+@Path( "/files/{workspaceId}" )
 @RequestScoped
 @RequiresAuthentication
 public class FileRESTManager
@@ -48,7 +48,8 @@ public class FileRESTManager
 
     @PUT
     @Path( "{name}/{description}" )
-    public Response save( @PathParam( "name" ) final String filename,
+    public Response save( @PathParam( "workspaceId" ) final Long workspaceId,
+                          @PathParam( "name" ) final String filename,
                           @PathParam( "description" ) final String description,
                           @Context final HttpServletRequest request )
     {
@@ -66,7 +67,7 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDir(), URLDecoder.decode( filename, "UTF-8" ) );
+            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {
@@ -106,7 +107,8 @@ public class FileRESTManager
 
     @DELETE
     @Path( "{name}" )
-    public Response delete( @PathParam( "name" ) final String filename )
+    public Response delete( @PathParam( "workspaceId" ) final Long workspaceId,
+                            @PathParam( "name" ) final String filename )
     {
         SecurityUtils.getSubject()
                      .checkPermission( "edit:file" );
@@ -114,7 +116,7 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDir(), URLDecoder.decode( filename, "UTF-8" ) );
+            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {
@@ -141,13 +143,13 @@ public class FileRESTManager
         }
     }
 
-    public List<FileInfo> getFiles()
+    public List<FileInfo> getFiles( final Long workspaceId )
     {
         final List<FileInfo> result = new ArrayList<FileInfo>();
-        for ( final String name : config.getUploadDir()
+        for ( final String name : config.getUploadDirectory()
                                         .list() )
         {
-            final File f = new File( config.getUploadDir(), name );
+            final File f = new File( config.getUploadDirectory(), name );
             result.add( new FileInfo( f ) );
         }
 
@@ -157,13 +159,13 @@ public class FileRESTManager
     @GET
     @Path( "list" )
     @Produces( MediaType.TEXT_PLAIN )
-    public String list()
+    public String list( @PathParam( "workspaceId" ) final Long workspaceId )
     {
         SecurityUtils.getSubject()
                      .checkPermission( "view:file-info" );
 
         final StringBuilder sb = new StringBuilder();
-        for ( final FileInfo f : getFiles() )
+        for ( final FileInfo f : getFiles( workspaceId ) )
         {
             if ( sb.length() > 0 )
             {
@@ -184,22 +186,24 @@ public class FileRESTManager
     @Path( "{name}" )
     @LinkHeaderParam( rel = "self" )
     @Produces( MediaType.TEXT_XML )
-    public FileInfo getFileInfoXml( @PathParam( "name" ) final String filename )
+    public FileInfo getFileInfoXml( @PathParam( "workspaceId" ) final Long workspaceId,
+                                    @PathParam( "name" ) final String filename )
     {
         logger.info( "\n\nXML-INFO: %s. Configuration is: %s\n\n", filename, config );
 
-        return getFileInfo( filename );
+        return getFileInfo( workspaceId, filename );
     }
 
     @GET
     @Path( "{name}" )
     @LinkHeaderParam( rel = "self" )
     @Produces( MediaType.TEXT_PLAIN )
-    public Response getFileInfoTxt( @PathParam( "name" ) final String filename )
+    public Response getFileInfoTxt( @PathParam( "workspaceId" ) final Long workspaceId,
+                                    @PathParam( "name" ) final String filename )
     {
         logger.info( "\n\nTXT-INFO: %s. Configuration is: %s\n\n", filename, config );
 
-        final String result = String.valueOf( getFileInfo( filename ) );
+        final String result = String.valueOf( getFileInfo( workspaceId, filename ) );
 
         logger.info( "Result:\n\n%s\n\n", result );
 
@@ -207,7 +211,7 @@ public class FileRESTManager
                        .build();
     }
 
-    private FileInfo getFileInfo( final String filename )
+    private FileInfo getFileInfo( final Long workspaceId, final String filename )
     {
         SecurityUtils.getSubject()
                      .checkPermission( "view:file-info" );
@@ -215,7 +219,7 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDir(), URLDecoder.decode( filename, "UTF-8" ) );
+            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {
@@ -247,7 +251,7 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDir(), URLDecoder.decode( filename, "UTF-8" ) );
+            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {

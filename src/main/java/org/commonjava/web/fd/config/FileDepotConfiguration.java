@@ -5,7 +5,7 @@ import java.io.File;
 public interface FileDepotConfiguration
 {
 
-    File getUploadDir();
+    File getUploadDirectory();
 
     File getSecurityConfigurationFile();
 

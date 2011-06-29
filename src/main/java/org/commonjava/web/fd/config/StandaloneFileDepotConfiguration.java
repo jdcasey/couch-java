@@ -2,9 +2,12 @@ package org.commonjava.web.fd.config;
 
 import java.io.File;
 
-//@Named
-//@ApplicationScoped
-class StandaloneFileDepotConfiguration
+import javax.enterprise.inject.Alternative;
+import javax.inject.Named;
+
+@Named( "standalone" )
+@Alternative
+public class StandaloneFileDepotConfiguration
     implements FileDepotConfiguration
 {
 
@@ -20,7 +23,7 @@ class StandaloneFileDepotConfiguration
     private File securityConfigurationFile = DEFAULT_SECURITY_INI_PATH;
 
     @Override
-    public File getUploadDir()
+    public File getUploadDirectory()
     {
         return uploadDirectory;
     }
@@ -31,12 +34,12 @@ class StandaloneFileDepotConfiguration
         return securityConfigurationFile;
     }
 
-    protected void setUploadDir( final File uploadDir )
+    public void setUploadDirectory( final File uploadDir )
     {
         this.uploadDirectory = uploadDir;
     }
 
-    protected void setSecurityConfigurationFile( final File securityConfigurationFile )
+    public void setSecurityConfigurationFile( final File securityConfigurationFile )
     {
         this.securityConfigurationFile = securityConfigurationFile;
     }

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.inject.Model;
@@ -32,6 +33,9 @@ public class FileAdmin
     @Inject
     private FileRESTManager fileManager;
 
+    @Inject
+    private WorkspaceSession session;
+
     private String description;
 
     private File file;
@@ -40,7 +44,16 @@ public class FileAdmin
     @Named
     public List<FileInfo> getFiles()
     {
-        final List<FileInfo> files = fileManager.getFiles();
+        final List<FileInfo> files;
+        if ( session.getCurrentWorkspace() != null )
+        {
+            files = fileManager.getFiles( session.getCurrentWorkspace() );
+        }
+        else
+        {
+            files = Collections.emptyList();
+        }
+
         return files;
     }
 
@@ -48,14 +61,14 @@ public class FileAdmin
     {
         final UploadedFile f = uploadEvent.getUploadedFile();
 
-        final File dir = config.getUploadDir();
+        final File dir = config.getUploadDirectory();
         if ( ( !dir.exists() || !dir.isDirectory() ) && !dir.mkdirs() )
         {
             log.error( "\n\n\nFailed to create directory: %s", dir );
             return;
         }
 
-        final File dest = new File( config.getUploadDir(), f.getName() );
+        final File dest = new File( config.getUploadDirectory(), f.getName() );
 
         log.info( "\n\n\nSaving: %s\nSize: %s\nTo: %s\n\n\n", f.getName(), f.getSize(), dest );
 

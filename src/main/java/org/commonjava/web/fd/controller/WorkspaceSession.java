@@ -20,17 +20,17 @@ public class WorkspaceSession
 
     private final Logger logger = new Logger( getClass() );
 
-    private String currentWorkspace;
+    private Long currentWorkspace;
 
     @Produces
     @Named( "currentWorkspace" )
-    public String getCurrentWorkspace()
+    public Long getCurrentWorkspace()
     {
         logger.info( "Retrieving current workspace: %s", currentWorkspace );
         return currentWorkspace;
     }
 
-    public void setWorkspace( final String workspace )
+    public void setWorkspace( final Long workspace )
     {
         this.currentWorkspace = workspace;
         logger.info( "Set current workspace to: %s", workspace );

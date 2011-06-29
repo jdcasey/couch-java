@@ -1,5 +1,6 @@
 package org.commonjava.web.fd.config;
 
+import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.servlet.annotation.WebFilter;
 
@@ -11,6 +12,7 @@ public class FDShiroFilter
 {
 
     @Inject
+    @Default
     private FileDepotConfiguration config;
 
     @Override
