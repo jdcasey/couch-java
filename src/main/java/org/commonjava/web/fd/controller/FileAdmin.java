@@ -45,9 +45,9 @@ public class FileAdmin
     public List<FileInfo> getFiles()
     {
         final List<FileInfo> files;
-        if ( session.getCurrentWorkspace() != null )
+        if ( session.getCurrentWorkspaceId() != null )
         {
-            files = fileManager.getFiles( session.getCurrentWorkspace() );
+            files = fileManager.getFiles( session.getCurrentWorkspaceId() );
         }
         else
         {

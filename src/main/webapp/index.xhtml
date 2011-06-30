@@ -7,11 +7,11 @@
     <h1>Select Your Workspace</h1>
 
     <h:form enctype="multipart/form-data" prependId="false">
-      <h:selectOneMenu id="workspace">
-        <f:selectItems value="#{workspaceAdmin.workspaces}"></f:selectItems>
+      <h:selectOneMenu id="currentWorkspaceId" onchange="this.form.submit();" required="true">
+        <f:selectItem itemLabel="Select a workspace..."/>
+        <f:selectItems value="#{workspaceSession.workspaceItems}"></f:selectItems>
       </h:selectOneMenu>
-      
-      <h:commandButton value="submit" action="#{workspaceSession.setWorkspace}" />
+      <h:commandButton id="submit" value="Submit" action="#{workspaceSession.selectCurrentWorkspace}"/>
     </h:form>
   </ui:define>
 </ui:composition>

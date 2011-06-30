@@ -1,7 +1,5 @@
 package org.commonjava.web.fd.controller;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Model;
@@ -38,15 +36,7 @@ public class WorkspaceAdmin
     @Inject
     private UserTransaction tx;
 
-    @Inject
-    private List<Workspace> workspaces;
-
     private Workspace newWorkspace;
-
-    public List<Workspace> getWorkspaces()
-    {
-        return workspaces;
-    }
 
     @Produces
     @Named
