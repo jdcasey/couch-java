@@ -4,14 +4,14 @@
   xmlns:a4j="http://richfaces.org/a4j"
   xmlns:rich="http://richfaces.org/rich" template="/WEB-INF/templates/default.xhtml">
   <ui:define name="content">
-    <h1>Select Your Workspace</h1>
+    <h1>Select a Workspace:</h1>
 
-    <h:form enctype="multipart/form-data" prependId="false">
-      <h:selectOneMenu id="currentWorkspaceId" onchange="this.form.submit();" required="true">
+    <h:form id="ws">
+      <h:selectOneMenu id="currentWorkspaceId" value="#{currentWorkspace.id}" required="true">
         <f:selectItem itemLabel="Select a workspace..."/>
-        <f:selectItems value="#{workspaceSession.workspaceItems}"></f:selectItems>
+        <f:selectItems value="#{workspaceItems}"></f:selectItems>
       </h:selectOneMenu>
-      <h:commandButton id="submit" value="Submit" action="#{workspaceSession.selectCurrentWorkspace}"/>
+      <h:commandButton id="submit" value="Select" action="#{workspaceSelector.select}"/>
     </h:form>
   </ui:define>
 </ui:composition>

@@ -67,7 +67,8 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
+            final File dir = new File( config.getUploadDirectory(), workspaceId.toString() );
+            f = new File( dir, URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {
@@ -116,7 +117,8 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
+            final File dir = new File( config.getUploadDirectory(), workspaceId.toString() );
+            f = new File( dir, URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {
@@ -146,11 +148,15 @@ public class FileRESTManager
     public List<FileInfo> getFiles( final Long workspaceId )
     {
         final List<FileInfo> result = new ArrayList<FileInfo>();
-        for ( final String name : config.getUploadDirectory()
-                                        .list() )
+        final File dir = new File( config.getUploadDirectory(), workspaceId.toString() );
+
+        if ( dir.exists() )
         {
-            final File f = new File( config.getUploadDirectory(), name );
-            result.add( new FileInfo( f ) );
+            for ( final String name : dir.list() )
+            {
+                final File f = new File( dir, name );
+                result.add( new FileInfo( f ) );
+            }
         }
 
         return result;
@@ -219,7 +225,8 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
+            final File dir = new File( config.getUploadDirectory(), workspaceId.toString() );
+            f = new File( dir, URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {
@@ -241,7 +248,8 @@ public class FileRESTManager
     @GET
     @Path( "{name}/data" )
     @Produces( MediaType.APPLICATION_OCTET_STREAM )
-    public Response getFile( @PathParam( "name" ) final String filename )
+    public Response getFile( @PathParam( "workspaceId" ) final Long workspaceId,
+                             @PathParam( "name" ) final String filename )
     {
         SecurityUtils.getSubject()
                      .checkPermission( "view:file" );
@@ -251,7 +259,8 @@ public class FileRESTManager
         File f;
         try
         {
-            f = new File( config.getUploadDirectory(), URLDecoder.decode( filename, "UTF-8" ) );
+            final File dir = new File( config.getUploadDirectory(), workspaceId.toString() );
+            f = new File( dir, URLDecoder.decode( filename, "UTF-8" ) );
         }
         catch ( final UnsupportedEncodingException e )
         {

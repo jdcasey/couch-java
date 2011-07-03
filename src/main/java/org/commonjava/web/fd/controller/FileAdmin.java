@@ -14,9 +14,12 @@ import javax.enterprise.inject.Model;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
+import org.commonjava.web.fd.data.WorkspaceSession;
 import org.commonjava.web.fd.model.FileInfo;
 import org.commonjava.web.fd.rest.FileRESTManager;
 import org.richfaces.event.FileUploadEvent;
@@ -34,20 +37,16 @@ public class FileAdmin
     private FileRESTManager fileManager;
 
     @Inject
-    private WorkspaceSession session;
-
-    private String description;
-
-    private File file;
+    private WorkspaceSession workspaceSession;
 
     @Produces
     @Named
     public List<FileInfo> getFiles()
     {
         final List<FileInfo> files;
-        if ( session.getCurrentWorkspaceId() != null )
+        if ( workspaceSession.getCurrentWorkspaceId() != null )
         {
-            files = fileManager.getFiles( session.getCurrentWorkspaceId() );
+            files = fileManager.getFiles( workspaceSession.getCurrentWorkspaceId() );
         }
         else
         {
@@ -61,14 +60,20 @@ public class FileAdmin
     {
         final UploadedFile f = uploadEvent.getUploadedFile();
 
-        final File dir = config.getUploadDirectory();
+        if ( workspaceSession.getCurrentWorkspaceId() == null )
+        {
+            throw new WebApplicationException( Status.BAD_REQUEST );
+        }
+
+        final File dir = new File( config.getUploadDirectory(), workspaceSession.getCurrentWorkspaceId()
+                                                                                .toString() );
         if ( ( !dir.exists() || !dir.isDirectory() ) && !dir.mkdirs() )
         {
             log.error( "\n\n\nFailed to create directory: %s", dir );
-            return;
+            throw new WebApplicationException( Status.INTERNAL_SERVER_ERROR );
         }
 
-        final File dest = new File( config.getUploadDirectory(), f.getName() );
+        final File dest = new File( dir, f.getName() );
 
         log.info( "\n\n\nSaving: %s\nSize: %s\nTo: %s\n\n\n", f.getName(), f.getSize(), dest );
 
@@ -82,6 +87,7 @@ public class FileAdmin
         catch ( final IOException e )
         {
             log.error( "Failed to save: %s. Reason: %s", e, dest, e.getMessage() );
+            throw new WebApplicationException( Status.INTERNAL_SERVER_ERROR );
         }
         finally
         {
@@ -90,30 +96,10 @@ public class FileAdmin
         }
     }
 
-    public void save()
+    public String save()
     {
-        log.info( "\n\n\nSaved: %s\nDescription: '%s'\n\n\n", file.getAbsolutePath(), description );
+        log.info( "\n\n\nSaved.\n\n\n" );
+        return null;
     }
 
-    public File getFile()
-    {
-        return file;
-    }
-
-    public void setFile( final File file )
-    {
-        log.info( "binding file: '%s'", file );
-        this.file = file;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( final String description )
-    {
-        log.info( "binding '%s'", description );
-        this.description = description;
-    }
 }

@@ -13,7 +13,7 @@ import org.commonjava.web.fd.data.WorkspaceDataManager.WorkspaceRepository;
 import org.commonjava.web.fd.model.Workspace;
 
 @Singleton
-@WebServlet( loadOnStartup = 0 )
+@WebServlet( loadOnStartup = 1 )
 public class DataSeeder
 {
     private final Logger logger = new Logger( getClass() );
