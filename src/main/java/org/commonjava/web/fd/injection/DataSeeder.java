@@ -1,20 +1,20 @@
 package org.commonjava.web.fd.injection;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TransactionRequiredException;
-import javax.servlet.annotation.WebServlet;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import javax.transaction.UserTransaction;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.data.WorkspaceDataManager.WorkspaceRepository;
 import org.commonjava.web.fd.model.Workspace;
 
-@Singleton
-@WebServlet( loadOnStartup = 1 )
+@WebListener
 public class DataSeeder
+    implements ServletContextListener
 {
     private final Logger logger = new Logger( getClass() );
 
@@ -25,9 +25,11 @@ public class DataSeeder
     @Inject
     private UserTransaction tx;
 
-    @PostConstruct
-    public void importData()
+    @Override
+    public void contextInitialized( final ServletContextEvent sce )
     {
+        logger.info( "\n\n\n\nImporting seed data...\n\n\n\n" );
+
         final Workspace ws = new Workspace();
         ws.setId( (long) 1 );
         ws.setName( "Workspace One" );
@@ -47,11 +49,16 @@ public class DataSeeder
                 tx.commit();
             }
 
-            logger.info( "Successfully imported seed data." );
+            logger.info( "\n\n\n\nSuccessfully imported seed data.\n\n\n\n" );
         }
         catch ( final Exception e )
         {
-            logger.warn( "Seed data import failed.", e );
+            logger.error( "Seed data import failed: %s", e, e.getMessage() );
         }
+    }
+
+    @Override
+    public void contextDestroyed( final ServletContextEvent sce )
+    {
     }
 }
