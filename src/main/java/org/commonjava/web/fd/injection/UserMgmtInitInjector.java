@@ -16,6 +16,7 @@
  ******************************************************************************/
 package org.commonjava.web.fd.injection;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -23,41 +24,38 @@ import javax.servlet.annotation.WebListener;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
-import org.commonjava.web.fd.data.WorkspaceDataException;
-import org.commonjava.web.fd.data.WorkspaceDataManager;
-import org.commonjava.web.fd.model.Workspace;
 import org.commonjava.web.user.data.UserDataException;
+import org.commonjava.web.user.data.UserManagerInitializer;
 
 @WebListener
-public class TestDataInjector
+public class UserMgmtInitInjector
     implements ServletContextListener
 {
     private final Logger logger = new Logger( getClass() );
 
     @Inject
-    private WorkspaceDataManager dataManager;
+    @ApplicationScoped
+    private UserManagerInitializer initializer;
 
     @SuppressWarnings( "unused" )
+    @ApplicationScoped
     @Inject
-    private FileDepotConfiguration config;
+    private FileDepotConfiguration fdConfig;
+
+    // @SuppressWarnings( "unused" )
+    // @Inject
+    // private UserManagerConfiguration umConfig;
 
     @Override
     public void contextInitialized( final ServletContextEvent sce )
     {
-        logger.info( "\n\n\n\nImporting seed data...\n\n\n\n" );
-
         try
         {
-            dataManager.addWorkspace( new Workspace( 1L, "Workspace One", "workspace-one" ), true );
-            logger.info( "\n\n\n\nSuccessfully imported seed data.\n\n\n\n" );
-        }
-        catch ( final WorkspaceDataException e )
-        {
-            logger.error( "Seed data import failed: %s", e, e.getMessage() );
+            initializer.initializeAdmin();
         }
         catch ( final UserDataException e )
         {
-            logger.error( "Seed data import failed: %s", e, e.getMessage() );
+            logger.error( "Failed to initialize admin-level access: %s", e, e.getMessage() );
         }
     }
 

@@ -21,8 +21,6 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -30,23 +28,27 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 
 import org.commonjava.web.config.ConfigurationException;
-import org.commonjava.web.config.ConfigurationListener;
+import org.commonjava.web.config.DefaultConfigurationListener;
 import org.commonjava.web.config.dotconf.DotConfConfigurationReader;
-import org.commonjava.web.config.section.BeanSectionListener;
-import org.commonjava.web.config.section.ConfigurationSectionListener;
 import org.commonjava.web.user.conf.DefaultUserManagerConfig;
+import org.commonjava.web.user.conf.UserManagerConfiguration;
 
 @ApplicationScoped
 public class FileDepotConfigurationFactory
-    implements ConfigurationListener
+    extends DefaultConfigurationListener
 {
 
     private static final String CONFIG_PATH = "/etc/file-depot/file-depot.conf";
 
-    private final BeanSectionListener<DefaultFileDepotConfiguration> FD_SECTION_LISTENER =
-        new BeanSectionListener<DefaultFileDepotConfiguration>( DefaultFileDepotConfiguration.class );
+    private DefaultFileDepotConfiguration fileDepotConfig;
 
-    private DefaultFileDepotConfiguration configuration;
+    private DefaultUserManagerConfig userManagerConfig;
+
+    public FileDepotConfigurationFactory()
+        throws ConfigurationException
+    {
+        super( DefaultFileDepotConfiguration.class, DefaultUserManagerConfig.class );
+    }
 
     // @Inject
     // private PostOfficeConfigurationListener postOfficeConfigurationListener;
@@ -59,8 +61,7 @@ public class FileDepotConfigurationFactory
         try
         {
             stream = new FileInputStream( CONFIG_PATH );
-            new DotConfConfigurationReader( DefaultFileDepotConfiguration.class, DefaultUserManagerConfig.class/*, postOfficeConfigurationListener
-                                                                                                                */).loadConfiguration( stream );
+            new DotConfConfigurationReader( this ).loadConfiguration( stream );
         }
         catch ( final IOException e )
         {
@@ -75,26 +76,24 @@ public class FileDepotConfigurationFactory
 
     @Produces
     @Default
-    public FileDepotConfiguration getConfiguration()
+    public FileDepotConfiguration getFileDepotConfiguration()
     {
-        return configuration;
+        return fileDepotConfig;
     }
 
-    @Override
-    public Map<String, ConfigurationSectionListener<?>> getSectionListeners()
+    @Produces
+    @Default
+    public UserManagerConfiguration getUserManagerConfiguration()
     {
-        final Map<String, ConfigurationSectionListener<?>> listeners =
-            new HashMap<String, ConfigurationSectionListener<?>>();
-
-        listeners.put( ConfigurationSectionListener.DEFAULT_SECTION, FD_SECTION_LISTENER );
-        return listeners;
+        return userManagerConfig;
     }
 
     @Override
     public void configurationComplete()
         throws ConfigurationException
     {
-        configuration = FD_SECTION_LISTENER.getConfiguration();
+        fileDepotConfig = getConfiguration( DefaultFileDepotConfiguration.class );
+        userManagerConfig = getConfiguration( DefaultUserManagerConfig.class );
     }
 
 }
