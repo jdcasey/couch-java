@@ -31,10 +31,10 @@ import javax.enterprise.inject.Produces;
 
 import org.commonjava.web.config.ConfigurationException;
 import org.commonjava.web.config.ConfigurationListener;
-import org.commonjava.web.config.ConfigurationSectionListener;
-import org.commonjava.web.config.DefaultConfigurationRegistry;
 import org.commonjava.web.config.dotconf.DotConfConfigurationReader;
 import org.commonjava.web.config.section.BeanSectionListener;
+import org.commonjava.web.config.section.ConfigurationSectionListener;
+import org.commonjava.web.user.conf.DefaultUserManagerConfig;
 
 @ApplicationScoped
 public class FileDepotConfigurationFactory
@@ -43,10 +43,13 @@ public class FileDepotConfigurationFactory
 
     private static final String CONFIG_PATH = "/etc/file-depot/file-depot.conf";
 
-    private final BeanSectionListener<StandaloneFileDepotConfiguration> FD_SECTION_LISTENER =
-        new BeanSectionListener<StandaloneFileDepotConfiguration>( StandaloneFileDepotConfiguration.class );
+    private final BeanSectionListener<DefaultFileDepotConfiguration> FD_SECTION_LISTENER =
+        new BeanSectionListener<DefaultFileDepotConfiguration>( DefaultFileDepotConfiguration.class );
 
-    private StandaloneFileDepotConfiguration configuration;
+    private DefaultFileDepotConfiguration configuration;
+
+    // @Inject
+    // private PostOfficeConfigurationListener postOfficeConfigurationListener;
 
     @PostConstruct
     protected void load()
@@ -56,7 +59,8 @@ public class FileDepotConfigurationFactory
         try
         {
             stream = new FileInputStream( CONFIG_PATH );
-            new DotConfConfigurationReader( new DefaultConfigurationRegistry( this ) ).loadConfiguration( stream );
+            new DotConfConfigurationReader( DefaultFileDepotConfiguration.class, DefaultUserManagerConfig.class/*, postOfficeConfigurationListener
+                                                                                                                */).loadConfiguration( stream );
         }
         catch ( final IOException e )
         {
@@ -82,7 +86,7 @@ public class FileDepotConfigurationFactory
         final Map<String, ConfigurationSectionListener<?>> listeners =
             new HashMap<String, ConfigurationSectionListener<?>>();
 
-        listeners.put( DotConfConfigurationReader.DEFAULT_SECTION, FD_SECTION_LISTENER );
+        listeners.put( ConfigurationSectionListener.DEFAULT_SECTION, FD_SECTION_LISTENER );
         return listeners;
     }
 

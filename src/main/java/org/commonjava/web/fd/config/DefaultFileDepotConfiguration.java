@@ -21,9 +21,14 @@ import java.io.File;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Named;
 
+import org.commonjava.web.config.annotation.ConfigName;
+import org.commonjava.web.config.annotation.SectionName;
+import org.commonjava.web.config.section.ConfigurationSectionListener;
+
+@SectionName( ConfigurationSectionListener.DEFAULT_SECTION )
 @Named( "standalone" )
 @Alternative
-public class StandaloneFileDepotConfiguration
+public class DefaultFileDepotConfiguration
     implements FileDepotConfiguration
 {
 
@@ -50,11 +55,13 @@ public class StandaloneFileDepotConfiguration
         return securityConfigurationFile;
     }
 
+    @ConfigName( "upload.dir" )
     public void setUploadDirectory( final File uploadDir )
     {
         this.uploadDirectory = uploadDir;
     }
 
+    @ConfigName( "security.config" )
     public void setSecurityConfigurationFile( final File securityConfigurationFile )
     {
         this.securityConfigurationFile = securityConfigurationFile;

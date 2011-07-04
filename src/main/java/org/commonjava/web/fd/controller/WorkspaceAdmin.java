@@ -17,22 +17,16 @@
 package org.commonjava.web.fd.controller;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
 import javax.enterprise.inject.Model;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
 
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.fd.data.WorkspaceDataManager.WorkspaceRepository;
+import org.commonjava.web.fd.data.WorkspaceDataException;
+import org.commonjava.web.fd.data.WorkspaceDataManager;
 import org.commonjava.web.fd.model.Workspace;
+import org.commonjava.web.user.data.UserDataException;
 
 @Model
 public class WorkspaceAdmin
@@ -43,14 +37,7 @@ public class WorkspaceAdmin
     private static final int GENERATED_PATH_MAXLEN = 12;
 
     @Inject
-    @WorkspaceRepository
-    private EntityManager em;
-
-    @Inject
-    private Event<Workspace> eventSrc;
-
-    @Inject
-    private UserTransaction tx;
+    private WorkspaceDataManager workspaceDataManager;
 
     private Workspace newWorkspace;
 
@@ -62,16 +49,11 @@ public class WorkspaceAdmin
     }
 
     public void createWorkspace()
-        throws NotSupportedException, SystemException, RollbackException, HeuristicMixedException,
-        HeuristicRollbackException
+        throws WorkspaceDataException, UserDataException
     {
         logger.info( "\n\nSaving workspace: %s\n\n", newWorkspace );
 
-        tx.begin();
-        em.joinTransaction();
-        em.persist( newWorkspace );
-        tx.commit();
-        eventSrc.fire( newWorkspace );
+        workspaceDataManager.addWorkspace( newWorkspace, true );
         createWorkspaceInstance();
     }
 

@@ -37,6 +37,17 @@ public class Workspace
     @Column( nullable = false, unique = true, length = 128 )
     private String pathName;
 
+    public Workspace()
+    {
+    }
+
+    public Workspace( final long id, final String name, final String pathName )
+    {
+        this.id = id;
+        this.name = name;
+        this.pathName = pathName;
+    }
+
     public Long getId()
     {
         return id;
