@@ -16,39 +16,36 @@
  ******************************************************************************/
 package org.commonjava.web.fd.injection;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.fd.config.FileDepotConfiguration;
 import org.commonjava.web.user.data.UserDataException;
 import org.commonjava.web.user.data.UserManagerInitializer;
 
 @WebListener
+@Singleton
 public class UserMgmtInitInjector
     implements ServletContextListener
 {
     private final Logger logger = new Logger( getClass() );
 
+    private boolean finished = false;
+
     @Inject
-    @ApplicationScoped
     private UserManagerInitializer initializer;
-
-    @SuppressWarnings( "unused" )
-    @ApplicationScoped
-    @Inject
-    private FileDepotConfiguration fdConfig;
-
-    // @SuppressWarnings( "unused" )
-    // @Inject
-    // private UserManagerConfiguration umConfig;
 
     @Override
     public void contextInitialized( final ServletContextEvent sce )
     {
+        if ( finished )
+        {
+            return;
+        }
+
         try
         {
             initializer.initializeAdmin();
@@ -57,6 +54,8 @@ public class UserMgmtInitInjector
         {
             logger.error( "Failed to initialize admin-level access: %s", e, e.getMessage() );
         }
+
+        finished = true;
     }
 
     @Override

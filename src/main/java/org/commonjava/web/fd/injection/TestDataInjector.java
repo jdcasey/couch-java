@@ -17,6 +17,7 @@
 package org.commonjava.web.fd.injection;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -29,10 +30,13 @@ import org.commonjava.web.fd.model.Workspace;
 import org.commonjava.web.user.data.UserDataException;
 
 @WebListener
+@Singleton
 public class TestDataInjector
     implements ServletContextListener
 {
     private final Logger logger = new Logger( getClass() );
+
+    private boolean finished = false;
 
     @Inject
     private WorkspaceDataManager dataManager;
@@ -44,21 +48,34 @@ public class TestDataInjector
     @Override
     public void contextInitialized( final ServletContextEvent sce )
     {
+        if ( finished )
+        {
+            return;
+        }
+
         logger.info( "\n\n\n\nImporting seed data...\n\n\n\n" );
 
-        try
+        final Workspace ws = new Workspace( 1L, "Workspace One", "workspace-one" );
+        if ( !dataManager.reloadWorkspaces()
+                         .getWorkspaces()
+                         .contains( ws ) )
         {
-            dataManager.addWorkspace( new Workspace( 1L, "Workspace One", "workspace-one" ), true );
-            logger.info( "\n\n\n\nSuccessfully imported seed data.\n\n\n\n" );
+            try
+            {
+                dataManager.addWorkspace( ws, true );
+                logger.info( "\n\n\n\nSuccessfully imported seed data.\n\n\n\n" );
+            }
+            catch ( final WorkspaceDataException e )
+            {
+                logger.error( "Seed data import failed: %s", e, e.getMessage() );
+            }
+            catch ( final UserDataException e )
+            {
+                logger.error( "Seed data import failed: %s", e, e.getMessage() );
+            }
         }
-        catch ( final WorkspaceDataException e )
-        {
-            logger.error( "Seed data import failed: %s", e, e.getMessage() );
-        }
-        catch ( final UserDataException e )
-        {
-            logger.error( "Seed data import failed: %s", e, e.getMessage() );
-        }
+
+        finished = true;
     }
 
     @Override

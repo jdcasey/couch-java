@@ -56,6 +56,9 @@
       <em>No registered workspaces.</em>
     </h:panelGroup>
     <h:dataTable var="_user" value="#{users}" rendered="#{not empty users}">
+      <h:column><f:facet name="header">ID</f:facet>
+        #{_user.id}
+      </h:column>
       <h:column><f:facet name="header">Username</f:facet>
         #{_user.username}
       </h:column>

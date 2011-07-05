@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.Reception;
@@ -35,6 +34,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
+import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -53,7 +53,7 @@ import org.commonjava.web.user.data.UserDataManager;
 import org.commonjava.web.user.model.Permission;
 import org.commonjava.web.user.model.Role;
 
-@RequestScoped
+@Singleton
 public class WorkspaceDataManager
 {
     private static final String WORKSPACE_PERMBASE = "workspace";
@@ -86,7 +86,7 @@ public class WorkspaceDataManager
             em.joinTransaction();
             em.persist( ws );
 
-            final String name = ws.getName();
+            final String name = ws.getPathName();
 
             final Map<String, Permission> perms = userMgr.createCRUDPermissions( WORKSPACE_PERMBASE, name, false );
 
@@ -131,13 +131,22 @@ public class WorkspaceDataManager
         return workspaces;
     }
 
-    public void onWorkspacesChanged( @Observes( notifyObserver = Reception.IF_EXISTS ) final Workspace workspace )
+    public synchronized WorkspaceDataManager reloadWorkspaces()
     {
         loadAllWorkspacesOrderedByName();
+        return this;
+    }
+
+    public synchronized void onWorkspacesChanged( @Observes( notifyObserver = Reception.ALWAYS ) final Workspace workspace )
+    {
+        if ( workspaces != null )
+        {
+            loadAllWorkspacesOrderedByName();
+        }
     }
 
     @PostConstruct
-    public void loadAllWorkspacesOrderedByName()
+    public synchronized void loadAllWorkspacesOrderedByName()
     {
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<Workspace> query = cb.createQuery( Workspace.class );

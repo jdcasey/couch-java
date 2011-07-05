@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 
 import org.commonjava.web.config.ConfigurationException;
 import org.commonjava.web.config.DefaultConfigurationListener;
@@ -33,7 +33,7 @@ import org.commonjava.web.config.dotconf.DotConfConfigurationReader;
 import org.commonjava.web.user.conf.DefaultUserManagerConfig;
 import org.commonjava.web.user.conf.UserManagerConfiguration;
 
-@ApplicationScoped
+@Singleton
 public class FileDepotConfigurationFactory
     extends DefaultConfigurationListener
 {
