@@ -26,6 +26,8 @@ import javax.persistence.Id;
 public class Workspace
 {
 
+    public static final String NAMESPACE = "files";
+
     @Id
     @Column( nullable = false )
     @GeneratedValue( strategy = GenerationType.AUTO )

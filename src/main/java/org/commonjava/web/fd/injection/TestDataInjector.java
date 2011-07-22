@@ -17,10 +17,7 @@
 package org.commonjava.web.fd.injection;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
@@ -29,10 +26,10 @@ import org.commonjava.web.fd.data.WorkspaceDataManager;
 import org.commonjava.web.fd.model.Workspace;
 import org.commonjava.web.user.data.UserDataException;
 
-@WebListener
-@Singleton
+//@WebListener
+//@Singleton
 public class TestDataInjector
-    implements ServletContextListener
+// implements ServletContextListener
 {
     private final Logger logger = new Logger( getClass() );
 
@@ -45,7 +42,7 @@ public class TestDataInjector
     @Inject
     private FileDepotConfiguration config;
 
-    @Override
+    // @Override
     public void contextInitialized( final ServletContextEvent sce )
     {
         if ( finished )
@@ -62,7 +59,7 @@ public class TestDataInjector
         {
             try
             {
-                dataManager.addWorkspace( ws, true );
+                dataManager.saveWorkspace( ws, true );
                 logger.info( "\n\n\n\nSuccessfully imported seed data.\n\n\n\n" );
             }
             catch ( final WorkspaceDataException e )
@@ -78,7 +75,7 @@ public class TestDataInjector
         finished = true;
     }
 
-    @Override
+    // @Override
     public void contextDestroyed( final ServletContextEvent sce )
     {
     }

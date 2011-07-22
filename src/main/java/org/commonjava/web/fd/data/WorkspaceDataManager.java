@@ -16,8 +16,8 @@
  ******************************************************************************/
 package org.commonjava.web.fd.data;
 
-import static org.commonjava.web.user.data.UserDataManager.CREATE;
-import static org.commonjava.web.user.data.UserDataManager.READ;
+import static org.commonjava.web.user.model.Permission.CREATE;
+import static org.commonjava.web.user.model.Permission.READ;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -56,8 +56,6 @@ import org.commonjava.web.user.model.Role;
 @Singleton
 public class WorkspaceDataManager
 {
-    private static final String WORKSPACE_PERMBASE = "workspace";
-
     @Inject
     @WorkspaceRepository
     private EntityManager em;
@@ -73,7 +71,7 @@ public class WorkspaceDataManager
 
     private List<Workspace> workspaces;
 
-    public void addWorkspace( final Workspace ws, final boolean autoCommit )
+    public void saveWorkspace( final Workspace ws, final boolean autoCommit )
         throws WorkspaceDataException, UserDataException
     {
         try
@@ -88,7 +86,7 @@ public class WorkspaceDataManager
 
             final String name = ws.getPathName();
 
-            final Map<String, Permission> perms = userMgr.createCRUDPermissions( WORKSPACE_PERMBASE, name, false );
+            final Map<String, Permission> perms = userMgr.createCRUDPermissions( Workspace.NAMESPACE, name, false );
 
             userMgr.saveRole( new Role( name + "-all", perms.values() ), false );
             userMgr.saveRole( new Role( name + "-create_read", perms.get( CREATE ), perms.get( READ ) ), false );
@@ -173,6 +171,12 @@ public class WorkspaceDataManager
     @Retention( RetentionPolicy.RUNTIME )
     public @interface WorkspaceRepository
     {
+    }
+
+    public Workspace getWorkspace( final Long workspaceId )
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

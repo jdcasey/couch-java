@@ -53,7 +53,7 @@ public class WorkspaceAdmin
     {
         logger.info( "\n\nSaving workspace: %s\n\n", newWorkspace );
 
-        workspaceDataManager.addWorkspace( newWorkspace, true );
+        workspaceDataManager.saveWorkspace( newWorkspace, true );
         createWorkspaceInstance();
     }
 

@@ -17,19 +17,16 @@
 package org.commonjava.web.fd.injection;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.user.data.UserDataException;
 import org.commonjava.web.user.data.UserManagerInitializer;
 
-@WebListener
-@Singleton
+//@WebListener
+//@Singleton
 public class UserMgmtInitInjector
-    implements ServletContextListener
+// implements ServletContextListener
 {
     private final Logger logger = new Logger( getClass() );
 
@@ -38,7 +35,7 @@ public class UserMgmtInitInjector
     @Inject
     private UserManagerInitializer initializer;
 
-    @Override
+    // @Override
     public void contextInitialized( final ServletContextEvent sce )
     {
         if ( finished )
@@ -58,7 +55,7 @@ public class UserMgmtInitInjector
         finished = true;
     }
 
-    @Override
+    // @Override
     public void contextDestroyed( final ServletContextEvent sce )
     {
     }

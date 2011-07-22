@@ -17,96 +17,37 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.commonjava.web</groupId>
+  <parent>
+    <groupId>org.commonjava.web</groupId>
+    <artifactId>jsf-app-parent</artifactId>
+    <version>1-SNAPSHOT</version>
+  </parent>
+  
   <artifactId>file-depot</artifactId>
   <version>0.1-SNAPSHOT</version>
+  
   <packaging>war</packaging>
   <name>File Depot</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <appSupport-version>1-SNAPSHOT</appSupport-version>
-  </properties>
-  
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.commonjava.web</groupId>
-        <artifactId>jsf-app-support</artifactId>
-        <version>${appSupport-version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-  
   <dependencies>
-    <dependency>
-      <groupId>org.commonjava.web</groupId>
-      <artifactId>jsf-app-support</artifactId>
-      <version>${appSupport-version}</version>
-      <type>pom</type>
-    </dependency>
-    
     <dependency>
     	<groupId>org.apache.velocity</groupId>
     	<artifactId>velocity</artifactId>
     	<version>1.7</version>
     </dependency>
     
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-cdi</artifactId>
+    <!-- <dependency>
+      <groupId>javax.transaction</groupId>
+      <artifactId>jta</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>jaxrs-api</artifactId>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
     </dependency>
     <dependency>
-        <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jaxrs</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.faces</groupId>
-      <artifactId>jsf-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.faces</groupId>
-      <artifactId>jsf-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jstl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.spec.javax.servlet</groupId>
-      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>javax.transaction</groupId>
-    	<artifactId>jta</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>javax.mail</groupId>
-    	<artifactId>mail</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>javax.activation</groupId>
-    	<artifactId>activation</artifactId>
-    </dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+    </dependency> -->
     <dependency>
     	<groupId>org.commonjava.web</groupId>
     	<artifactId>configuration-api</artifactId>
@@ -122,13 +63,17 @@
     	<artifactId>user-manager</artifactId>
     	<version>0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+    	<groupId>org.commonjava.web</groupId>
+    	<artifactId>web-common</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2.1</version>
         <executions>
           <execution>
             <id>custom-war</id>
@@ -150,7 +95,6 @@
       <plugins>
         <plugin>
           <artifactId>maven-war-plugin</artifactId>
-          <version>2.1.1</version>
           <!-- <executions>
             <execution>
               <id>default-war</id>
@@ -177,21 +121,6 @@
               </configuration>
             </execution>
           </executions> -->
-        </plugin>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
-          <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.8</version>
-          <configuration>
-            <!-- <skip>true</skip> -->
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

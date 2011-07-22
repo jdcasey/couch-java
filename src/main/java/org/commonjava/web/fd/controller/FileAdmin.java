@@ -37,7 +37,7 @@ import org.commonjava.util.logging.Logger;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
 import org.commonjava.web.fd.data.WorkspaceSession;
 import org.commonjava.web.fd.model.FileInfo;
-import org.commonjava.web.fd.rest.FileRESTManager;
+import org.commonjava.web.fd.rest.FileResource;
 import org.richfaces.event.FileUploadEvent;
 import org.richfaces.model.UploadedFile;
 
@@ -50,7 +50,7 @@ public class FileAdmin
     private FileDepotConfiguration config;
 
     @Inject
-    private FileRESTManager fileManager;
+    private FileResource fileManager;
 
     @Inject
     private WorkspaceSession workspaceSession;
@@ -62,7 +62,8 @@ public class FileAdmin
         final List<FileInfo> files;
         if ( workspaceSession.getCurrentWorkspaceId() != null )
         {
-            files = fileManager.getFiles( workspaceSession.getCurrentWorkspaceId() );
+            files = fileManager.getFiles( workspaceSession.getCurrentWorkspaceId() )
+                               .getItems();
         }
         else
         {
