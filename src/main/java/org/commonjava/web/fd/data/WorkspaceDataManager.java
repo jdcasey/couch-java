@@ -88,9 +88,9 @@ public class WorkspaceDataManager
 
             final Map<String, Permission> perms = userMgr.createCRUDPermissions( Workspace.NAMESPACE, name, false );
 
-            userMgr.saveRole( new Role( name + "-all", perms.values() ), false );
-            userMgr.saveRole( new Role( name + "-create_read", perms.get( CREATE ), perms.get( READ ) ), false );
-            userMgr.saveRole( new Role( name + "-read", perms.get( READ ) ), false );
+            userMgr.createRole( new Role( name + "-all", perms.values() ), false );
+            userMgr.createRole( new Role( name + "-create_read", perms.get( CREATE ), perms.get( READ ) ), false );
+            userMgr.createRole( new Role( name + "-read", perms.get( READ ) ), false );
 
             if ( autoCommit )
             {

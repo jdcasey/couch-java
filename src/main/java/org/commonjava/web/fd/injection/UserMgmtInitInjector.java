@@ -21,7 +21,7 @@ import javax.servlet.ServletContextEvent;
 
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.user.data.UserDataException;
-import org.commonjava.web.user.data.UserManagerInitializer;
+import org.commonjava.web.user.data.UserDataInitializer;
 
 //@WebListener
 //@Singleton
@@ -33,7 +33,7 @@ public class UserMgmtInitInjector
     private boolean finished = false;
 
     @Inject
-    private UserManagerInitializer initializer;
+    private UserDataInitializer initializer;
 
     // @Override
     public void contextInitialized( final ServletContextEvent sce )

@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.web.fd;
+package org.commonjava.web.fd.rest;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath( "/api/1.0" )
-public class FileDepotJaxRSApplication
+public class RESTApplication
     extends Application
 {
 
