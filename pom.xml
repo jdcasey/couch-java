@@ -8,7 +8,6 @@
     <version>1-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.commonjava.web</groupId>
   <artifactId>web-common</artifactId>
   <version>0.1-SNAPSHOT</version>
 
@@ -18,6 +17,10 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
     </dependency>
   </dependencies>
 </project>

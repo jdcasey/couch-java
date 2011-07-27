@@ -6,11 +6,18 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Listing<T>
     implements Iterable<T>
 {
 
     private List<T> items;
+
+    public Listing()
+    {
+    }
 
     public Listing( final T... elements )
     {
