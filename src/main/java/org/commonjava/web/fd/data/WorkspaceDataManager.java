@@ -50,6 +50,7 @@ import javax.transaction.UserTransaction;
 import org.commonjava.web.fd.model.Workspace;
 import org.commonjava.web.user.data.UserDataException;
 import org.commonjava.web.user.data.UserDataManager;
+import org.commonjava.web.user.data.UserNotificationContext;
 import org.commonjava.web.user.model.Permission;
 import org.commonjava.web.user.model.Role;
 
@@ -74,6 +75,7 @@ public class WorkspaceDataManager
     public void saveWorkspace( final Workspace ws, final boolean autoCommit )
         throws WorkspaceDataException, UserDataException
     {
+        UserNotificationContext userCtx = userMgr.createNotificationContext();
         try
         {
             if ( autoCommit )
@@ -86,39 +88,48 @@ public class WorkspaceDataManager
 
             final String name = ws.getPathName();
 
-            final Map<String, Permission> perms = userMgr.createCRUDPermissions( Workspace.NAMESPACE, name, false );
+            final Map<String, Permission> perms =
+                userMgr.createCRUDPermissions( Workspace.NAMESPACE, name, userCtx );
 
-            userMgr.createRole( new Role( name + "-all", perms.values() ), false );
-            userMgr.createRole( new Role( name + "-create_read", perms.get( CREATE ), perms.get( READ ) ), false );
-            userMgr.createRole( new Role( name + "-read", perms.get( READ ) ), false );
+            userMgr.createRole( new Role( name + "-all", perms.values() ), userCtx );
+            userMgr.createRole( new Role( name + "-create_read", perms.get( CREATE ),
+                                          perms.get( READ ) ), userCtx );
+            userMgr.createRole( new Role( name + "-read", perms.get( READ ) ), userCtx );
 
             if ( autoCommit )
             {
                 tx.commit();
             }
 
+            userCtx.sendNotifications();
+
             loadAllWorkspacesOrderedByName();
             eventSrc.fire( ws );
         }
         catch ( final NotSupportedException e )
         {
-            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws, e.getMessage() );
+            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws,
+                                              e.getMessage() );
         }
         catch ( final SystemException e )
         {
-            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws, e.getMessage() );
+            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws,
+                                              e.getMessage() );
         }
         catch ( final RollbackException e )
         {
-            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws, e.getMessage() );
+            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws,
+                                              e.getMessage() );
         }
         catch ( final HeuristicMixedException e )
         {
-            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws, e.getMessage() );
+            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws,
+                                              e.getMessage() );
         }
         catch ( final HeuristicRollbackException e )
         {
-            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws, e.getMessage() );
+            throw new WorkspaceDataException( "Cannot save workspace: %s. Error: %s", e, ws,
+                                              e.getMessage() );
         }
     }
 
@@ -150,11 +161,9 @@ public class WorkspaceDataManager
         final CriteriaQuery<Workspace> query = cb.createQuery( Workspace.class );
         final Root<Workspace> root = query.from( Workspace.class );
 
-        query.select( root )
-             .orderBy( cb.asc( root.get( "name" ) ) );
+        query.select( root ).orderBy( cb.asc( root.get( "name" ) ) );
 
-        workspaces = em.createQuery( query )
-                       .getResultList();
+        workspaces = em.createQuery( query ).getResultList();
     }
 
     public static final class WorkspaceRepositoryProducer
@@ -170,8 +179,7 @@ public class WorkspaceDataManager
     @Target( { ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD } )
     @Retention( RetentionPolicy.RUNTIME )
     public @interface WorkspaceRepository
-    {
-    }
+    {}
 
     public Workspace getWorkspace( final Long workspaceId )
     {
