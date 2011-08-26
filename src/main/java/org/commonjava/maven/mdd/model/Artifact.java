@@ -1,5 +1,6 @@
-package org.commonjava.poc.mdb.model;
+package org.commonjava.maven.mdd.model;
 
+import org.apache.maven.mae.project.key.FullProjectKey;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 
@@ -30,6 +31,25 @@ public class Artifact
     public Artifact( final MavenProject project )
     {
         this( project.getGroupId(), project.getArtifactId(), project.getVersion() );
+    }
+
+    public Artifact( final FullProjectKey projectKey )
+    {
+        this( projectKey.getGroupId(), projectKey.getArtifactId(), projectKey.getVersion() );
+    }
+
+    public Artifact( final String key )
+        throws InvalidKeyException
+    {
+        String[] parts = key.split( ":" );
+        if ( parts.length != 3 )
+        {
+            throw new InvalidKeyException( "Invalid artifact key: '%s'", key );
+        }
+
+        this.groupId = parts[0];
+        this.artifactId = parts[1];
+        this.version = parts[2];
     }
 
     public String getGroupId()

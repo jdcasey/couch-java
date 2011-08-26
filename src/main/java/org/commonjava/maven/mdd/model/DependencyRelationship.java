@@ -1,12 +1,14 @@
-package org.commonjava.poc.mdb.model;
+package org.commonjava.maven.mdd.model;
 
+import org.apache.maven.mae.project.key.FullProjectKey;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.project.MavenProject;
 
 import com.google.gson.annotations.SerializedName;
 
 public class DependencyRelationship
 {
+    private static final String DEPENDENCY_RELATIONSHIP_DOCTYPE = "dependency-relationship";
+
     private Artifact dependency;
 
     private Artifact dependent;
@@ -21,31 +23,48 @@ public class DependencyRelationship
     @SerializedName( "_rev" )
     private String rev;
 
+    @SerializedName( "doctype" )
+    private String doctype = DEPENDENCY_RELATIONSHIP_DOCTYPE;
+
     DependencyRelationship()
     {}
 
-    public DependencyRelationship( final Artifact dependency, final Artifact usedBy,
+    public DependencyRelationship( final Artifact dependency, final Artifact dependent,
                                    final String type, final String scope )
     {
         this.dependency = dependency;
-        this.dependent = usedBy;
+        this.dependent = dependent;
         this.type = type;
         this.scope = scope == null ? "compile" : scope;
         generateId();
     }
 
-    public DependencyRelationship( final Dependency dep, final MavenProject project )
+    public DependencyRelationship( final Dependency dep, final FullProjectKey projectKey )
     {
         this.dependency = new Artifact( dep );
-        this.dependent = new Artifact( project );
+        this.dependent = new Artifact( projectKey );
         this.scope = dep.getScope() == null ? "compile" : dep.getScope();
         this.type = dep.getType();
         generateId();
     }
 
+    public DependencyRelationship( final FullProjectKey dependent, final FullProjectKey dependency )
+    {
+        this.dependent = new Artifact( dependent );
+        this.dependency = new Artifact( dependency );
+        this.type = null;
+        this.scope = null;
+        generateId();
+    }
+
+    public DependencyRelationship( final Artifact dependency, final Artifact dependent )
+    {
+        this( dependency, dependent, "jar", null );
+    }
+
     private void generateId()
     {
-        id = String.format( "%s_%s_%s_%s", dependent, dependency, type, scope );
+        id = String.format( "%s_%s", dependent, dependency );
     }
 
     public Artifact getDependent()
@@ -188,6 +207,16 @@ public class DependencyRelationship
     public void setRev( final String rev )
     {
         this.rev = rev;
+    }
+
+    String getDoctype()
+    {
+        return doctype;
+    }
+
+    void setDoctype( final String doctype )
+    {
+        this.doctype = doctype;
     }
 
 }

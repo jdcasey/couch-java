@@ -1,0 +1,94 @@
+package org.commonjava.maven.mdd.mapper;
+
+import static org.commonjava.maven.mdd.fixture.DBFixture.URL;
+import static org.commonjava.maven.mdd.fixture.LoggingFixture.setupLogging;
+
+import java.util.List;
+
+import org.apache.log4j.Level;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.mae.MAEException;
+import org.apache.maven.mae.app.AbstractMAEApplication;
+import org.apache.maven.mae.depgraph.impl.FlexibleScopeDependencySelector;
+import org.apache.maven.mae.depgraph.impl.collect.BareBonesDependencyCollector;
+import org.apache.maven.mae.internal.container.ComponentKey;
+import org.apache.maven.mae.internal.container.ComponentSelector;
+import org.apache.maven.mae.project.key.FullProjectKey;
+import org.apache.maven.mae.project.session.SimpleProjectToolsSession;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.mdd.db.session.SimpleDependencyDBSession;
+import org.commonjava.maven.mdd.model.DependencyRelationship;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.sonatype.aether.impl.DependencyCollector;
+
+public class ProjectMapperTest
+{
+
+    @BeforeClass
+    public static void initLogging()
+    {
+        setupLogging( Level.DEBUG );
+    }
+
+    @Test
+    public void storeMavenDependencyGraph()
+        throws Exception
+    {
+        ProjectMapper mapper = new TestApplication().mapper;
+
+        SimpleProjectToolsSession pts = new SimpleProjectToolsSession();
+        pts.setProcessPomPlugins( false );
+        pts.setDependencySelector( new FlexibleScopeDependencySelector( Artifact.SCOPE_PROVIDED,
+                                                                        Artifact.SCOPE_TEST ) );
+
+        SimpleDependencyDBSession dbs = new SimpleDependencyDBSession( URL );
+
+        SimpleMapperSession session = new SimpleMapperSession( dbs, pts );
+
+        FullProjectKey key = new FullProjectKey( "org.apache.maven", "maven-model", "3.0.3" );
+
+        List<DependencyRelationship> rels = mapper.mapProjectDependencyGraph( key, session );
+        System.out.println( "Mapped " + rels.size() + " relationships." );
+    }
+
+    @Component( role = TestApplication.class )
+    private static final class TestApplication
+        extends AbstractMAEApplication
+    {
+        @Requirement
+        private ProjectMapper mapper;
+
+        TestApplication()
+            throws MAEException
+        {
+            load();
+        }
+
+        @Override
+        public String getId()
+        {
+            return "test";
+        }
+
+        @Override
+        public String getName()
+        {
+            return "Test App";
+        }
+
+        @Override
+        public ComponentSelector getComponentSelector()
+        {
+            ComponentSelector sel = new ComponentSelector();
+
+            sel.setSelection( new ComponentKey<DependencyCollector>( DependencyCollector.class ),
+                              BareBonesDependencyCollector.HINT );
+
+            return sel;
+        }
+
+    }
+
+}

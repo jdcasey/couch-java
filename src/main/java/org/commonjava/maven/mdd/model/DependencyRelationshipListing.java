@@ -1,4 +1,4 @@
-package org.commonjava.poc.mdb.model;
+package org.commonjava.maven.mdd.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,13 +8,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import com.google.gson.annotations.SerializedName;
-
 public class DependencyRelationshipListing
     implements Iterable<DependencyRelationship>
 {
 
-    @SerializedName( "rows" )
     private List<DependencyRelationship> dependencies;
 
     DependencyRelationshipListing()
@@ -33,7 +30,10 @@ public class DependencyRelationshipListing
         }
         else
         {
-            dependencies = new ArrayList<DependencyRelationship>( new LinkedHashSet<DependencyRelationship>( deps ) );
+            dependencies =
+                new ArrayList<DependencyRelationship>(
+                                                       new LinkedHashSet<DependencyRelationship>(
+                                                                                                  deps ) );
         }
     }
 
@@ -56,6 +56,23 @@ public class DependencyRelationshipListing
     public int size()
     {
         return dependencies.size();
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append( "Dependency-Relationship Listing: [\n" );
+        if ( dependencies != null && !dependencies.isEmpty() )
+        {
+            for ( DependencyRelationship rel : dependencies )
+            {
+                sb.append( "  " ).append( rel ).append( "\n" );
+            }
+        }
+        sb.append( "]" );
+
+        return sb.toString();
     }
 
 }

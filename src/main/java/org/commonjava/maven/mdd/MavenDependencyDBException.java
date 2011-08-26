@@ -1,9 +1,9 @@
-package org.commonjava.poc.mdb.db;
+package org.commonjava.maven.mdd;
 
 import java.text.MessageFormat;
 import java.util.IllegalFormatException;
 
-public class DatabaseException
+public class MavenDependencyDBException
     extends Exception
 {
 
@@ -11,13 +11,13 @@ public class DatabaseException
 
     private final Object[] params;
 
-    public DatabaseException( final String message, final Throwable error, final Object... params )
+    public MavenDependencyDBException( final String message, final Throwable error, final Object... params )
     {
         super( message, error );
         this.params = params;
     }
 
-    public DatabaseException( final String message, final Object... params )
+    public MavenDependencyDBException( final String message, final Object... params )
     {
         super( message );
         this.params = params;
