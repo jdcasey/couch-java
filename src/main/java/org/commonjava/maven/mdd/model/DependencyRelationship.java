@@ -1,13 +1,30 @@
+/*******************************************************************************
+ * Copyright (C) 2011  John Casey
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package org.commonjava.maven.mdd.model;
 
 import org.apache.maven.mae.project.key.FullProjectKey;
 import org.apache.maven.model.Dependency;
+import org.commonjava.couch.model.CouchDocument;
 
 import com.google.gson.annotations.SerializedName;
 
 public class DependencyRelationship
+    implements CouchDocument
 {
     private static final String DEPENDENCY_RELATIONSHIP_DOCTYPE = "dependency-relationship";
+
+    @SerializedName( "_id" )
+    private String id;
+
+    @SerializedName( "_rev" )
+    private String rev;
 
     private Artifact dependency;
 
@@ -16,12 +33,6 @@ public class DependencyRelationship
     private String type;
 
     private String scope;
-
-    @SerializedName( "_id" )
-    private String id;
-
-    @SerializedName( "_rev" )
-    private String rev;
 
     @SerializedName( "doctype" )
     private String doctype = DEPENDENCY_RELATIONSHIP_DOCTYPE;
@@ -189,6 +200,16 @@ public class DependencyRelationship
                               dependency, dependent, type, scope );
     }
 
+    String getDoctype()
+    {
+        return doctype;
+    }
+
+    void setDoctype( final String doctype )
+    {
+        this.doctype = doctype;
+    }
+
     public String getId()
     {
         return id;
@@ -209,14 +230,22 @@ public class DependencyRelationship
         this.rev = rev;
     }
 
-    String getDoctype()
+    @Override
+    public String getCouchDocId()
     {
-        return doctype;
+        return id;
     }
 
-    void setDoctype( final String doctype )
+    @Override
+    public String getCouchDocRev()
     {
-        this.doctype = doctype;
+        return rev;
+    }
+
+    @Override
+    public void setCouchDocRev( final String revision )
+    {
+        this.rev = revision;
     }
 
 }

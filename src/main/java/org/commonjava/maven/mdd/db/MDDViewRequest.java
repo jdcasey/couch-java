@@ -7,24 +7,23 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.maven.mdd.mapper;
+package org.commonjava.maven.mdd.db;
 
-import org.commonjava.maven.mdd.MavenDependencyDBException;
+import org.commonjava.couch.db.model.ViewRequest;
 
-public class MapperException
-    extends MavenDependencyDBException
+public class MDDViewRequest
+    extends ViewRequest
 {
 
-    private static final long serialVersionUID = 1L;
+    public static final String LOGIC_APP = "db-logic";
 
-    public MapperException( final String message, final Throwable error, final Object... params )
-    {
-        super( message, error, params );
-    }
+    public static final String DIRECT_DEPENDENCIES = "direct-dependencies";
 
-    public MapperException( final String message, final Object... params )
+    public static final String DIRECT_DEPENDENTS = "direct-dependents";
+
+    public MDDViewRequest( final String view )
     {
-        super( message, params );
+        super( LOGIC_APP, view );
     }
 
 }

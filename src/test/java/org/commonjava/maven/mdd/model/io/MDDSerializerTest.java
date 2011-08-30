@@ -1,10 +1,17 @@
+/*******************************************************************************
+ * Copyright (C) 2011  John Casey
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package org.commonjava.maven.mdd.model.io;
 
 import static org.commonjava.maven.mdd.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-
-import java.io.ByteArrayInputStream;
 
 import org.apache.log4j.Level;
 import org.apache.maven.mae.MAEException;
@@ -12,27 +19,13 @@ import org.apache.maven.mae.app.AbstractMAEApplication;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.mdd.model.Artifact;
-import org.commonjava.maven.mdd.model.DatabaseError;
 import org.commonjava.maven.mdd.model.DependencyRelationship;
 import org.commonjava.maven.mdd.model.DependencyRelationshipListing;
-import org.commonjava.maven.mdd.model.io.Serializer;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class SerializerTest
+public class MDDSerializerTest
 {
-
-    @Test
-    public void errorToString()
-        throws Exception
-    {
-        String json = "{\"error\":\"bad_request\",\"reason\":\"invalid UTF-8 JSON\"}";
-        DatabaseError error =
-            new TestApplication().serializer.toError( new ByteArrayInputStream(
-                                                                                json.getBytes( "UTF-8" ) ),
-                                                      "UTF-8" );
-        System.out.println( error );
-    }
 
     @Test
     public void dependencyToString()
@@ -57,9 +50,9 @@ public class SerializerTest
                                         new Artifact( "org.commonjava.poc", "maven-dependency-db",
                                                       "1.0-SNAPSHOT" ), "jar", "compile" );
 
-        Serializer serializer = new TestApplication().serializer;
+        MDDSerializer serializer = new TestApplication().serializer;
         String result = serializer.toString( dep );
-        DependencyRelationship out = serializer.toDependency( result );
+        DependencyRelationship out = serializer.toDocument( result, DependencyRelationship.class );
 
         assertThat( out.getDependency(), equalTo( dep.getDependency() ) );
         assertThat( out.getDependent(), equalTo( dep.getDependent() ) );
@@ -69,7 +62,7 @@ public class SerializerTest
     public void dependencyListRoundTrip()
         throws MAEException
     {
-        Serializer serializer = new TestApplication().serializer;
+        MDDSerializer serializer = new TestApplication().serializer;
         String result =
             "{\"total_rows\":1,\"offset\":0,\"rows\":[\n"
                 + "{\"id\":\"org.foo:test-store-deps:1.0_org.dep:dep-artifact:1.0.1\","
@@ -85,7 +78,8 @@ public class SerializerTest
                 + "                         \"version\":\"1.0\"}," + "         \"type\":\"jar\","
                 + "         \"scope\":\"compile\"}}\n" + "]}";
 
-        DependencyRelationshipListing out = serializer.toDependencyListing( result );
+        DependencyRelationshipListing out =
+            serializer.fromJson( result, DependencyRelationshipListing.class );
 
         assertThat( out.size(), equalTo( 1 ) );
 
@@ -114,7 +108,7 @@ public class SerializerTest
         extends AbstractMAEApplication
     {
         @Requirement
-        private Serializer serializer;
+        private MDDSerializer serializer;
 
         TestApplication()
             throws MAEException
