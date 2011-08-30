@@ -1,10 +1,14 @@
 package org.commonjava.couch.db;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +40,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.Logger;
+import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
@@ -63,6 +68,8 @@ public class CouchManager
 
     private static final String APP_BASE = "_design";
 
+    private static final String BULK_DOCS = "_bulk_docs";
+
     private Serializer serializer;
 
     private HttpClient client;
@@ -76,6 +83,70 @@ public class CouchManager
 
     CouchManager()
     {}
+
+    public void bulkModify( final Collection<? extends CouchDocumentAction> actions,
+                            final String dbUrl, final boolean allOrNothing )
+        throws CouchDBException
+    {
+        BulkActionHolder bulk = new BulkActionHolder( actions, allOrNothing );
+        String body = getSerializer().toString( bulk );
+
+        String url;
+        try
+        {
+            url = buildUrl( dbUrl, null, BULK_DOCS );
+        }
+        catch ( MalformedURLException e )
+        {
+            throw new CouchDBException( "Failed to format bulk-update URL: %s", e, e.getMessage() );
+        }
+
+        HttpPost request = new HttpPost( url );
+        try
+        {
+            request.setEntity( new StringEntity( body, "application/json", "UTF-8" ) );
+        }
+        catch ( UnsupportedEncodingException e )
+        {
+            throw new CouchDBException( "Failed to encode POST entity for bulk update: %s", e,
+                                        e.getMessage() );
+        }
+
+        HttpResponse response = executeHttp( request, "Bulk update failed" );
+        StatusLine statusLine = response.getStatusLine();
+        int code = statusLine.getStatusCode();
+        if ( code != SC_OK && code != SC_CREATED )
+        {
+            String content = null;
+            HttpEntity entity = response.getEntity();
+            if ( entity != null )
+            {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                InputStream in = null;
+                try
+                {
+                    in = entity.getContent();
+                    copy( in, baos );
+                }
+                catch ( IOException e )
+                {
+                    throw new CouchDBException(
+                                                "Error reading response content for error: %s\nError was: %s",
+                                                e, statusLine, e.getMessage() );
+                }
+                finally
+                {
+                    closeQuietly( in );
+                }
+
+                content = new String( baos.toByteArray() );
+            }
+
+            throw new CouchDBException(
+                                        "Bulk operation failed. Status line: %s\nContent:\n----------\n\n%s",
+                                        statusLine, content );
+        }
+    }
 
     public void store( final Collection<? extends CouchDocument> documents, final String dbUrl,
                        final boolean skipIfExists, final boolean allOrNothing )
@@ -92,49 +163,8 @@ public class CouchManager
             toStore.add( new StoreAction( doc, skipIfExists ) );
         }
 
-        execute( toStore, dbUrl );
-
-    }
-
-    private void execute( final Set<? extends CouchDocumentAction> actions, final String dbUrl )
-        throws CouchDBException
-    {
-        CountDownLatch latch = new CountDownLatch( actions.size() );
-        for ( CouchDocumentAction action : actions )
-        {
-            action.prepareExecution( latch, dbUrl, this );
-            exec.execute( action );
-        }
-
-        synchronized ( latch )
-        {
-            while ( latch.getCount() > 0 )
-            {
-                LOGGER.info( "Waiting for " + latch.getCount() + " actions to complete." );
-                try
-                {
-                    latch.await( 2, TimeUnit.SECONDS );
-                }
-                catch ( InterruptedException e )
-                {
-                    break;
-                }
-            }
-        }
-
-        List<Throwable> errors = new ArrayList<Throwable>();
-        for ( CouchDocumentAction action : actions )
-        {
-            if ( action.getError() != null )
-            {
-                errors.add( action.getError() );
-            }
-        }
-
-        if ( !errors.isEmpty() )
-        {
-            throw new CouchDBException( "Failed to execute %d actions.", errors.size() ).withNestedErrors( errors );
-        }
+        bulkModify( toStore, dbUrl, allOrNothing );
+        // threadedExecute( toStore, dbUrl );
     }
 
     public void delete( final Collection<? extends CouchDocument> documents, final String dbUrl,
@@ -152,14 +182,16 @@ public class CouchManager
             toDelete.add( new DeleteAction( doc ) );
         }
 
-        execute( toDelete, dbUrl );
+        bulkModify( toDelete, dbUrl, allOrNothing );
+        // threadedExecute( toDelete, dbUrl );
     }
 
     public void modify( final Collection<? extends CouchDocumentAction> actions,
                         final String dbUrl, final boolean allOrNothing )
         throws CouchDBException
     {
-        execute( new HashSet<CouchDocumentAction>( actions ), dbUrl );
+        bulkModify( actions, dbUrl, allOrNothing );
+        // threadedExecute( new HashSet<CouchDocumentAction>( actions ), dbUrl );
     }
 
     public <V> V getView( final ViewRequest req, final String dbUrl, final Class<V> type )
@@ -198,7 +230,7 @@ public class CouchManager
         try
         {
             request.setHeader( "Referer", dbUrl );
-            String src = serializer.toString( doc );
+            String src = getSerializer().toString( doc );
             request.setEntity( new StringEntity( src, "application/json", "UTF-8" ) );
 
             executeHttp( request, SC_CREATED, "Failed to store document" );
@@ -282,7 +314,7 @@ public class CouchManager
 
             try
             {
-                error = serializer.toError( entity );
+                error = getSerializer().toError( entity );
             }
             catch ( IOException e )
             {
@@ -342,7 +374,7 @@ public class CouchManager
 
             try
             {
-                error = serializer.toError( entity );
+                error = getSerializer().toError( entity );
             }
             catch ( IOException e )
             {
@@ -358,10 +390,16 @@ public class CouchManager
         return exists;
     }
 
+    public boolean dbExists( final String url )
+        throws CouchDBException
+    {
+        return exists( url );
+    }
+
     public void dropDatabase( final String url )
         throws CouchDBException
     {
-        if ( !exists( url ) )
+        if ( !dbExists( url ) )
         {
             return;
         }
@@ -385,7 +423,7 @@ public class CouchManager
         try
         {
             request.setHeader( "Referer", dbUrl );
-            String appJson = serializer.toString( app );
+            String appJson = getSerializer().toString( app );
             request.setEntity( new StringEntity( appJson, "application/json", "UTF-8" ) );
 
             executeHttp( request, SC_CREATED, "Failed to store application document" );
@@ -416,7 +454,7 @@ public class CouchManager
             if ( expectedStatus != null && statusLine.getStatusCode() != expectedStatus )
             {
                 HttpEntity entity = response.getEntity();
-                CouchError error = serializer.toError( entity );
+                CouchError error = getSerializer().toError( entity );
                 throw new CouchDBException( "%s: %s.\nHTTP Response: %s\nError: %s",
                                             failureMessage, url, statusLine, error );
             }
@@ -583,6 +621,48 @@ public class CouchManager
         }
 
         return new URL( urlBuilder.toString() ).toExternalForm();
+    }
+
+    protected void threadedExecute( final Set<? extends CouchDocumentAction> actions,
+                                    final String dbUrl )
+        throws CouchDBException
+    {
+        CountDownLatch latch = new CountDownLatch( actions.size() );
+        for ( CouchDocumentAction action : actions )
+        {
+            action.prepareExecution( latch, dbUrl, this );
+            exec.execute( action );
+        }
+
+        synchronized ( latch )
+        {
+            while ( latch.getCount() > 0 )
+            {
+                LOGGER.info( "Waiting for " + latch.getCount() + " actions to complete." );
+                try
+                {
+                    latch.await( 2, TimeUnit.SECONDS );
+                }
+                catch ( InterruptedException e )
+                {
+                    break;
+                }
+            }
+        }
+
+        List<Throwable> errors = new ArrayList<Throwable>();
+        for ( CouchDocumentAction action : actions )
+        {
+            if ( action.getError() != null )
+            {
+                errors.add( action.getError() );
+            }
+        }
+
+        if ( !errors.isEmpty() )
+        {
+            throw new CouchDBException( "Failed to execute %d actions.", errors.size() ).withNestedErrors( errors );
+        }
     }
 
 }
