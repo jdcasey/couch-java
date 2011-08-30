@@ -26,8 +26,11 @@ import org.apache.maven.mae.project.key.FullProjectKey;
 import org.apache.maven.mae.project.session.SimpleProjectToolsSession;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.mdd.db.DependencyDatabase;
 import org.commonjava.maven.mdd.db.session.SimpleDependencyDBSession;
 import org.commonjava.maven.mdd.model.DependencyRelationship;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sonatype.aether.impl.DependencyCollector;
@@ -35,17 +38,26 @@ import org.sonatype.aether.impl.DependencyCollector;
 public class ProjectMapperTest
 {
 
+    private ProjectMapper mapper;
+
+    private DependencyDatabase db;
+
+    private MapperSession session;
+
     @BeforeClass
     public static void initLogging()
     {
         setupLogging( Level.DEBUG );
     }
 
-    @Test
-    public void storeMavenDependencyGraph()
+    @Before
+    public void setupTest()
         throws Exception
     {
-        ProjectMapper mapper = new TestApplication().mapper;
+        TestApplication app = new TestApplication();
+
+        mapper = app.mapper;
+        db = app.db;
 
         SimpleProjectToolsSession pts = new SimpleProjectToolsSession();
         pts.setProcessPomPlugins( false );
@@ -54,11 +66,40 @@ public class ProjectMapperTest
 
         SimpleDependencyDBSession dbs = new SimpleDependencyDBSession( URL );
 
-        SimpleMapperSession session = new SimpleMapperSession( dbs, pts );
+        session = new SimpleMapperSession( dbs, pts );
 
-        FullProjectKey key = new FullProjectKey( "org.apache.maven", "maven-model", "3.0.3" );
+        db.installDatabase( dbs );
+
+        db.validateConnection( dbs );
+    }
+
+    @After
+    public void teardownTest()
+        throws Exception
+    {
+        if ( db != null && session != null )
+        {
+            db.dropDatabase( session.getDBSession() );
+        }
+    }
+
+    @Test
+    public void storeMavenDependencyGraph()
+        throws Exception
+    {
+        FullProjectKey key = new FullProjectKey( "org.apache.maven", "maven-embedder", "3.0.3" );
 
         List<DependencyRelationship> rels = mapper.mapProjectDependencyGraph( key, session );
+        System.out.println( "Mapped " + rels.size() + " relationships." );
+    }
+
+    @Test
+    public void storeMavenDirectDependencies()
+        throws Exception
+    {
+        FullProjectKey key = new FullProjectKey( "org.apache.maven", "maven-embedder", "3.0.3" );
+
+        List<DependencyRelationship> rels = mapper.mapProjectDirectDependencies( key, session );
         System.out.println( "Mapped " + rels.size() + " relationships." );
     }
 
@@ -66,6 +107,9 @@ public class ProjectMapperTest
     private static final class TestApplication
         extends AbstractMAEApplication
     {
+        @Requirement
+        public DependencyDatabase db;
+
         @Requirement
         private ProjectMapper mapper;
 

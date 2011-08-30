@@ -11,20 +11,25 @@ package org.commonjava.maven.mdd.model.io;
 
 import static org.commonjava.maven.mdd.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+
+import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.maven.mae.MAEException;
 import org.apache.maven.mae.app.AbstractMAEApplication;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.couch.db.model.CouchObjectList;
+import org.commonjava.couch.model.io.CouchObjectListDeserializer;
+import org.commonjava.couch.model.io.Serializer;
 import org.commonjava.maven.mdd.model.Artifact;
 import org.commonjava.maven.mdd.model.DependencyRelationship;
-import org.commonjava.maven.mdd.model.DependencyRelationshipListing;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MDDSerializerTest
+public class SerializerTest
 {
 
     @Test
@@ -34,7 +39,7 @@ public class MDDSerializerTest
         DependencyRelationship dep =
             new DependencyRelationship( new Artifact( "org.apache.maven", "maven-core", "3.0.3" ),
                                         new Artifact( "org.commonjava.poc", "maven-dependency-db",
-                                                      "1.0-SNAPSHOT" ), "jar", "compile" );
+                                                      "1.0-SNAPSHOT" ), "jar", "compile", 1 );
 
         String result = new TestApplication().serializer.toString( dep );
 
@@ -48,9 +53,9 @@ public class MDDSerializerTest
         DependencyRelationship dep =
             new DependencyRelationship( new Artifact( "org.apache.maven", "maven-core", "3.0.3" ),
                                         new Artifact( "org.commonjava.poc", "maven-dependency-db",
-                                                      "1.0-SNAPSHOT" ), "jar", "compile" );
+                                                      "1.0-SNAPSHOT" ), "jar", "compile", 1 );
 
-        MDDSerializer serializer = new TestApplication().serializer;
+        Serializer serializer = new TestApplication().serializer;
         String result = serializer.toString( dep );
         DependencyRelationship out = serializer.toDocument( result, DependencyRelationship.class );
 
@@ -62,7 +67,7 @@ public class MDDSerializerTest
     public void dependencyListRoundTrip()
         throws MAEException
     {
-        MDDSerializer serializer = new TestApplication().serializer;
+        Serializer serializer = new TestApplication().serializer;
         String result =
             "{\"total_rows\":1,\"offset\":0,\"rows\":[\n"
                 + "{\"id\":\"org.foo:test-store-deps:1.0_org.dep:dep-artifact:1.0.1\","
@@ -78,12 +83,19 @@ public class MDDSerializerTest
                 + "                         \"version\":\"1.0\"}," + "         \"type\":\"jar\","
                 + "         \"scope\":\"compile\"}}\n" + "]}";
 
-        DependencyRelationshipListing out =
-            serializer.fromJson( result, DependencyRelationshipListing.class );
+        CouchObjectListDeserializer<DependencyRelationship> deser =
+            new CouchObjectListDeserializer<DependencyRelationship>( DependencyRelationship.class );
+
+        CouchObjectList<DependencyRelationship> listing =
+            serializer.fromJson( result, deser.typeLiteral(), deser );
+
+        assertThat( listing, notNullValue() );
+
+        List<DependencyRelationship> out = listing.getItems();
 
         assertThat( out.size(), equalTo( 1 ) );
 
-        DependencyRelationship outDep = out.iterator().next();
+        DependencyRelationship outDep = out.get( 0 );
 
         assertThat( outDep.getDependency().getGroupId(), equalTo( "org.dep" ) );
         assertThat( outDep.getDependency().getArtifactId(), equalTo( "dep-artifact" ) );
@@ -108,7 +120,7 @@ public class MDDSerializerTest
         extends AbstractMAEApplication
     {
         @Requirement
-        private MDDSerializer serializer;
+        private Serializer serializer;
 
         TestApplication()
             throws MAEException

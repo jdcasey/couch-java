@@ -37,21 +37,26 @@ public class DependencyRelationship
     @SerializedName( "doctype" )
     private String doctype = DEPENDENCY_RELATIONSHIP_DOCTYPE;
 
+    private int index;
+
     DependencyRelationship()
     {}
 
     public DependencyRelationship( final Artifact dependency, final Artifact dependent,
-                                   final String type, final String scope )
+                                   final String type, final String scope, final int index )
     {
         this.dependency = dependency;
         this.dependent = dependent;
         this.type = type;
         this.scope = scope == null ? "compile" : scope;
+        this.index = index;
         generateId();
     }
 
-    public DependencyRelationship( final Dependency dep, final FullProjectKey projectKey )
+    public DependencyRelationship( final Dependency dep, final FullProjectKey projectKey,
+                                   final int index )
     {
+        this.index = index;
         this.dependency = new Artifact( dep );
         this.dependent = new Artifact( projectKey );
         this.scope = dep.getScope() == null ? "compile" : dep.getScope();
@@ -59,18 +64,31 @@ public class DependencyRelationship
         generateId();
     }
 
-    public DependencyRelationship( final FullProjectKey dependent, final FullProjectKey dependency )
+    public DependencyRelationship( final FullProjectKey dependent, final FullProjectKey dependency,
+                                   final int index )
     {
         this.dependent = new Artifact( dependent );
         this.dependency = new Artifact( dependency );
         this.type = null;
         this.scope = null;
+        this.index = index;
         generateId();
     }
 
-    public DependencyRelationship( final Artifact dependency, final Artifact dependent )
+    public DependencyRelationship( final Artifact dependency, final Artifact dependent,
+                                   final int index )
     {
-        this( dependency, dependent, "jar", null );
+        this( dependency, dependent, "jar", null, index );
+    }
+
+    public DependencyRelationship( final FullProjectKey dependency, final FullProjectKey dependent )
+    {
+        this( dependency, dependent, -1 );
+    }
+
+    public DependencyRelationship( final Dependency dep, final FullProjectKey projectKey )
+    {
+        this( dep, projectKey, -1 );
     }
 
     private void generateId()
@@ -246,6 +264,16 @@ public class DependencyRelationship
     public void setCouchDocRev( final String revision )
     {
         this.rev = revision;
+    }
+
+    public int getIndex()
+    {
+        return index;
+    }
+
+    void setIndex( final int index )
+    {
+        this.index = index;
     }
 
 }

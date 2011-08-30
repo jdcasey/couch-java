@@ -10,20 +10,19 @@
 package org.commonjava.maven.mdd.db;
 
 import org.commonjava.couch.db.model.ViewRequest;
+import org.commonjava.maven.mdd.db.session.DependencyDBSession;
 
 public class MDDViewRequest
     extends ViewRequest
 {
 
-    public static final String LOGIC_APP = "db-logic";
-
     public static final String DIRECT_DEPENDENCIES = "direct-dependencies";
 
     public static final String DIRECT_DEPENDENTS = "direct-dependents";
 
-    public MDDViewRequest( final String view )
+    public MDDViewRequest( final String view, final DependencyDBSession session )
     {
-        super( LOGIC_APP, view );
+        super( session.getLogicApplication(), view );
     }
 
 }

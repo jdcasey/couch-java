@@ -47,6 +47,36 @@ public class ProjectMapper
     @Requirement
     private DependencyDatabase dependencyDatabase;
 
+    public List<DependencyRelationship> mapProjectDirectDependencies( final FullProjectKey key,
+                                                                      final MapperSession session )
+        throws MapperException
+    {
+        ProjectToolsSession pts = session.getProjectToolsSession();
+
+        MavenProject project;
+        try
+        {
+            project = projectLoader.buildProjectInstance( key, pts );
+        }
+        catch ( ProjectToolsException e )
+        {
+            throw new MapperException( "Failed to load Maven project instance for: %s. Reason: %s",
+                                       e, key, e.getMessage() );
+        }
+
+        try
+        {
+            return dependencyDatabase.storeDependencies( key, project.getDependencies(),
+                                                         session.getDBSession() );
+        }
+        catch ( DatabaseException e )
+        {
+            throw new MapperException(
+                                       "Failed to store dependency relationships from direct dependencies of: %s. Reason: %s",
+                                       e, key, e.getMessage() );
+        }
+    }
+
     public List<DependencyRelationship> mapProjectDependencyGraph( final FullProjectKey key,
                                                                    final MapperSession session )
         throws MapperException
@@ -80,6 +110,7 @@ public class ProjectMapper
             Collection<DirectionalEdge<DepGraphNode>> childEdges =
                 depGraph.getGraph().getManagedGraph().getOutEdges( parent );
 
+            int count = 0;
             for ( DirectionalEdge<DepGraphNode> edge : childEdges )
             {
                 DepGraphNode child = edge.getTo();
@@ -89,7 +120,9 @@ public class ProjectMapper
                     {
                         LOGGER.info( "+ " + parent.getKey() + " -> " + child.getKey() );
                         rels.add( new DependencyRelationship( new Artifact( child.getKey() ),
-                                                              new Artifact( parent.getKey() ) ) );
+                                                              new Artifact( parent.getKey() ),
+                                                              count ) );
+                        count++;
                     }
                     catch ( InvalidKeyException e )
                     {

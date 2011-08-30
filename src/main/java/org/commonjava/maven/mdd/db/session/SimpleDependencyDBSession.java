@@ -13,8 +13,6 @@ public class SimpleDependencyDBSession
     implements DependencyDBSession
 {
 
-    private static final String DEFAULT_VIEW_APPLICATION = "db-logic";
-
     private final String baseUrl;
 
     private final String logicApplication;
@@ -22,7 +20,7 @@ public class SimpleDependencyDBSession
     public SimpleDependencyDBSession( final String baseUrl )
     {
         this.baseUrl = baseUrl;
-        this.logicApplication = DEFAULT_VIEW_APPLICATION;
+        this.logicApplication = DEFAULT_LOGIC_APPLICATION;
     }
 
     public SimpleDependencyDBSession( final String baseUrl, final String logicApplication )

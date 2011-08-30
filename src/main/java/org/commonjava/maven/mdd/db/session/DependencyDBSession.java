@@ -12,6 +12,10 @@ package org.commonjava.maven.mdd.db.session;
 public interface DependencyDBSession
 {
 
+    String LOGIC_APPLICATION_RESOURCE_BASE = "db-logic";
+
+    String DEFAULT_LOGIC_APPLICATION = LOGIC_APPLICATION_RESOURCE_BASE;
+
     String getBaseUrl();
 
     String getLogicApplication();

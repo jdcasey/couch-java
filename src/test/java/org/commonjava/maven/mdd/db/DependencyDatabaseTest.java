@@ -27,7 +27,6 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.mdd.db.session.SimpleDependencyDBSession;
 import org.commonjava.maven.mdd.model.DependencyRelationship;
-import org.commonjava.maven.mdd.model.DependencyRelationshipListing;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -82,12 +81,12 @@ public class DependencyDatabaseTest
         FullProjectKey key = new FullProjectKey( "org.foo", "test-store-deps", "1.0" );
 
         db.storeDependencies( key, deps, session );
-        DependencyRelationshipListing listing = db.getDirectDependencies( key, session );
+        List<DependencyRelationship> listing = db.getDirectDependencies( key, session );
 
         assertThat( listing, notNullValue() );
         assertThat( listing.size(), equalTo( 1 ) );
 
-        DependencyRelationship rel = listing.iterator().next();
+        DependencyRelationship rel = listing.get( 0 );
 
         assertThat( rel.getDependency().getGroupId(), equalTo( dep.getGroupId() ) );
         assertThat( rel.getDependency().getArtifactId(), equalTo( dep.getArtifactId() ) );
@@ -112,11 +111,11 @@ public class DependencyDatabaseTest
         FullProjectKey dk = new FullProjectKey( dep );
 
         db.storeDependencies( pk, deps, session );
-        DependencyRelationshipListing listing = db.getDirectDependents( dk, session );
+        List<DependencyRelationship> listing = db.getDirectDependents( dk, session );
 
         assertThat( listing.size(), equalTo( 1 ) );
 
-        DependencyRelationship rel = listing.iterator().next();
+        DependencyRelationship rel = listing.get( 0 );
 
         assertThat( rel.getDependent().getGroupId(), equalTo( pk.getGroupId() ) );
         assertThat( rel.getDependent().getArtifactId(), equalTo( pk.getArtifactId() ) );

@@ -10,14 +10,17 @@
 package org.commonjava.maven.mdd.db;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.mae.project.key.FullProjectKey;
 import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.db.model.ViewRequest;
@@ -25,8 +28,6 @@ import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.maven.mdd.db.session.DependencyDBSession;
 import org.commonjava.maven.mdd.model.DependencyRelationship;
-import org.commonjava.maven.mdd.model.DependencyRelationshipListing;
-import org.commonjava.maven.mdd.model.io.MDDSerializer;
 
 @Component( role = DependencyDatabase.class )
 public class DependencyDatabase
@@ -34,17 +35,11 @@ public class DependencyDatabase
 
     private static final String KEY = "key";
 
-    private static final String INCLUDE_DOCS = "include_docs";
-
+    @Requirement
     private CouchManager couch;
 
     protected synchronized CouchManager getCouch()
     {
-        if ( couch == null )
-        {
-            couch = new CouchManager( new MDDSerializer() );
-        }
-
         return couch;
     }
 
@@ -67,7 +62,7 @@ public class DependencyDatabase
     {
         try
         {
-            if ( !getCouch().exists( session.getBaseUrl() ) )
+            if ( !getCouch().dbExists( session.getBaseUrl() ) )
             {
                 getCouch().createDatabase( session.getBaseUrl() );
             }
@@ -78,23 +73,25 @@ public class DependencyDatabase
                                          e.getMessage() );
         }
 
+        String app = session.getLogicApplication();
         try
         {
-            if ( !getCouch().appExists( session.getBaseUrl(), MDDViewRequest.LOGIC_APP ) )
+            if ( !getCouch().appExists( session.getBaseUrl(), app ) )
             {
-                CouchApp app = new CouchAppReader().readAppDefinition( MDDViewRequest.LOGIC_APP );
-                getCouch().installApplication( app, session.getBaseUrl() );
+                CouchApp application =
+                    new CouchAppReader().readAppDefinition( DependencyDBSession.LOGIC_APPLICATION_RESOURCE_BASE );
+                getCouch().installApplication( application, session.getBaseUrl() );
             }
         }
         catch ( CouchDBException e )
         {
-            throw new DatabaseException( "Failed to install application: %s Reason: %s", e,
-                                         MDDViewRequest.LOGIC_APP, e.getMessage() );
+            throw new DatabaseException( "Failed to install application: %s Reason: %s", e, app,
+                                         e.getMessage() );
         }
         catch ( IOException e )
         {
-            throw new DatabaseException( "Failed to install application: %s Reason: %s", e,
-                                         MDDViewRequest.LOGIC_APP, e.getMessage() );
+            throw new DatabaseException( "Failed to install application: %s Reason: %s", e, app,
+                                         e.getMessage() );
         }
 
     }
@@ -115,7 +112,7 @@ public class DependencyDatabase
 
             for ( String view : views )
             {
-                if ( !getCouch().viewExists( url, MDDViewRequest.LOGIC_APP, view ) )
+                if ( !getCouch().viewExists( url, session.getLogicApplication(), view ) )
                 {
                     return false;
                 }
@@ -131,18 +128,42 @@ public class DependencyDatabase
         return true;
     }
 
-    public DependencyRelationshipListing getDirectDependencies( final FullProjectKey projectKey,
-                                                                final DependencyDBSession session )
+    public List<DependencyRelationship> getDirectDependencies( final FullProjectKey projectKey,
+                                                               final DependencyDBSession session )
         throws DatabaseException
     {
-        return getDependencyRelationshipView( "direct-dependencies", projectKey, session );
+        ViewRequest req = new MDDViewRequest( MDDViewRequest.DIRECT_DEPENDENCIES, session );
+        req.setParameter( KEY, projectKey );
+        try
+        {
+            return getCouch().getViewListing( req, session.getBaseUrl(),
+                                              DependencyRelationship.class );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new DatabaseException(
+                                         "Failed to retrieve direct dependencies for: %s. Reason: %s",
+                                         e, projectKey, e.getMessage() );
+        }
     }
 
-    public DependencyRelationshipListing getDirectDependents( final FullProjectKey projectKey,
-                                                              final DependencyDBSession session )
+    public List<DependencyRelationship> getDirectDependents( final FullProjectKey projectKey,
+                                                             final DependencyDBSession session )
         throws DatabaseException
     {
-        return getDependencyRelationshipView( "direct-dependents", projectKey, session );
+        ViewRequest req = new MDDViewRequest( MDDViewRequest.DIRECT_DEPENDENTS, session );
+        req.setParameter( KEY, projectKey );
+        try
+        {
+            return getCouch().getViewListing( req, session.getBaseUrl(),
+                                              DependencyRelationship.class );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new DatabaseException(
+                                         "Failed to retrieve direct dependencies for: %s. Reason: %s",
+                                         e, projectKey, e.getMessage() );
+        }
     }
 
     public void store( final Collection<DependencyRelationship> rels,
@@ -160,18 +181,22 @@ public class DependencyDatabase
         }
     }
 
-    public void storeDependencies( final FullProjectKey projectKey,
-                                   final List<Dependency> dependencies,
-                                   final DependencyDBSession session )
+    public List<DependencyRelationship> storeDependencies( final FullProjectKey projectKey,
+                                                           final List<Dependency> dependencies,
+                                                           final DependencyDBSession session )
         throws DatabaseException
     {
-        Set<DependencyRelationship> rels = new HashSet<DependencyRelationship>();
+        Set<DependencyRelationship> rels = new LinkedHashSet<DependencyRelationship>();
+        int count = 0;
         for ( Dependency dep : dependencies )
         {
-            rels.add( new DependencyRelationship( dep, projectKey ) );
+            rels.add( new DependencyRelationship( dep, projectKey, count ) );
+            count++;
         }
 
         store( rels, session );
+
+        return new ArrayList<DependencyRelationship>( rels );
     }
 
     public void store( final DependencyRelationship rel, final DependencyDBSession session )
@@ -230,7 +255,7 @@ public class DependencyDatabase
                                         final DependencyDBSession session )
         throws DatabaseException
     {
-        return hasDirectDependency( new DependencyRelationship( dependent, dependency ), session );
+        return hasDirectDependency( new DependencyRelationship( dependency, dependent ), session );
     }
 
     public boolean hasDirectDependency( final DependencyRelationship rel,
@@ -246,27 +271,6 @@ public class DependencyDatabase
             throw new DatabaseException(
                                          "Failed to check for existing dependency relationship: %s. Reason: %s",
                                          e, rel, e.getMessage() );
-        }
-    }
-
-    protected DependencyRelationshipListing getDependencyRelationshipView( final String viewName,
-                                                                           final FullProjectKey projectKey,
-                                                                           final DependencyDBSession session )
-        throws DatabaseException
-    {
-        ViewRequest req = new ViewRequest( session.getLogicApplication(), viewName );
-        req.setParameter( KEY, projectKey );
-        req.setParameter( INCLUDE_DOCS, true );
-
-        try
-        {
-            return getCouch().getView( req, session.getBaseUrl(),
-                                       DependencyRelationshipListing.class );
-        }
-        catch ( CouchDBException e )
-        {
-            throw new DatabaseException( "Failed to retrieve view: %s. Reason: %s", e, viewName,
-                                         e.getMessage() );
         }
     }
 
