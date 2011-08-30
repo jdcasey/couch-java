@@ -1,4 +1,17 @@
+/*******************************************************************************
+ * Copyright (C) 2011  John Casey
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package org.commonjava.couch.model.io;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +22,8 @@ import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
+import org.commonjava.couch.db.model.CouchObjectList;
+import org.commonjava.couch.fixture.TestUser;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchAppView;
 import org.commonjava.couch.model.CouchDocument;
@@ -18,6 +33,44 @@ import com.google.gson.annotations.SerializedName;
 
 public class SerializerTest
 {
+
+    @Test
+    public void deserializeObjectList()
+    {
+        String src =
+            "{\"total_rows\":1,\"offset\":0,\"rows\":[\n"
+                + "{\"key\":\"username\",\"value\":\"2-abcdef012345678\",\"doc\":{\"username\":\"username\",\"first\":\"first\",\"last\":\"last\",\"email\":\"email@nowhere.com\",\"_id\":\"username\"}},\n"
+                + "{\"key\":\"username2\",\"value\":\"3-bdefca34567216\",\"doc\":{\"username\":\"username2\",\"first\":\"first2\",\"last\":\"last2\",\"email\":\"email2@nowhere.com\",\"_id\":\"username2\"}}"
+                + "]}";
+
+        CouchObjectListDeserializer<TestUser> deser =
+            new CouchObjectListDeserializer<TestUser>( TestUser.class );
+
+        CouchObjectList<TestUser> listing =
+            new Serializer().fromJson( src, deser.typeLiteral(), deser );
+
+        assertThat( listing, notNullValue() );
+
+        List<TestUser> users = listing.getItems();
+
+        assertThat( users, notNullValue() );
+        assertThat( users.size(), equalTo( 2 ) );
+
+        TestUser user = users.get( 0 );
+
+        assertThat( user.getUsername(), equalTo( "username" ) );
+
+        user = users.get( 1 );
+
+        assertThat( user.getUsername(), equalTo( "username2" ) );
+    }
+
+    @Test
+    public void serializeSimpleUser()
+    {
+        System.out.println( new Serializer().toString( new TestUser( "username", "first", "last",
+                                                                     "email@nowhere.com" ) ) );
+    }
 
     @Test
     public void serializeBulkStore()

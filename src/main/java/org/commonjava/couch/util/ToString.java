@@ -7,20 +7,26 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.couch.model;
+package org.commonjava.couch.util;
 
-public class CouchDocRef
-    extends AbstractCouchDocument
+
+public class ToString
 {
-    public CouchDocRef( final String id, final String rev )
+
+    private final Object[] params;
+
+    private final String format;
+
+    public ToString( final String format, final Object... params )
     {
-        setCouchDocId( id );
-        setCouchDocRev( rev );
+        this.format = format;
+        this.params = params;
     }
 
-    public CouchDocRef( final String id )
+    @Override
+    public String toString()
     {
-        setCouchDocId( id );
+        return String.format( format, params );
     }
 
 }

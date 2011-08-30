@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (C) 2011  John Casey
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package org.commonjava.couch.db.handler;
 
 import static org.apache.commons.io.IOUtils.copy;
@@ -6,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -15,6 +25,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.model.CouchError;
+import org.commonjava.couch.model.io.SerializationAdapter;
 import org.commonjava.couch.model.io.Serializer;
 
 public class SerializedGetHandler<T>
@@ -27,12 +38,23 @@ public class SerializedGetHandler<T>
 
     private final Serializer serializer;
 
-    private final Class<T> type;
+    private final Type type;
+
+    private final SerializationAdapter[] adapters;
 
     public SerializedGetHandler( final Serializer serializer, final Class<T> type )
     {
         this.serializer = serializer;
         this.type = type;
+        this.adapters = new SerializationAdapter[] {};
+    }
+
+    public SerializedGetHandler( final Serializer serializer, final Type type,
+                                 final SerializationAdapter... adapters )
+    {
+        this.serializer = serializer;
+        this.type = type;
+        this.adapters = adapters;
     }
 
     @Override
@@ -81,7 +103,7 @@ public class SerializedGetHandler<T>
             else
             {
                 return serializer.fromJson( new ByteArrayInputStream( out.toByteArray() ), "UTF-8",
-                                            type );
+                                            type, adapters );
             }
         }
         finally

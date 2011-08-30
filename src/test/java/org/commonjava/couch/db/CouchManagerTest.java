@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (C) 2011  John Casey
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package org.commonjava.couch.db;
 
 import static org.commonjava.couch.fixture.LoggingFixture.setupLogging;
@@ -5,13 +14,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Level;
-import org.commonjava.couch.db.action.CouchDocumentAction;
-import org.commonjava.couch.db.action.StoreAction;
-import org.commonjava.couch.fixture.TestUser;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.couch.model.io.Serializer;
@@ -74,44 +78,6 @@ public class CouchManagerTest
 
         assertThat( mgr.exists( app, url ), is( false ) );
         assertThat( mgr.exists( url ), is( false ) );
-    }
-
-    @Test
-    public void bulkModify_Store_NonTransactional()
-        throws Exception
-    {
-        String url = DB_BASE + "test-create-bulkstore-drop";
-
-        mgr.dropDatabase( url );
-        mgr.createDatabase( url );
-
-        assertThat( mgr.exists( url ), is( true ) );
-
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
-
-        actions.add( new StoreAction( new TestUser( "user1", "User", "Name", "user@nowhere.com" ),
-                                      false ) );
-
-        actions.add( new StoreAction(
-                                      new TestUser( "user2", "Another", "Name", "user2@nowhere.com" ),
-                                      false ) );
-
-        try
-        {
-            mgr.bulkModify( actions, url, false );
-        }
-        finally
-        {
-            try
-            {
-                mgr.dropDatabase( url );
-            }
-            catch ( CouchDBException e )
-            {
-                // Forget it...
-                e.printStackTrace();
-            }
-        }
     }
 
 }

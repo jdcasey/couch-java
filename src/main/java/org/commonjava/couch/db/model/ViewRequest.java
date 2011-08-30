@@ -1,4 +1,15 @@
+/*******************************************************************************
+ * Copyright (C) 2011  John Casey
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package org.commonjava.couch.db.model;
+
+import static org.commonjava.couch.util.UrlUtils.stringQueryParameter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +31,7 @@ public class ViewRequest
 
     public void setParameter( final String key, final Object value )
     {
-        requestParameters.put( key, stringParam( value ) );
+        requestParameters.put( key, stringQueryParameter( value ) );
     }
 
     public void setParameter( final String key, final boolean value )
@@ -28,10 +39,14 @@ public class ViewRequest
         requestParameters.put( key, Boolean.toString( value ) );
     }
 
-    protected String stringParam( final Object value )
+    public void setParameter( final String key, final int value )
     {
-        String base = String.valueOf( value );
-        return "%22" + base + "%22";
+        requestParameters.put( key, Integer.toString( value ) );
+    }
+
+    public void setParameter( final String key, final long value )
+    {
+        requestParameters.put( key, Long.toString( value ) );
     }
 
     public String getApplication()
