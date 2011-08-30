@@ -1,0 +1,76 @@
+package org.commonjava.couch.model;
+
+import com.google.gson.annotations.SerializedName;
+
+public abstract class AbstractCouchDocument
+    implements CouchDocument
+{
+    @SerializedName( "_id" )
+    private String id;
+
+    @SerializedName( "_rev" )
+    private String revision;
+
+    @Override
+    public String getCouchDocId()
+    {
+        return id;
+    }
+
+    protected void setCouchDocId( final String id )
+    {
+        this.id = id;
+    }
+
+    @Override
+    public String getCouchDocRev()
+    {
+        return revision;
+    }
+
+    @Override
+    public void setCouchDocRev( final String revision )
+    {
+        this.revision = revision;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ( ( id == null ) ? 0 : id.hashCode() );
+        return result;
+    }
+
+    @Override
+    public boolean equals( final Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj == null )
+        {
+            return false;
+        }
+        if ( getClass() != obj.getClass() )
+        {
+            return false;
+        }
+        AbstractCouchDocument other = (AbstractCouchDocument) obj;
+        if ( id == null )
+        {
+            if ( other.id != null )
+            {
+                return false;
+            }
+        }
+        else if ( !id.equals( other.id ) )
+        {
+            return false;
+        }
+        return true;
+    }
+
+}
