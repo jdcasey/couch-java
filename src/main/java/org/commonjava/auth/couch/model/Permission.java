@@ -9,8 +9,6 @@ import com.google.gson.annotations.Expose;
 
 public class Permission
     extends AbstractCouchDocument
-    implements org.apache.shiro.authz.Permission
-
 {
 
     public static final String WILDCARD = "*";
@@ -32,12 +30,12 @@ public class Permission
     @Expose( deserialize = false )
     private final String docType = NAMESPACE;
 
-    Permission()
+    public Permission()
     {}
 
-    public Permission( final String... nameParts )
+    public Permission( final String firstPart, final String... nameParts )
     {
-        this.name = name( nameParts );
+        this.name = name( firstPart, nameParts );
         setCouchDocId( namespaceId( NAMESPACE, this.name ) );
     }
 
@@ -84,34 +82,14 @@ public class Permission
     }
 
     @Override
-    public boolean implies( final org.apache.shiro.authz.Permission p )
-    {
-        if ( name.equals( WILDCARD ) )
-        {
-            return true;
-        }
-
-        if ( name.endsWith( WILDCARD ) && ( p instanceof Permission ) )
-        {
-            Permission perm = (Permission) p;
-            String prefix = name.substring( 0, name.length() - WILDCARD.length() );
-
-            String permName = perm.getName();
-            return permName.length() > prefix.length() && permName.startsWith( prefix );
-        }
-
-        return false;
-    }
-
-    @Override
     public String toString()
     {
         return String.format( "Permission@%d [%s]", hashCode(), name );
     }
 
-    public static String name( final String... parts )
+    public static String name( final String firstPart, final String... parts )
     {
-        return join( parts, ":" );
+        return firstPart + ":" + join( parts, ":" );
     }
 
     public String getDocType()

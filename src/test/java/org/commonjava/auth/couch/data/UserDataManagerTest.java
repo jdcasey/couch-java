@@ -14,7 +14,6 @@ import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.model.io.CouchAppReader;
-import org.commonjava.couch.model.io.Serializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -23,11 +22,11 @@ import org.junit.Test;
 public class UserDataManagerTest
 {
 
-    private static UserDataManager manager;
-
-    private static CouchManager couch;
+    private static TestUserDataManager manager;
 
     private static DefaultUserManagerConfig config;
+
+    private static CouchManager couch;
 
     @BeforeClass
     public static void setupManager()
@@ -37,10 +36,10 @@ public class UserDataManagerTest
         config = new DefaultUserManagerConfig();
         config.setDatabaseUrl( "http://developer.commonjava.org/db/test-user-manager" );
 
-        couch = new CouchManager( new Serializer() );
         CouchAppReader reader = new CouchAppReader();
 
-        manager = new UserDataManager( config, couch, reader );
+        manager = new TestUserDataManager( config, reader );
+        couch = manager.couch();
     }
 
     @Before
@@ -125,6 +124,21 @@ public class UserDataManagerTest
         assertThat( perms, notNullValue() );
         assertThat( perms.size(), equalTo( 1 ) );
         assertThat( perms.iterator().next().getName(), equalTo( perm.getName() ) );
+    }
+
+    private static final class TestUserDataManager
+        extends UserDataManager
+    {
+        public TestUserDataManager( final DefaultUserManagerConfig config,
+                                    final CouchAppReader reader )
+        {
+            super( config, reader );
+        }
+
+        public CouchManager couch()
+        {
+            return super.getCouch();
+        }
     }
 
 }

@@ -18,11 +18,11 @@ import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.io.CouchAppReader;
+import org.commonjava.couch.model.io.Serializer;
 
 public class UserDataManager
 {
 
-    @Inject
     private CouchManager couch;
 
     @Inject
@@ -31,15 +31,21 @@ public class UserDataManager
     @Inject
     private CouchAppReader appReader;
 
-    UserDataManager()
+    public UserDataManager()
     {}
 
-    public UserDataManager( final UserManagerConfiguration config, final CouchManager couch,
-                            final CouchAppReader appReader )
+    public UserDataManager( final UserManagerConfiguration config, final CouchAppReader appReader )
     {
         this.config = config;
-        this.couch = couch;
         this.appReader = appReader;
+        initCouch();
+    }
+
+    public void initCouch()
+    {
+        this.couch =
+            new CouchManager( new Serializer( config.getUserCreator(), config.getRoleCreator(),
+                                              config.getPermissionCreator() ) );
     }
 
     public void install()
@@ -94,7 +100,7 @@ public class UserDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ),
-                                      config.getDatabaseUrl(), User.class );
+                                      config.getDatabaseUrl(), config.getUserClass() );
         }
         catch ( CouchDBException e )
         {
@@ -109,7 +115,7 @@ public class UserDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Permission.class );
+                                      config.getDatabaseUrl(), config.getPermissionClass() );
         }
         catch ( CouchDBException e )
         {
@@ -124,7 +130,7 @@ public class UserDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Role.class );
+                                      config.getDatabaseUrl(), config.getRoleClass() );
         }
         catch ( CouchDBException e )
         {
@@ -140,7 +146,7 @@ public class UserDataManager
         try
         {
             return new HashSet<Role>( couch.getViewListing( req, config.getDatabaseUrl(),
-                                                            Role.class ) );
+                                                            config.getRoleClass() ) );
         }
         catch ( CouchDBException e )
         {
@@ -156,7 +162,7 @@ public class UserDataManager
         try
         {
             return new HashSet<Permission>( couch.getViewListing( req, config.getDatabaseUrl(),
-                                                                  Permission.class ) );
+                                                                  config.getPermissionClass() ) );
         }
         catch ( CouchDBException e )
         {
@@ -205,6 +211,11 @@ public class UserDataManager
             throw new UserDataException( "Failed to store user: %s. Reason: %s", e, user,
                                          e.getMessage() );
         }
+    }
+
+    protected final CouchManager getCouch()
+    {
+        return couch;
     }
 
 }

@@ -5,7 +5,15 @@ import javax.inject.Named;
 
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserViewRequest;
+import org.commonjava.auth.couch.model.Permission;
+import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
+import org.commonjava.auth.couch.model.factory.DefaultPermissionCreator;
+import org.commonjava.auth.couch.model.factory.DefaultRoleCreator;
+import org.commonjava.auth.couch.model.factory.DefaultUserCreator;
+import org.commonjava.auth.couch.model.factory.PermissionCreator;
+import org.commonjava.auth.couch.model.factory.RoleCreator;
+import org.commonjava.auth.couch.model.factory.UserCreator;
 import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 
@@ -121,5 +129,44 @@ public class DefaultUserManagerConfig
     public void setLogicApplication( final String logicApplication )
     {
         this.logicApplication = logicApplication;
+    }
+
+    @Override
+    public UserCreator<?> getUserCreator()
+    {
+        return new DefaultUserCreator();
+    }
+
+    @Override
+    public RoleCreator<?> getRoleCreator()
+    {
+        return new DefaultRoleCreator();
+    }
+
+    @Override
+    public PermissionCreator<?> getPermissionCreator()
+    {
+        return new DefaultPermissionCreator();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public <U extends User> Class<U> getUserClass()
+    {
+        return (Class<U>) User.class;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public <R extends Role> Class<R> getRoleClass()
+    {
+        return (Class<R>) Role.class;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public <P extends Permission> Class<P> getPermissionClass()
+    {
+        return (Class<P>) Permission.class;
     }
 }

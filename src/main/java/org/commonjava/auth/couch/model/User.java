@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.commonjava.couch.model.AbstractCouchDocument;
 
 import com.google.gson.annotations.Expose;
@@ -37,10 +35,6 @@ public class User
     public static final String NAMESPACE = "user";
 
     public static final String NOT_SPECIFIED = "";
-
-    private static final String DEFAULT_REALM = "default";
-
-    private final String realm = DEFAULT_REALM;
 
     private String username;
 
@@ -57,7 +51,7 @@ public class User
 
     private Set<String> roles;
 
-    User()
+    public User()
     {}
 
     public User( final String username, final String email, final String firstName,
@@ -183,12 +177,6 @@ public class User
             return false;
         }
         return true;
-    }
-
-    public static AuthenticationInfo getAuthenticationInfo( final User user )
-    {
-        return new SimpleAuthenticationInfo( user.getUsername(), user.getPasswordDigest(),
-                                             user.realm );
     }
 
     public synchronized boolean addRole( final Role role )

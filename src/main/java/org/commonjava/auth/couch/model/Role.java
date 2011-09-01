@@ -25,7 +25,7 @@ public class Role
     @Expose( deserialize = false )
     private final String docType = NAMESPACE;
 
-    Role()
+    public Role()
     {}
 
     public Role( final String name, final Permission... perms )
