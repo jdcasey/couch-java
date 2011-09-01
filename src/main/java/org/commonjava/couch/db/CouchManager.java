@@ -1,11 +1,19 @@
 /*******************************************************************************
  * Copyright (C) 2011  John Casey
  * 
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program.  If not, see 
+ * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package org.commonjava.couch.db;
 
@@ -50,8 +58,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.Logger;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.DeleteAction;
@@ -61,6 +67,7 @@ import org.commonjava.couch.db.handler.SerializedGetHandler;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.model.CouchApp;
+import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
 import org.commonjava.couch.model.io.CouchObjectListDeserializer;
@@ -68,13 +75,8 @@ import org.commonjava.couch.model.io.SerializationAdapter;
 import org.commonjava.couch.model.io.Serializer;
 import org.commonjava.couch.util.ToString;
 
-@Component( role = CouchManager.class )
 public class CouchManager
 {
-
-    // private static final String KEY = "key";
-
-    private static final String INCLUDE_DOCS = "include_docs";
 
     private static final Logger LOGGER = Logger.getLogger( CouchManager.class );
 
@@ -86,8 +88,7 @@ public class CouchManager
 
     private static final String BULK_DOCS = "_bulk_docs";
 
-    @Requirement
-    private Serializer serializer;
+    private final Serializer serializer;
 
     private HttpClient client;
 
@@ -98,8 +99,10 @@ public class CouchManager
         this.serializer = serializer;
     }
 
-    CouchManager()
-    {}
+    public CouchManager()
+    {
+        this.serializer = new Serializer();
+    }
 
     public void store( final Collection<? extends CouchDocument> documents, final String dbUrl,
                        final boolean skipIfExists, final boolean allOrNothing )
@@ -210,7 +213,7 @@ public class CouchManager
                                                              final Class<T> itemType )
         throws CouchDBException
     {
-        req.setParameter( INCLUDE_DOCS, true );
+        req.setParameter( ViewRequest.INCLUDE_DOCS, true );
 
         String url = buildViewUrl( dbUrl, req );
         HttpGet request = new HttpGet( url );
@@ -237,6 +240,21 @@ public class CouchManager
                                         new ToString(
                                                       "Failed to retrieve contents for view request: %s",
                                                       req ) );
+    }
+
+    public <T> T getDocument( final CouchDocRef ref, final String dbUrl, final Class<T> docType )
+        throws CouchDBException
+    {
+        if ( !documentRevisionExists( ref, dbUrl ) )
+        {
+            return null;
+        }
+
+        String url = buildDocUrl( dbUrl, ref, true );
+        HttpGet get = new HttpGet( url );
+
+        return executeHttpWithResponse( get, new SerializedGetHandler<T>( serializer, docType ),
+                                        new ToString( "Failed to retrieve document: %s", ref ) );
     }
 
     public void store( final CouchDocument doc, final String dbUrl, final boolean skipIfExists )

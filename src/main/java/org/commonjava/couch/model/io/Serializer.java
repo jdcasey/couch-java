@@ -1,11 +1,19 @@
 /*******************************************************************************
  * Copyright (C) 2011  John Casey
  * 
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program.  If not, see 
+ * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package org.commonjava.couch.model.io;
 
@@ -17,7 +25,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 
 import org.apache.http.HttpEntity;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.model.CouchDocument;
@@ -26,9 +33,15 @@ import org.commonjava.couch.model.CouchError;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-@Component( role = Serializer.class )
 public class Serializer
 {
+
+    private final SerializationAdapter[] baseAdapters;
+
+    public Serializer( final SerializationAdapter... baseAdapters )
+    {
+        this.baseAdapters = baseAdapters;
+    }
 
     public String toString( final BulkActionHolder actions, final SerializationAdapter... adapters )
     {
@@ -105,6 +118,14 @@ public class Serializer
     protected final Gson getGson( final SerializationAdapter... adapters )
     {
         GsonBuilder builder = newGsonBuilder();
+        if ( baseAdapters != null )
+        {
+            for ( SerializationAdapter adapter : baseAdapters )
+            {
+                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+            }
+        }
+
         if ( adapters != null )
         {
             for ( SerializationAdapter adapter : adapters )

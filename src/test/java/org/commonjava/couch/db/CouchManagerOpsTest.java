@@ -1,11 +1,19 @@
 /*******************************************************************************
  * Copyright (C) 2011  John Casey
  * 
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program.  If not, see 
+ * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package org.commonjava.couch.db;
 
@@ -22,6 +30,7 @@ import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.fixture.TestUser;
+import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.couch.model.io.Serializer;
 import org.junit.After;
@@ -55,6 +64,20 @@ public class CouchManagerOpsTest
         throws Exception
     {
         mgr.dropDatabase( DB_URL );
+    }
+
+    @Test
+    public void storeAndGetDocument()
+        throws Exception
+    {
+        mgr.store( new TestUser( "user", "User", "Name", "email@nowhere.com" ), DB_URL, false );
+
+        TestUser user = mgr.getDocument( new CouchDocRef( "user" ), DB_URL, TestUser.class );
+        assertThat( user, notNullValue() );
+        assertThat( user.getUsername(), equalTo( "user" ) );
+        assertThat( user.getFirst(), equalTo( "User" ) );
+        assertThat( user.getLast(), equalTo( "Name" ) );
+        assertThat( user.getEmail(), equalTo( "email@nowhere.com" ) );
     }
 
     @Test
