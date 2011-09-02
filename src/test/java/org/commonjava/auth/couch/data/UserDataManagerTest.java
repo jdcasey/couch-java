@@ -13,7 +13,6 @@ import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.model.io.CouchAppReader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,9 +37,7 @@ public class UserDataManagerTest
 
         couch = new CouchManager();
 
-        CouchAppReader reader = new CouchAppReader();
-
-        manager = new UserDataManager( config, couch, reader );
+        manager = new UserDataManager( config, couch );
     }
 
     @Before

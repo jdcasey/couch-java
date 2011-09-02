@@ -2,8 +2,10 @@ package org.commonjava.auth.couch.data;
 
 import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 
-import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -15,9 +17,7 @@ import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
-import org.commonjava.couch.model.io.CouchAppReader;
 
 public class UserDataManager
 {
@@ -28,63 +28,29 @@ public class UserDataManager
     @Inject
     private UserManagerConfiguration config;
 
-    @Inject
-    private CouchAppReader appReader;
-
     public UserDataManager()
     {}
 
-    public UserDataManager( final UserManagerConfiguration config, final CouchManager couch,
-                            final CouchAppReader appReader )
+    public UserDataManager( final UserManagerConfiguration config, final CouchManager couch )
     {
         this.config = config;
-        this.appReader = appReader;
         this.couch = couch;
     }
 
     public void install()
         throws UserDataException
     {
-        CouchApp app;
         try
         {
-            app =
-                appReader.readAppDefinition( config.getLogicApplication(),
-                                             UserViewRequest.APPLICATION_RESOURCE );
-        }
-        catch ( IOException e )
-        {
-            throw new UserDataException(
-                                         "Failed to retrieve application definition: %s. Reason: %s",
-                                         e, UserViewRequest.APPLICATION_RESOURCE, e.getMessage() );
-        }
-
-        try
-        {
-            if ( !couch.dbExists( config.getDatabaseUrl() ) )
-            {
-                couch.createDatabase( config.getDatabaseUrl() );
-            }
-        }
-        catch ( CouchDBException e )
-        {
-            throw new UserDataException( "Failed to create database: %s.\nReason: %s", e,
-                                         config.getDatabaseUrl(), e.getMessage() );
-        }
-
-        try
-        {
-            if ( !couch.appExists( config.getDatabaseUrl(), config.getLogicApplication() ) )
-            {
-                couch.installApplication( app, config.getDatabaseUrl() );
-            }
+            couch.initialize( config.getDatabaseUrl(), config.getLogicApplication(),
+                              UserViewRequest.APPLICATION_RESOURCE );
         }
         catch ( CouchDBException e )
         {
             throw new UserDataException(
-                                         "Failed to install user-application: %s\nDatabase: %s.\nReason: %s",
-                                         e, config.getLogicApplication(), config.getDatabaseUrl(),
-                                         e.getMessage() );
+                                         "Failed to initialize user-management database: %s (application: %s). Reason: %s",
+                                         e, config.getDatabaseUrl(),
+                                         UserViewRequest.APPLICATION_RESOURCE, e.getMessage() );
         }
     }
 
@@ -210,6 +176,40 @@ public class UserDataManager
     protected final CouchManager getCouch()
     {
         return couch;
+    }
+
+    public Map<String, Permission> createPermissions( final String namespace, final String name,
+                                                      final String... verbs )
+        throws UserDataException
+    {
+        Map<String, Permission> result = new HashMap<String, Permission>();
+        for ( String verb : verbs )
+        {
+            Permission perm = new Permission( namespace, name, verb );
+            storePermission( perm );
+
+            result.put( verb, perm );
+        }
+
+        return result;
+    }
+
+    public Role createRole( final String name, final Collection<Permission> permissions )
+        throws UserDataException
+    {
+        Role role = new Role( name, permissions );
+        storeRole( role );
+
+        return role;
+    }
+
+    public Role createRole( final String name, final Permission... permissions )
+        throws UserDataException
+    {
+        Role role = new Role( name, permissions );
+        storeRole( role );
+
+        return role;
     }
 
 }
