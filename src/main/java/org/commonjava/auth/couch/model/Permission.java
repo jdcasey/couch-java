@@ -89,7 +89,8 @@ public class Permission
 
     public static String name( final String firstPart, final String... parts )
     {
-        return firstPart + ":" + join( parts, ":" );
+        return firstPart
+            + ( ( parts != null && parts.length > 0 ) ? ( ":" + join( parts, ":" ) ) : "" );
     }
 
     public String getDocType()

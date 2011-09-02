@@ -22,7 +22,7 @@ import org.junit.Test;
 public class UserDataManagerTest
 {
 
-    private static TestUserDataManager manager;
+    private static UserDataManager manager;
 
     private static DefaultUserManagerConfig config;
 
@@ -36,10 +36,11 @@ public class UserDataManagerTest
         config = new DefaultUserManagerConfig();
         config.setDatabaseUrl( "http://developer.commonjava.org/db/test-user-manager" );
 
+        couch = new CouchManager();
+
         CouchAppReader reader = new CouchAppReader();
 
-        manager = new TestUserDataManager( config, reader );
-        couch = manager.couch();
+        manager = new UserDataManager( config, couch, reader );
     }
 
     @Before
@@ -124,21 +125,6 @@ public class UserDataManagerTest
         assertThat( perms, notNullValue() );
         assertThat( perms.size(), equalTo( 1 ) );
         assertThat( perms.iterator().next().getName(), equalTo( perm.getName() ) );
-    }
-
-    private static final class TestUserDataManager
-        extends UserDataManager
-    {
-        public TestUserDataManager( final DefaultUserManagerConfig config,
-                                    final CouchAppReader reader )
-        {
-            super( config, reader );
-        }
-
-        public CouchManager couch()
-        {
-            return super.getCouch();
-        }
     }
 
 }

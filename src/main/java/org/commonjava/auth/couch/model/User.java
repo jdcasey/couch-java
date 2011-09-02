@@ -179,26 +179,41 @@ public class User
         return true;
     }
 
-    public synchronized boolean addRole( final Role role )
+    public boolean addRole( final Role role )
     {
         if ( role == null )
         {
             return false;
         }
 
+        return addRole( role.getName() );
+    }
+
+    public synchronized boolean addRole( final String roleName )
+    {
         if ( roles == null )
         {
             roles = new HashSet<String>();
         }
 
-        return roles.add( role.getName() );
+        return roles.add( roleName );
     }
 
     public boolean removeRole( final Role role )
     {
-        if ( roles != null && role != null )
+        if ( role == null )
         {
-            return roles.remove( role.getName() );
+            return false;
+        }
+
+        return removeRole( role.getName() );
+    }
+
+    public boolean removeRole( final String roleName )
+    {
+        if ( roles != null )
+        {
+            return roles.remove( roleName );
         }
 
         return false;
@@ -207,6 +222,13 @@ public class User
     public String getDocType()
     {
         return docType;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "User [\n  username=%s\n  passwordDigest=%s\n  firstName=%s\n  lastName=%s\n  email=%s\n  roles=%s]",
+                              username, passwordDigest, firstName, lastName, email, roles );
     }
 
 }

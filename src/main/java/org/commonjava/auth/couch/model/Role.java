@@ -67,19 +67,34 @@ public class Role
             return false;
         }
 
+        return addPermission( permission.getName() );
+    }
+
+    public synchronized boolean addPermission( final String name )
+    {
         if ( permissions == null )
         {
             permissions = new HashSet<String>();
         }
 
-        return permissions.add( permission.getName() );
+        return permissions.add( name );
     }
 
     public boolean removePermission( final Permission permission )
     {
-        if ( permissions != null && permission != null )
+        if ( permission == null )
         {
-            return permissions.remove( permission.getName() );
+            return false;
+        }
+
+        return removePermission( permission.getName() );
+    }
+
+    public boolean removePermission( final String name )
+    {
+        if ( permissions != null )
+        {
+            return permissions.remove( name );
         }
 
         return false;
