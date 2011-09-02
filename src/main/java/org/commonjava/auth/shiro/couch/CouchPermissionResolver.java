@@ -25,12 +25,27 @@ public class CouchPermissionResolver
     @Inject
     private UserDataManager dataManager;
 
+    CouchPermissionResolver()
+    {}
+
+    public CouchPermissionResolver( final UserDataManager dataManager )
+    {
+        this.dataManager = dataManager;
+    }
+
     @Override
     public Permission resolvePermission( final String permissionName )
     {
         try
         {
-            return (ShiroPermission) dataManager.getPermission( permissionName );
+            org.commonjava.auth.couch.model.Permission perm =
+                dataManager.getPermission( permissionName );
+            if ( perm == null )
+            {
+                throw new AuthorizationException( "No such permission: " + permissionName );
+            }
+
+            return new ShiroPermission( perm );
         }
         catch ( UserDataException e )
         {
@@ -51,6 +66,7 @@ public class CouchPermissionResolver
         try
         {
             role = dataManager.getRole( roleName );
+
         }
         catch ( UserDataException e )
         {
@@ -58,6 +74,11 @@ public class CouchPermissionResolver
 
             throw new AuthorizationException(
                                               "Cannot retrieve role. System configuration is invalid." );
+        }
+
+        if ( role == null )
+        {
+            throw new AuthorizationException( "No such role: " + roleName );
         }
 
         if ( role.getPermissions() != null )
@@ -76,9 +97,12 @@ public class CouchPermissionResolver
                                                   "Cannot retrieve permissions for role. System configuration is invalid." );
             }
 
-            for ( final org.commonjava.auth.couch.model.Permission perm : permissions )
+            if ( permissions != null )
             {
-                perms.add( (ShiroPermission) perm );
+                for ( final org.commonjava.auth.couch.model.Permission perm : permissions )
+                {
+                    perms.add( new ShiroPermission( perm ) );
+                }
             }
         }
 

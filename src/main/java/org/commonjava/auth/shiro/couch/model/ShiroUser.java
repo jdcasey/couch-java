@@ -1,8 +1,9 @@
 package org.commonjava.auth.shiro.couch.model;
 
 import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.commonjava.auth.couch.model.Role;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.commonjava.auth.couch.model.User;
 
 public class ShiroUser
@@ -11,41 +12,16 @@ public class ShiroUser
 
     private static final String DEFAULT_REALM = "default";
 
-    private String realm = DEFAULT_REALM;
-
-    public ShiroUser()
-    {}
-
-    public ShiroUser( final String username, final Role... roles )
-    {
-        super( username, roles );
-    }
-
-    public ShiroUser( final String username, final String email, final String firstName,
-                      final String lastName, final String passwordDigest )
-    {
-        super( username, email, firstName, lastName, passwordDigest );
-    }
-
-    public String getRealm()
-    {
-        return realm;
-    }
-
-    public void setRealm( final String realm )
-    {
-        this.realm = realm;
-    }
-
     public static AuthenticationInfo getAuthenticationInfo( final User user )
     {
+        // TODO: make the user able to store properties, so we can set different realms...?
         String realm = DEFAULT_REALM;
-        if ( user instanceof ShiroUser )
-        {
-            realm = ( (ShiroUser) user ).getRealm();
-        }
-
         return new SimpleAuthenticationInfo( user.getUsername(), user.getPasswordDigest(), realm );
+    }
+
+    public static AuthenticationToken getAuthenticationToken( final User user )
+    {
+        return new UsernamePasswordToken( user.getUsername(), user.getPasswordDigest() );
     }
 
 }

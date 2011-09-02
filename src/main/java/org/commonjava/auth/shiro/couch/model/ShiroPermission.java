@@ -2,35 +2,32 @@ package org.commonjava.auth.shiro.couch.model;
 
 import org.commonjava.auth.couch.model.Permission;
 
-
 public class ShiroPermission
-    extends Permission
     implements org.apache.shiro.authz.Permission
 {
 
-    public ShiroPermission()
-    {}
+    private final Permission permission;
 
-    public ShiroPermission( final String firstPart, final String... nameParts )
+    public ShiroPermission( final Permission permission )
     {
-        super( firstPart, nameParts );
+        this.permission = permission;
     }
 
     @Override
     public boolean implies( final org.apache.shiro.authz.Permission p )
     {
-        String name = getName();
-        if ( name.equals( WILDCARD ) )
+        String name = permission.getName();
+        if ( name.equals( Permission.WILDCARD ) )
         {
             return true;
         }
 
-        if ( name.endsWith( WILDCARD ) && ( p instanceof ShiroPermission ) )
+        if ( name.endsWith( Permission.WILDCARD ) && ( p instanceof ShiroPermission ) )
         {
             ShiroPermission perm = (ShiroPermission) p;
-            String prefix = name.substring( 0, name.length() - WILDCARD.length() );
+            String prefix = name.substring( 0, name.length() - Permission.WILDCARD.length() );
 
-            String permName = perm.getName();
+            String permName = perm.permission.getName();
             return permName.length() > prefix.length() && permName.startsWith( prefix );
         }
 

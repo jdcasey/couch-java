@@ -10,7 +10,6 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAccount;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -32,6 +31,14 @@ public class CouchRealm
     @Inject
     private UserDataManager dataManager;
 
+    CouchRealm()
+    {}
+
+    public CouchRealm( final UserDataManager dataManager )
+    {
+        this.dataManager = dataManager;
+    }
+
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo( final PrincipalCollection principals )
     {
@@ -45,8 +52,13 @@ public class CouchRealm
         {
             logger.error( "Failed to retrieve user: %s. Reason: %s", e, principal, e.getMessage() );
 
-            throw new AuthorizationException(
-                                              "Cannot retrieve user. System configuration is invalid." );
+            throw new AuthenticationException(
+                                               "Cannot retrieve user. System configuration is invalid." );
+        }
+
+        if ( user == null )
+        {
+            throw new AuthenticationException( "Authentication failed: " + principal );
         }
 
         final Set<String> roleNames = new HashSet<String>();
@@ -63,8 +75,8 @@ public class CouchRealm
                 logger.error( "Failed to retrieve roles for user: %s. Reason: %s", e, principal,
                               e.getMessage() );
 
-                throw new AuthorizationException(
-                                                  "Cannot retrieve user roles. System configuration is invalid." );
+                throw new AuthenticationException(
+                                                   "Cannot retrieve user roles. System configuration is invalid." );
             }
 
             for ( final Role role : roles )
@@ -81,13 +93,16 @@ public class CouchRealm
                     logger.error( "Failed to retrieve permissions for role: %s. Reason: %s", e,
                                   role.getName(), e.getMessage() );
 
-                    throw new AuthorizationException(
-                                                      "Cannot retrieve role permissions. System configuration is invalid." );
+                    throw new AuthenticationException(
+                                                       "Cannot retrieve role permissions. System configuration is invalid." );
                 }
 
-                for ( org.commonjava.auth.couch.model.Permission perm : permissions )
+                if ( permissions != null )
                 {
-                    perms.add( (ShiroPermission) perm );
+                    for ( org.commonjava.auth.couch.model.Permission perm : permissions )
+                    {
+                        perms.add( new ShiroPermission( perm ) );
+                    }
                 }
             }
         }
