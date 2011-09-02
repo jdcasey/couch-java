@@ -6,20 +6,20 @@ import org.commonjava.couch.model.AbstractCouchDocument;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Repository
+public class Proxy
     extends AbstractCouchDocument
 {
-    public static final String NAMESPACE = "repository";
+    public static final String NAMESPACE = "proxy";
 
     private String name;
 
     @SerializedName( "remote_url" )
     private String remoteUrl;
 
-    Repository()
+    Proxy()
     {}
 
-    public Repository( final String name, final String remoteUrl )
+    public Proxy( final String name, final String remoteUrl )
     {
         this.name = name;
         this.remoteUrl = remoteUrl;
@@ -70,7 +70,7 @@ public class Repository
         {
             return false;
         }
-        Repository other = (Repository) obj;
+        Proxy other = (Proxy) obj;
         if ( name == null )
         {
             if ( other.name != null )

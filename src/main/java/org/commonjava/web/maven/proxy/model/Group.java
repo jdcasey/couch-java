@@ -2,8 +2,9 @@ package org.commonjava.web.maven.proxy.model;
 
 import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
 
@@ -15,12 +16,26 @@ public class Group
 
     private String name;
 
-    private Set<String> constituents;
+    private List<String> constituents;
 
-    public Group( final String name, final Set<String> constituents )
+    public Group( final String name, final List<String> constituents )
     {
         this.name = name;
         this.constituents = constituents;
+        setCouchDocId( namespaceId( NAMESPACE, name ) );
+    }
+
+    public Group( final String name, final String... constituents )
+    {
+        this.name = name;
+        this.constituents = new ArrayList<String>( Arrays.asList( constituents ) );
+        setCouchDocId( namespaceId( NAMESPACE, name ) );
+    }
+
+    public Group( final String name, final Proxy... constituents )
+    {
+        this.name = name;
+        setConstituentProxies( Arrays.asList( constituents ) );
         setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
@@ -34,12 +49,12 @@ public class Group
         this.name = name;
     }
 
-    public Set<String> getConstituents()
+    public List<String> getConstituents()
     {
         return constituents;
     }
 
-    public boolean addConstituent( final Repository repository )
+    public boolean addConstituent( final Proxy repository )
     {
         if ( repository == null )
         {
@@ -53,15 +68,24 @@ public class Group
     {
         if ( constituents == null )
         {
-            constituents = new HashSet<String>();
+            constituents = new ArrayList<String>();
         }
 
         return constituents.add( repository );
     }
 
-    public void setConstituents( final Set<String> constituents )
+    public void setConstituents( final List<String> constituents )
     {
         this.constituents = constituents;
+    }
+
+    public void setConstituentProxies( final List<Proxy> constituents )
+    {
+        this.constituents = null;
+        for ( Proxy proxy : constituents )
+        {
+            addConstituent( proxy );
+        }
     }
 
     @Override
