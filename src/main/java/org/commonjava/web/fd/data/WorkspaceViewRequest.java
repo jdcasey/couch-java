@@ -15,14 +15,38 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.web.fd.rest;
+package org.commonjava.web.fd.data;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import org.commonjava.couch.db.model.ViewRequest;
+import org.commonjava.web.fd.config.FileDepotConfiguration;
 
-@ApplicationPath( "/api/1.0" )
-public class RESTApplication
-    extends Application
+public class WorkspaceViewRequest
+    extends ViewRequest
 {
+
+    public static final String APPLICATION_RESOURCE = "workspace-logic";
+
+    public enum View
+    {
+        WORKSPACES( "workspaces" );
+
+        String name;
+
+        private View( final String name )
+        {
+            this.name = name;
+        }
+
+        public String viewName()
+        {
+            return name;
+        }
+    }
+
+    public WorkspaceViewRequest( final FileDepotConfiguration config, final View view )
+    {
+        super( config.getLogicApplication(), view.viewName() );
+        setParameter( INCLUDE_DOCS, true );
+    }
 
 }
