@@ -70,6 +70,7 @@ import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
+import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.couch.model.io.CouchObjectListDeserializer;
 import org.commonjava.couch.model.io.SerializationAdapter;
 import org.commonjava.couch.model.io.Serializer;
@@ -94,14 +95,44 @@ public class CouchManager
 
     private final ExecutorService exec = Executors.newCachedThreadPool();
 
-    public CouchManager( final Serializer serializer )
+    private final CouchAppReader appReader;
+
+    public CouchManager( final Serializer serializer, final CouchAppReader appReader )
     {
         this.serializer = serializer;
+        this.appReader = appReader;
     }
 
     public CouchManager()
     {
         this.serializer = new Serializer();
+        this.appReader = new CouchAppReader();
+    }
+
+    public void initialize( final String dbUrl, final String appName, final String appResource )
+        throws CouchDBException
+    {
+        CouchApp app;
+        try
+        {
+            app = appReader.readAppDefinition( appName, appResource );
+        }
+        catch ( IOException e )
+        {
+            throw new CouchDBException(
+                                        "Failed to retrieve application definition: %s. Reason: %s",
+                                        e, appResource, e.getMessage() );
+        }
+
+        if ( !dbExists( dbUrl ) )
+        {
+            createDatabase( dbUrl );
+        }
+
+        if ( !appExists( dbUrl, appName ) )
+        {
+            installApplication( app, dbUrl );
+        }
     }
 
     public void store( final Collection<? extends CouchDocument> documents, final String dbUrl,

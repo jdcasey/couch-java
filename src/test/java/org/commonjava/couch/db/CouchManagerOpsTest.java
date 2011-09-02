@@ -43,7 +43,7 @@ public class CouchManagerOpsTest
 
     private static final String DB_URL = "http://developer.commonjava.org/db/test-ops";
 
-    CouchManager mgr = new CouchManager( new Serializer() );
+    CouchManager mgr = new CouchManager( new Serializer(), new CouchAppReader() );
 
     @BeforeClass
     public static void initLogging()

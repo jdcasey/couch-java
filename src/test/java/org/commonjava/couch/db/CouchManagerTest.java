@@ -35,7 +35,7 @@ public class CouchManagerTest
 
     private static final String DB_BASE = "http://developer.commonjava.org/db/";
 
-    CouchManager mgr = new CouchManager( new Serializer() );
+    CouchManager mgr = new CouchManager( new Serializer(), new CouchAppReader() );
 
     @BeforeClass
     public static void initLogging()
