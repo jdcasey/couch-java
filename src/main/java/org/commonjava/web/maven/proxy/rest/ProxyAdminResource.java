@@ -102,6 +102,9 @@ public class ProxyAdminResource
     @GET
     public List<Proxy> getAllProxies()
     {
+        SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE,
+                                                                     Permission.ADMIN ) );
+
         try
         {
             return proxyManager.getAllProxies();
@@ -117,6 +120,9 @@ public class ProxyAdminResource
     @Path( "/{proxyName}" )
     public Proxy getProxy( @PathParam( "proxyName" ) final String proxyName )
     {
+        SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE, proxyName,
+                                                                     Permission.READ ) );
+
         try
         {
             return proxyManager.getProxy( proxyName );
@@ -132,6 +138,9 @@ public class ProxyAdminResource
     @Path( "/{proxyName}" )
     public Response deleteProxy( @PathParam( "proxyName" ) final String proxyName )
     {
+        SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE,
+                                                                     Permission.ADMIN ) );
+
         ResponseBuilder builder;
         try
         {
