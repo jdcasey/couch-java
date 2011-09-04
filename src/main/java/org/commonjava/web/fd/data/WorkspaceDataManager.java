@@ -29,7 +29,6 @@ import javax.inject.Singleton;
 
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.data.UserViewRequest;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
@@ -65,7 +64,10 @@ public class WorkspaceDataManager
         try
         {
             couch.initialize( config.getDatabaseUrl(), config.getLogicApplication(),
-                              UserViewRequest.APPLICATION_RESOURCE );
+                              WorkspaceViewRequest.APPLICATION_RESOURCE );
+
+            userMgr.install();
+            userMgr.setupAdminInformation();
         }
         catch ( CouchDBException e )
         {
@@ -74,6 +76,12 @@ public class WorkspaceDataManager
                                               e, config.getDatabaseUrl(),
                                               WorkspaceViewRequest.APPLICATION_RESOURCE,
                                               e.getMessage() );
+        }
+        catch ( UserDataException e )
+        {
+            throw new WorkspaceDataException(
+                                              "Failed to initialize admin user/privilege information in workspace-management database: %s. Reason: %s",
+                                              e, config.getDatabaseUrl(), e.getMessage() );
         }
     }
 

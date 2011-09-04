@@ -24,8 +24,6 @@ public interface FileDepotConfiguration
 
     File getUploadDirectory();
 
-    File getSecurityConfigurationFile();
-
     String getDatabaseUrl();
 
     String getLogicApplication();
