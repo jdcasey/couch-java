@@ -29,7 +29,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,6 +74,7 @@ import org.commonjava.couch.model.io.CouchObjectListDeserializer;
 import org.commonjava.couch.model.io.SerializationAdapter;
 import org.commonjava.couch.model.io.Serializer;
 import org.commonjava.couch.util.ToString;
+import org.commonjava.couch.util.UrlUtils;
 
 public class CouchManager
 {
@@ -288,12 +288,12 @@ public class CouchManager
                                         new ToString( "Failed to retrieve document: %s", ref ) );
     }
 
-    public void store( final CouchDocument doc, final String dbUrl, final boolean skipIfExists )
+    public boolean store( final CouchDocument doc, final String dbUrl, final boolean skipIfExists )
         throws CouchDBException
     {
         if ( skipIfExists && exists( doc, dbUrl ) )
         {
-            return;
+            return false;
         }
 
         HttpPost request = new HttpPost( dbUrl );
@@ -310,6 +310,8 @@ public class CouchManager
             throw new CouchDBException( "Failed to store document: %s.\nReason: %s", e, doc,
                                         e.getMessage() );
         }
+
+        return true;
     }
 
     public void delete( final CouchDocument doc, final String dbUrl )
@@ -654,42 +656,7 @@ public class CouchManager
                                final String... parts )
         throws MalformedURLException
     {
-        StringBuilder urlBuilder = new StringBuilder( baseUrl );
-        for ( String part : parts )
-        {
-            if ( part.startsWith( "/" ) )
-            {
-                part = part.substring( 1 );
-            }
-
-            if ( urlBuilder.charAt( urlBuilder.length() - 1 ) != '/' )
-            {
-                urlBuilder.append( "/" );
-            }
-
-            urlBuilder.append( part );
-        }
-
-        if ( params != null && !params.isEmpty() )
-        {
-            urlBuilder.append( "?" );
-            boolean first = true;
-            for ( Map.Entry<String, String> param : params.entrySet() )
-            {
-                if ( first )
-                {
-                    first = false;
-                }
-                else
-                {
-                    urlBuilder.append( "&" );
-                }
-
-                urlBuilder.append( param.getKey() ).append( "=" ).append( param.getValue() );
-            }
-        }
-
-        return new URL( urlBuilder.toString() ).toExternalForm();
+        return UrlUtils.buildUrl( baseUrl, params, parts );
     }
 
     protected void threadedExecute( final Set<? extends CouchDocumentAction> actions,

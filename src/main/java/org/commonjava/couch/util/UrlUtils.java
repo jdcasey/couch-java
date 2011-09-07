@@ -17,6 +17,10 @@
  ******************************************************************************/
 package org.commonjava.couch.util;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+
 public final class UrlUtils
 {
 
@@ -29,4 +33,51 @@ public final class UrlUtils
         return "%22" + base + "%22";
     }
 
+    public static String buildUrl( final String baseUrl, final String... parts )
+        throws MalformedURLException
+    {
+        return buildUrl( baseUrl, null, parts );
+    }
+
+    public static String buildUrl( final String baseUrl, final Map<String, String> params,
+                                   final String... parts )
+        throws MalformedURLException
+    {
+        StringBuilder urlBuilder = new StringBuilder( baseUrl );
+        for ( String part : parts )
+        {
+            if ( part.startsWith( "/" ) )
+            {
+                part = part.substring( 1 );
+            }
+
+            if ( urlBuilder.charAt( urlBuilder.length() - 1 ) != '/' )
+            {
+                urlBuilder.append( "/" );
+            }
+
+            urlBuilder.append( part );
+        }
+
+        if ( params != null && !params.isEmpty() )
+        {
+            urlBuilder.append( "?" );
+            boolean first = true;
+            for ( Map.Entry<String, String> param : params.entrySet() )
+            {
+                if ( first )
+                {
+                    first = false;
+                }
+                else
+                {
+                    urlBuilder.append( "&" );
+                }
+
+                urlBuilder.append( param.getKey() ).append( "=" ).append( param.getValue() );
+            }
+        }
+
+        return new URL( urlBuilder.toString() ).toExternalForm();
+    }
 }
