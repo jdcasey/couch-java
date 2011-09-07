@@ -11,7 +11,7 @@ public class ProxyViewRequest
 
     public enum View
     {
-        ALL_GROUPS( "all-groups" ), ALL_PROXIES( "all-proxies" ), GROUP_REPOSITORIES(
+        ALL_GROUPS( "all-groups" ), ALL_REPOSITORIES( "all-repositories" ), GROUP_REPOSITORIES(
             "group-repositories" );
 
         String name;

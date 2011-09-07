@@ -7,36 +7,44 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.DenormalizationException;
+import org.commonjava.couch.model.DenormalizedCouchDoc;
+
+import com.google.gson.annotations.Expose;
 
 public class Group
     extends AbstractCouchDocument
+    implements DenormalizedCouchDoc
 {
 
     public static final String NAMESPACE = "group";
 
     private String name;
 
+    @Expose( deserialize = false )
+    private final String doctype = NAMESPACE;
+
     private List<String> constituents;
+
+    Group()
+    {}
 
     public Group( final String name, final List<String> constituents )
     {
         this.name = name;
         this.constituents = constituents;
-        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
     public Group( final String name, final String... constituents )
     {
         this.name = name;
         this.constituents = new ArrayList<String>( Arrays.asList( constituents ) );
-        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
-    public Group( final String name, final Proxy... constituents )
+    public Group( final String name, final Repository... constituents )
     {
         this.name = name;
         setConstituentProxies( Arrays.asList( constituents ) );
-        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
     public String getName()
@@ -54,7 +62,7 @@ public class Group
         return constituents;
     }
 
-    public boolean addConstituent( final Proxy repository )
+    public boolean addConstituent( final Repository repository )
     {
         if ( repository == null )
         {
@@ -79,10 +87,10 @@ public class Group
         this.constituents = constituents;
     }
 
-    public void setConstituentProxies( final List<Proxy> constituents )
+    public void setConstituentProxies( final List<Repository> constituents )
     {
         this.constituents = null;
-        for ( Proxy proxy : constituents )
+        for ( Repository proxy : constituents )
         {
             addConstituent( proxy );
         }
@@ -131,6 +139,18 @@ public class Group
     public String toString()
     {
         return String.format( "Group [name=%s, constituents=%s]", name, constituents );
+    }
+
+    public String getDoctype()
+    {
+        return doctype;
+    }
+
+    @Override
+    public void calculateDenormalizedFields()
+        throws DenormalizationException
+    {
+        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
 }

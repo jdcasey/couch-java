@@ -2,11 +2,17 @@ package org.commonjava.web.maven.proxy.conf;
 
 import java.io.File;
 
+import javax.enterprise.inject.Alternative;
+import javax.inject.Named;
+
 import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 import org.commonjava.web.config.section.ConfigurationSectionListener;
+import org.commonjava.web.maven.proxy.data.ProxyViewRequest;
 
 @SectionName( ConfigurationSectionListener.DEFAULT_SECTION )
+@Alternative
+@Named( "unused" )
 public class DefaultProxyConfiguration
     implements ProxyConfiguration
 {
@@ -16,7 +22,7 @@ public class DefaultProxyConfiguration
 
     private File repositoryRootDirectory = DEFAULT_REPO_ROOT_DIR;
 
-    private String logicApplication;
+    private String logicApplication = ProxyViewRequest.APPLICATION_RESOURCE;
 
     private String databaseUrl;
 
@@ -50,7 +56,7 @@ public class DefaultProxyConfiguration
         this.logicApplication = logicApplication;
     }
 
-    @ConfigName( "database.url" )
+    @ConfigName( "db.url" )
     public void setDatabaseUrl( final String databaseUrl )
     {
         this.databaseUrl = databaseUrl;

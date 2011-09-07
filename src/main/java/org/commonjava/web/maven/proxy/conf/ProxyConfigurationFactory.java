@@ -76,8 +76,7 @@ public class ProxyConfigurationFactory
     }
 
     @Produces
-    @Default
-    public ProxyConfiguration getFileDepotConfiguration()
+    public ProxyConfiguration getProxyConfiguration()
     {
         return proxyConfig;
     }

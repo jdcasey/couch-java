@@ -2,8 +2,9 @@ package org.commonjava.web.maven.proxy.data;
 
 import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,13 +14,13 @@ import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.model.CouchDocRef;
+import org.commonjava.couch.model.DenormalizationException;
 import org.commonjava.couch.util.JoinString;
 import org.commonjava.web.maven.proxy.conf.ProxyConfiguration;
 import org.commonjava.web.maven.proxy.data.ProxyViewRequest.View;
 import org.commonjava.web.maven.proxy.model.Group;
-import org.commonjava.web.maven.proxy.model.Proxy;
+import org.commonjava.web.maven.proxy.model.Repository;
 
 @Singleton
 public class ProxyDataManager
@@ -45,13 +46,13 @@ public class ProxyDataManager
         this.couch = couch;
     }
 
-    public Proxy getProxy( final String name )
+    public Repository getRepository( final String name )
         throws ProxyDataException
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Proxy.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Proxy.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( Repository.NAMESPACE, name ) ),
+                                      config.getDatabaseUrl(), Repository.class );
         }
         catch ( CouchDBException e )
         {
@@ -90,13 +91,13 @@ public class ProxyDataManager
         }
     }
 
-    public List<Proxy> getAllProxies()
+    public List<Repository> getAllRepositories()
         throws ProxyDataException
     {
         try
         {
-            return couch.getViewListing( new ProxyViewRequest( config, View.ALL_PROXIES ),
-                                         config.getDatabaseUrl(), Proxy.class );
+            return couch.getViewListing( new ProxyViewRequest( config, View.ALL_REPOSITORIES ),
+                                         config.getDatabaseUrl(), Repository.class );
         }
         catch ( CouchDBException e )
         {
@@ -105,13 +106,14 @@ public class ProxyDataManager
         }
     }
 
-    public List<Proxy> getProxiesForGroup( final String groupName )
+    public List<Repository> getRepositoriesForGroup( final String groupName )
         throws ProxyDataException
     {
         try
         {
             return couch.getViewListing( new ProxyViewRequest( config, View.GROUP_REPOSITORIES,
-                                                               groupName ), groupName, Proxy.class );
+                                                               groupName ),
+                                         config.getDatabaseUrl(), Repository.class );
         }
         catch ( CouchDBException e )
         {
@@ -120,26 +122,81 @@ public class ProxyDataManager
         }
     }
 
-    public void storeProxy( final Proxy proxy )
+    public boolean storeRepository( final Repository proxy )
+        throws ProxyDataException
+    {
+        return storeRepository( proxy, false );
+    }
+
+    public boolean storeRepository( final Repository repository, final boolean skipIfExists )
         throws ProxyDataException
     {
         try
         {
-            couch.store( proxy, config.getDatabaseUrl(), false );
+            repository.calculateDenormalizedFields();
+            boolean result = couch.store( repository, config.getDatabaseUrl(), skipIfExists );
+
+            userMgr.createPermissions( Repository.NAMESPACE, repository.getName(),
+                                       Permission.ADMIN, Permission.READ );
+
+            return result;
         }
         catch ( CouchDBException e )
         {
-            throw new ProxyDataException( "Failed to store proxy configuration: %s. Reason: %s", e,
-                                          proxy.getName(), e.getMessage() );
+            throw new ProxyDataException(
+                                          "Failed to store repository configuration: %s. Reason: %s",
+                                          e, repository.getName(), e.getMessage() );
+        }
+        catch ( DenormalizationException e )
+        {
+            throw new ProxyDataException(
+                                          "Failed to store repository configuration: %s. Reason: %s",
+                                          e, repository.getName(), e.getMessage() );
+        }
+        catch ( UserDataException e )
+        {
+            throw new ProxyDataException(
+                                          "Failed to create permissions for repository: %s. Reason: %s",
+                                          e, repository.getName(), e.getMessage() );
         }
     }
 
-    public void storeGroup( final Group group )
+    public boolean storeGroup( final Group group )
+        throws ProxyDataException
+    {
+        return storeGroup( group, false );
+    }
+
+    public boolean storeGroup( final Group group, final boolean skipIfExists )
         throws ProxyDataException
     {
         try
         {
-            couch.store( group, config.getDatabaseUrl(), false );
+            group.calculateDenormalizedFields();
+
+            Set<String> missing = new HashSet<String>();
+            for ( String repoName : group.getConstituents() )
+            {
+                if ( !couch.exists( new CouchDocRef( namespaceId( Repository.NAMESPACE, repoName ) ),
+                                    config.getDatabaseUrl() ) )
+                {
+                    missing.add( repoName );
+                }
+            }
+
+            if ( !missing.isEmpty() )
+            {
+                throw new ProxyDataException(
+                                              "Invalid repository-group configuration: %s. Reason: One or more constituent repositories are missing: %s",
+                                              group.getName(), new JoinString( ", ", missing ) );
+            }
+
+            boolean result = couch.store( group, config.getDatabaseUrl(), false );
+
+            userMgr.createPermissions( Group.NAMESPACE, group.getName(), Permission.ADMIN,
+                                       Permission.READ );
+
+            return result;
         }
         catch ( CouchDBException e )
         {
@@ -147,9 +204,19 @@ public class ProxyDataManager
                                           "Failed to store proxy-group configuration: %s. Reason: %s",
                                           e, group.getName(), e.getMessage() );
         }
+        catch ( DenormalizationException e )
+        {
+            throw new ProxyDataException( "Failed to store group configuration: %s. Reason: %s", e,
+                                          group.getName(), e.getMessage() );
+        }
+        catch ( UserDataException e )
+        {
+            throw new ProxyDataException( "Failed to create permissions for group: %s. Reason: %s",
+                                          e, group.getName(), e.getMessage() );
+        }
     }
 
-    public void deleteProxy( final Proxy proxy )
+    public void deleteRepository( final Repository proxy )
         throws ProxyDataException
     {
         try
@@ -163,12 +230,12 @@ public class ProxyDataManager
         }
     }
 
-    public void deleteProxy( final String name )
+    public void deleteRepository( final String name )
         throws ProxyDataException
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( Proxy.NAMESPACE, name ) ),
+            couch.delete( new CouchDocRef( namespaceId( Repository.NAMESPACE, name ) ),
                           config.getDatabaseUrl() );
         }
         catch ( CouchDBException e )
@@ -209,35 +276,6 @@ public class ProxyDataManager
         }
     }
 
-    public void deleteGroupAndConstituents( final Group group )
-        throws ProxyDataException
-    {
-        deleteGroupAndConstituents( group.getName() );
-    }
-
-    public void deleteGroupAndConstituents( final String name )
-        throws ProxyDataException
-    {
-        List<Proxy> proxies = getProxiesForGroup( name );
-        List<DeleteAction> actions = new ArrayList<DeleteAction>();
-        actions.add( new DeleteAction( namespaceId( Group.NAMESPACE, name ) ) );
-        for ( Proxy proxy : proxies )
-        {
-            actions.add( new DeleteAction( proxy.getCouchDocId() ) );
-        }
-
-        try
-        {
-            couch.modify( actions, config.getDatabaseUrl(), true );
-        }
-        catch ( CouchDBException e )
-        {
-            throw new ProxyDataException(
-                                          "Failed to delete group: %s along with all of its proxies: %s.\nReason: %s",
-                                          e, name, new JoinString( ", ", proxies ), e.getMessage() );
-        }
-    }
-
     public void install()
         throws ProxyDataException
     {
@@ -249,7 +287,7 @@ public class ProxyDataManager
             userMgr.install();
             userMgr.setupAdminInformation();
 
-            userMgr.storePermission( new Permission( Proxy.NAMESPACE, Permission.ADMIN ) );
+            userMgr.storePermission( new Permission( Repository.NAMESPACE, Permission.ADMIN ) );
             userMgr.storePermission( new Permission( Group.NAMESPACE, Permission.ADMIN ) );
         }
         catch ( CouchDBException e )
