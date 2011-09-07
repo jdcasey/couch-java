@@ -13,6 +13,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.maven.proxy.data.ProxyDataException;
 import org.commonjava.web.maven.proxy.data.ProxyDataManager;
@@ -22,7 +25,7 @@ import org.commonjava.web.maven.proxy.rest.util.Downloader;
 
 @Path( "/group" )
 @RequestScoped
-// @RequiresAuthentication
+@RequiresAuthentication
 public class GroupAccessResource
 {
     private final Logger logger = new Logger( getClass() );
@@ -41,6 +44,9 @@ public class GroupAccessResource
     public Response getProxyContent( @PathParam( "name" ) final String name,
                                      @PathParam( "path" ) final String path )
     {
+        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE, name,
+                                                                     Permission.READ ) );
+
         // TODO:
         // 1. directory request (ends with "/")...browse somehow??
         // 2. empty path (directory request for proxy root)

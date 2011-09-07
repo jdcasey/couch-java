@@ -74,5 +74,4 @@ public class RepositoryAccessResource
         String mimeType = new MimetypesFileTypeMap().getContentType( target );
         return Response.ok( target, mimeType ).build();
     }
-
 }

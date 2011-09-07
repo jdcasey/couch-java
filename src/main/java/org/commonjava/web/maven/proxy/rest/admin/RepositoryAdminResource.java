@@ -18,6 +18,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.couch.model.DenormalizationException;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
@@ -30,7 +33,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Path( "/admin/repository" )
 @RequestScoped
-// @RequiresAuthentication
+@RequiresAuthentication
 public class RepositoryAdminResource
 {
 
@@ -52,8 +55,8 @@ public class RepositoryAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
+                                                                     Permission.ADMIN ) );
 
         Repository repository;
         try
@@ -90,8 +93,8 @@ public class RepositoryAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response store( @PathParam( "name" ) final String name )
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
+                                                                     Permission.ADMIN ) );
 
         Repository repository;
         try
@@ -137,8 +140,8 @@ public class RepositoryAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
+                                                                     Permission.ADMIN ) );
 
         try
         {
@@ -160,8 +163,8 @@ public class RepositoryAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE, proxyName,
-        // Permission.READ ) );
+        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
+                                                                     Permission.ADMIN ) );
 
         try
         {
@@ -181,8 +184,8 @@ public class RepositoryAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Proxy.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
+                                                                     Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try

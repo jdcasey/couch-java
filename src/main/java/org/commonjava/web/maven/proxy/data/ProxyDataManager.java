@@ -191,7 +191,7 @@ public class ProxyDataManager
                                               group.getName(), new JoinString( ", ", missing ) );
             }
 
-            boolean result = couch.store( group, config.getDatabaseUrl(), false );
+            boolean result = couch.store( group, config.getDatabaseUrl(), skipIfExists );
 
             userMgr.createPermissions( Group.NAMESPACE, group.getName(), Permission.ADMIN,
                                        Permission.READ );
