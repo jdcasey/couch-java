@@ -24,6 +24,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -45,6 +46,7 @@ import org.commonjava.auth.shiro.couch.model.ShiroPermission;
 import org.commonjava.auth.shiro.couch.model.ShiroUser;
 import org.commonjava.util.logging.Logger;
 
+@Singleton
 public class CouchRealm
     extends AuthorizingRealm
 {

@@ -18,6 +18,9 @@
 package org.commonjava.auth.shiro.couch;
 
 import static org.commonjava.auth.shiro.couch.fixture.LoggingFixture.setupLogging;
+import static org.commonjava.auth.shiro.couch.test.CouchShiroTestFixture.clearSubject;
+import static org.commonjava.auth.shiro.couch.test.CouchShiroTestFixture.setupSecurityManager;
+import static org.commonjava.auth.shiro.couch.test.CouchShiroTestFixture.teardownSecurityManager;
 
 import org.apache.log4j.Level;
 import org.apache.shiro.SecurityUtils;
@@ -31,6 +34,7 @@ import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.model.ShiroUser;
 import org.commonjava.couch.db.CouchManager;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,12 +68,12 @@ public class CouchRealmTest
 
         couch = new CouchManager();
 
-        manager = new UserDataManager( config, couch );
+        manager = new UserDataManager( config, passwordManager, couch );
 
         CouchPermissionResolver resolver = new CouchPermissionResolver( manager );
         realm = new CouchRealm( manager, resolver );
 
-        realm.setupSecurityManager();
+        setupSecurityManager( realm );
     }
 
     @Before
@@ -100,6 +104,13 @@ public class CouchRealmTest
         throws Exception
     {
         couch.dropDatabase( config.getDatabaseUrl() );
+        clearSubject();
+    }
+
+    @AfterClass
+    public static void teardownSecurity()
+    {
+        teardownSecurityManager();
     }
 
     @Test

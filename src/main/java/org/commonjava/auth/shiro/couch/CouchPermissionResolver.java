@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.Permission;
@@ -33,6 +34,7 @@ import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.shiro.couch.model.ShiroPermission;
 import org.commonjava.util.logging.Logger;
 
+@Singleton
 public class CouchPermissionResolver
     implements PermissionResolver, RolePermissionResolver
 {
