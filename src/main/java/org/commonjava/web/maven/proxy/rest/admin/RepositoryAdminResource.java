@@ -21,13 +21,13 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.commonjava.auth.couch.model.Permission;
-import org.commonjava.couch.model.DenormalizationException;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.common.ser.DenormalizerPostProcessor;
+import org.commonjava.web.common.ser.RestSerializer;
 import org.commonjava.web.maven.proxy.data.ProxyDataException;
 import org.commonjava.web.maven.proxy.data.ProxyDataManager;
 import org.commonjava.web.maven.proxy.model.Repository;
-import org.commonjava.web.maven.proxy.rest.ser.RestSerializer;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -58,17 +58,10 @@ public class RepositoryAdminResource
         SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
                                                                      Permission.ADMIN ) );
 
-        Repository repository;
-        try
-        {
-            repository = restSerializer.fromRequestBody( request, Repository.class );
-        }
-        catch ( DenormalizationException e )
-        {
-            logger.error( "Failed to deserialize Repository instance from request: %s", e,
-                          e.getMessage() );
-            throw new WebApplicationException( Status.BAD_REQUEST );
-        }
+        @SuppressWarnings( "unchecked" )
+        Repository repository =
+            restSerializer.fromRequestBody( request, Repository.class,
+                                            new DenormalizerPostProcessor<Repository>() );
 
         logger.info( "\n\nGot proxy: %s\n\n", repository );
 
@@ -96,17 +89,10 @@ public class RepositoryAdminResource
         SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
                                                                      Permission.ADMIN ) );
 
-        Repository repository;
-        try
-        {
-            repository = restSerializer.fromRequestBody( request, Repository.class );
-        }
-        catch ( DenormalizationException e )
-        {
-            logger.error( "Failed to deserialize Repository instance from request: %s", e,
-                          e.getMessage() );
-            throw new WebApplicationException( Status.BAD_REQUEST );
-        }
+        @SuppressWarnings( "unchecked" )
+        Repository repository =
+            restSerializer.fromRequestBody( request, Repository.class,
+                                            new DenormalizerPostProcessor<Repository>() );
 
         ResponseBuilder builder;
         try

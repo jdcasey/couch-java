@@ -95,6 +95,10 @@
       <scope>test</scope>
     </dependency>
  -->
+  	<dependency>
+  		<groupId>org.commonjava.web</groupId>
+  		<artifactId>restful-user-manager</artifactId>
+  	</dependency>
   </dependencies>
   
   <build>
