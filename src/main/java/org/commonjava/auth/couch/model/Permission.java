@@ -52,8 +52,7 @@ public class Permission
 
     public Permission( final String firstPart, final String... nameParts )
     {
-        this.name = name( firstPart, nameParts );
-        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
+        setName( name( firstPart, nameParts ) );
     }
 
     public String getName()
@@ -64,6 +63,7 @@ public class Permission
     void setName( final String name )
     {
         this.name = name;
+        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
     @Override

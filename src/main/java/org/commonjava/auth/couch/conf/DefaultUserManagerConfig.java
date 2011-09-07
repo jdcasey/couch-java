@@ -23,15 +23,18 @@ import javax.inject.Named;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserViewRequest;
 import org.commonjava.auth.couch.model.User;
+import org.commonjava.util.logging.Logger;
 import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 
 @SectionName( "user-manager" )
-@Named( "standalone" )
+@Named( "unused" )
 @Alternative
 public class DefaultUserManagerConfig
     implements UserManagerConfiguration
 {
+
+    private final Logger logger = new Logger( getClass() );
 
     private String adminEmail;
 
@@ -67,6 +70,8 @@ public class DefaultUserManagerConfig
         user.setEmail( adminEmail );
         user.setFirstName( adminFirstName );
         user.setLastName( adminLastName );
+
+        logger.info( "Creating admin user; %s with password: %s", User.ADMIN, adminPassword );
         user.setPasswordDigest( passwordManager.digestPassword( adminPassword ) );
 
         return user;

@@ -58,8 +58,7 @@ public class User
     public User( final String username, final String email, final String firstName,
                  final String lastName, final String passwordDigest )
     {
-        this.username = username;
-        setCouchDocId( namespaceId( NAMESPACE, this.username ) );
+        setUsername( username );
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -81,6 +80,7 @@ public class User
     void setUsername( final String username )
     {
         this.username = username;
+        setCouchDocId( namespaceId( NAMESPACE, this.username ) );
     }
 
     public String getPasswordDigest()

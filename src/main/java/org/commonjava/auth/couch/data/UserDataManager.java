@@ -45,12 +45,17 @@ public class UserDataManager
     @Inject
     private UserManagerConfiguration config;
 
+    @Inject
+    private PasswordManager passwordManager;
+
     public UserDataManager()
     {}
 
-    public UserDataManager( final UserManagerConfiguration config, final CouchManager couch )
+    public UserDataManager( final UserManagerConfiguration config,
+                            final PasswordManager passwordManager, final CouchManager couch )
     {
         this.config = config;
+        this.passwordManager = passwordManager;
         this.couch = couch;
     }
 
@@ -69,6 +74,20 @@ public class UserDataManager
                                          e, config.getDatabaseUrl(),
                                          UserViewRequest.APPLICATION_RESOURCE, e.getMessage() );
         }
+    }
+
+    public void setupAdminInformation()
+        throws UserDataException
+    {
+        Permission permission = new Permission( Permission.WILDCARD );
+        Role role = new Role( Role.ADMIN, permission );
+
+        User user = config.createInitialAdminUser( passwordManager );
+        user.addRole( role );
+
+        storePermission( permission );
+        storeRole( role, true );
+        storeUser( user, true );
     }
 
     public User getUser( final String username )
@@ -148,12 +167,12 @@ public class UserDataManager
         }
     }
 
-    public void storePermission( final Permission perm )
+    public boolean storePermission( final Permission perm )
         throws UserDataException
     {
         try
         {
-            couch.store( perm, config.getDatabaseUrl(), true );
+            return couch.store( perm, config.getDatabaseUrl(), true );
         }
         catch ( CouchDBException e )
         {
@@ -162,12 +181,18 @@ public class UserDataManager
         }
     }
 
-    public void storeRole( final Role role )
+    public boolean storeRole( final Role role )
+        throws UserDataException
+    {
+        return storeRole( role, false );
+    }
+
+    public boolean storeRole( final Role role, final boolean skipIfExists )
         throws UserDataException
     {
         try
         {
-            couch.store( role, config.getDatabaseUrl(), true );
+            return couch.store( role, config.getDatabaseUrl(), skipIfExists );
         }
         catch ( CouchDBException e )
         {
@@ -176,12 +201,18 @@ public class UserDataManager
         }
     }
 
-    public void storeUser( final User user )
+    public boolean storeUser( final User user )
+        throws UserDataException
+    {
+        return storeUser( user, false );
+    }
+
+    public boolean storeUser( final User user, final boolean skipIfExists )
         throws UserDataException
     {
         try
         {
-            couch.store( user, config.getDatabaseUrl(), true );
+            return couch.store( user, config.getDatabaseUrl(), true );
         }
         catch ( CouchDBException e )
         {
@@ -203,7 +234,10 @@ public class UserDataManager
         for ( String verb : verbs )
         {
             Permission perm = new Permission( namespace, name, verb );
-            storePermission( perm );
+            if ( !storePermission( perm ) )
+            {
+                perm = getPermission( perm.getName() );
+            }
 
             result.put( verb, perm );
         }
@@ -215,7 +249,10 @@ public class UserDataManager
         throws UserDataException
     {
         Role role = new Role( name, permissions );
-        storeRole( role );
+        if ( !storeRole( role, true ) )
+        {
+            role = getRole( name );
+        }
 
         return role;
     }
@@ -224,7 +261,10 @@ public class UserDataManager
         throws UserDataException
     {
         Role role = new Role( name, permissions );
-        storeRole( role );
+        if ( !storeRole( role, true ) )
+        {
+            role = getRole( name );
+        }
 
         return role;
     }

@@ -54,7 +54,7 @@ public class UserDataManagerTest
 
         couch = new CouchManager();
 
-        manager = new UserDataManager( config, couch );
+        manager = new UserDataManager( config, new PasswordManager(), couch );
     }
 
     @Before

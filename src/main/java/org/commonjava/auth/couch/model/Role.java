@@ -47,8 +47,7 @@ public class Role
 
     public Role( final String name, final Permission... perms )
     {
-        this.name = name;
-        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
+        setName( name );
         this.permissions = new HashSet<String>( perms.length );
         for ( Permission perm : perms )
         {
@@ -75,6 +74,7 @@ public class Role
     void setName( final String name )
     {
         this.name = name;
+        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
     }
 
     public synchronized boolean addPermission( final Permission permission )
