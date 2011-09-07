@@ -6,9 +6,10 @@
     <artifactId>rest-app-parent</artifactId>
     <version>1-SNAPSHOT</version>
   </parent>
-  <artifactId>artifact-proxy</artifactId>
+  
+  <artifactId>aprox</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>artifact-proxy</name>
+  <name>AProx Maven Artifact Proxy</name>
   <packaging>war</packaging>
   
   <properties>
