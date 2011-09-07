@@ -39,5 +39,29 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
+    <dependency>
+    	<groupId>com.google.code.gson</groupId>
+    	<artifactId>gson</artifactId>
+    	<optional>true</optional>
+    </dependency>
+    <dependency>
+    	<groupId>org.commonjava.util</groupId>
+    	<artifactId>logging</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.jboss.spec.javax.servlet</groupId>
+    	<artifactId>jboss-servlet-api_3.0_spec</artifactId>
+    	<optional>true</optional>
+    </dependency>
+    <dependency>
+    	<groupId>org.jboss.resteasy</groupId>
+    	<artifactId>jaxrs-api</artifactId>
+    	<optional>true</optional>
+    </dependency>
+    <dependency>
+    	<groupId>org.commonjava.couch</groupId>
+    	<artifactId>couch-app-support</artifactId>
+    	<optional>true</optional>
+    </dependency>
   </dependencies>
 </project>
