@@ -142,7 +142,7 @@ public class CouchManager
         Set<StoreAction> toStore = new HashSet<StoreAction>();
         for ( CouchDocument doc : documents )
         {
-            if ( skipIfExists && exists( doc, dbUrl ) )
+            if ( skipIfExists && documentRevisionExists( doc, dbUrl ) )
             {
                 continue;
             }
@@ -291,7 +291,7 @@ public class CouchManager
     public boolean store( final CouchDocument doc, final String dbUrl, final boolean skipIfExists )
         throws CouchDBException
     {
-        if ( skipIfExists && exists( doc, dbUrl ) )
+        if ( skipIfExists && documentRevisionExists( doc, dbUrl ) )
         {
             return false;
         }
@@ -317,7 +317,7 @@ public class CouchManager
     public void delete( final CouchDocument doc, final String dbUrl )
         throws CouchDBException
     {
-        if ( !exists( doc, dbUrl ) )
+        if ( !documentRevisionExists( doc, dbUrl ) )
         {
             return;
         }
