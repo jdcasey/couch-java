@@ -28,7 +28,11 @@ public class UserViewRequest
 
     public enum View
     {
-        USER_ROLES( "user-roles" ), ROLE_PERMISSIONS( "role-permissions" );
+        ALL_USERS( "all-users" ),
+        ALL_ROLES( "all-roles" ),
+        ALL_PERMISSIONS( "all-permissions" ),
+        USER_ROLES( "user-roles" ),
+        ROLE_PERMISSIONS( "role-permissions" );
 
         String name;
 

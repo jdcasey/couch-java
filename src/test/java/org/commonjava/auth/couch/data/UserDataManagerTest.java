@@ -89,6 +89,23 @@ public class UserDataManagerTest
     }
 
     @Test
+    public void addAndDeleteSimpleUserRolePermission()
+        throws Exception
+    {
+        Permission perm = new Permission( "*" );
+        Role role = new Role( "admin", perm );
+        User user = new User( "admin", role );
+
+        manager.storePermission( perm );
+        manager.storeRole( role );
+        manager.storeUser( user );
+
+        manager.deletePermission( perm.getName() );
+        manager.deleteRole( role.getName() );
+        manager.deleteUser( user.getUsername() );
+    }
+
+    @Test
     public void addAndQuerySimpleUserRolePermission()
         throws Exception
     {

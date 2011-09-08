@@ -24,11 +24,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.DenormalizedCouchDoc;
 
 import com.google.gson.annotations.Expose;
 
 public class User
     extends AbstractCouchDocument
+    implements DenormalizedCouchDoc
 {
 
     public static final String ADMIN = "admin";
@@ -48,11 +50,11 @@ public class User
     private String email;
 
     @Expose( deserialize = false )
-    private final String docType = NAMESPACE;
+    private final String doctype = NAMESPACE;
 
     private Set<String> roles;
 
-    public User()
+    User()
     {}
 
     public User( final String username, final String email, final String firstName,
@@ -63,12 +65,13 @@ public class User
         this.firstName = firstName;
         this.lastName = lastName;
         this.passwordDigest = passwordDigest;
+        calculateDenormalizedFields();
     }
 
     public User( final String username, final Role... roles )
     {
         this.username = username;
-        setCouchDocId( namespaceId( NAMESPACE, this.username ) );
+        calculateDenormalizedFields();
         setRoles( new HashSet<Role>( Arrays.asList( roles ) ) );
     }
 
@@ -80,7 +83,6 @@ public class User
     void setUsername( final String username )
     {
         this.username = username;
-        setCouchDocId( namespaceId( NAMESPACE, this.username ) );
     }
 
     public String getPasswordDigest()
@@ -144,6 +146,26 @@ public class User
             for ( Role role : roles )
             {
                 this.roles.add( role.getName() );
+            }
+        }
+    }
+
+    public synchronized void setRoleNames( final Set<String> roles )
+    {
+        if ( this.roles == null )
+        {
+            this.roles = new HashSet<String>();
+        }
+        else
+        {
+            this.roles.clear();
+        }
+
+        if ( roles != null )
+        {
+            for ( String role : roles )
+            {
+                this.roles.add( role );
             }
         }
     }
@@ -220,9 +242,9 @@ public class User
         return false;
     }
 
-    public String getDocType()
+    public String getDoctype()
     {
-        return docType;
+        return doctype;
     }
 
     @Override
@@ -230,6 +252,12 @@ public class User
     {
         return String.format( "User [\n  username=%s\n  passwordDigest=%s\n  firstName=%s\n  lastName=%s\n  email=%s\n  roles=%s]",
                               username, passwordDigest, firstName, lastName, email, roles );
+    }
+
+    @Override
+    public void calculateDenormalizedFields()
+    {
+        setCouchDocId( namespaceId( NAMESPACE, this.username ) );
     }
 
 }

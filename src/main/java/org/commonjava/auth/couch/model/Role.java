@@ -24,11 +24,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.DenormalizedCouchDoc;
 
 import com.google.gson.annotations.Expose;
 
 public class Role
     extends AbstractCouchDocument
+    implements DenormalizedCouchDoc
 {
 
     public static final String ADMIN = "admin";
@@ -40,9 +42,9 @@ public class Role
     private Set<String> permissions;
 
     @Expose( deserialize = false )
-    private final String docType = NAMESPACE;
+    private final String doctype = NAMESPACE;
 
-    public Role()
+    Role()
     {}
 
     public Role( final String name, final Permission... perms )
@@ -53,17 +55,20 @@ public class Role
         {
             this.permissions.add( perm.getName() );
         }
+
+        calculateDenormalizedFields();
     }
 
     public Role( final String name, final Collection<Permission> perms )
     {
         this.name = name;
-        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
         this.permissions = new HashSet<String>( perms.size() );
         for ( Permission perm : perms )
         {
             this.permissions.add( perm.getName() );
         }
+
+        calculateDenormalizedFields();
     }
 
     public String getName()
@@ -74,7 +79,6 @@ public class Role
     void setName( final String name )
     {
         this.name = name;
-        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
     }
 
     public synchronized boolean addPermission( final Permission permission )
@@ -124,12 +128,38 @@ public class Role
 
     public void setPermissions( final Set<Permission> permissions )
     {
-        this.permissions.clear();
+        if ( this.permissions == null )
+        {
+            this.permissions = new HashSet<String>();
+        }
+        else
+        {
+            this.permissions.clear();
+        }
         if ( permissions != null )
         {
             for ( Permission permission : permissions )
             {
                 this.permissions.add( permission.getName() );
+            }
+        }
+    }
+
+    public void setPermissionNames( final Set<String> permissions )
+    {
+        if ( this.permissions == null )
+        {
+            this.permissions = new HashSet<String>();
+        }
+        else
+        {
+            this.permissions.clear();
+        }
+        if ( permissions != null )
+        {
+            for ( String permission : permissions )
+            {
+                this.permissions.add( permission );
             }
         }
     }
@@ -179,9 +209,15 @@ public class Role
         return builder.toString();
     }
 
-    public String getDocType()
+    public String getDoctype()
     {
-        return docType;
+        return doctype;
+    }
+
+    @Override
+    public void calculateDenormalizedFields()
+    {
+        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
     }
 
 }

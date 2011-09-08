@@ -22,6 +22,7 @@ import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -267,6 +268,105 @@ public class UserDataManager
         }
 
         return role;
+    }
+
+    public Set<User> getAllUsers()
+        throws UserDataException
+    {
+        try
+        {
+            List<User> users =
+                couch.getViewListing( new UserViewRequest( config, View.ALL_USERS ),
+                                      config.getDatabaseUrl(), User.class );
+
+            return new HashSet<User>( users );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to retrieve full listing of users: %s", e,
+                                         e.getMessage() );
+        }
+    }
+
+    public void deleteUser( final String name )
+        throws UserDataException
+    {
+        try
+        {
+            couch.delete( new CouchDocRef( namespaceId( User.NAMESPACE, name ) ),
+                          config.getDatabaseUrl() );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to delete user: %s. Reason: %s", e, name,
+                                         e.getMessage() );
+        }
+    }
+
+    public Set<Role> getAllRoles()
+        throws UserDataException
+    {
+        try
+        {
+            List<Role> roles =
+                couch.getViewListing( new UserViewRequest( config, View.ALL_ROLES ),
+                                      config.getDatabaseUrl(), Role.class );
+
+            return new HashSet<Role>( roles );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to retrieve full listing of roles: %s", e,
+                                         e.getMessage() );
+        }
+    }
+
+    public void deleteRole( final String name )
+        throws UserDataException
+    {
+        try
+        {
+            couch.delete( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ),
+                          config.getDatabaseUrl() );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to delete role: %s. Reason: %s", e, name,
+                                         e.getMessage() );
+        }
+    }
+
+    public Set<Permission> getAllPermissions()
+        throws UserDataException
+    {
+        try
+        {
+            List<Permission> permissions =
+                couch.getViewListing( new UserViewRequest( config, View.ALL_PERMISSIONS ),
+                                      config.getDatabaseUrl(), Permission.class );
+
+            return new HashSet<Permission>( permissions );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to retrieve full listing of permission: %s", e,
+                                         e.getMessage() );
+        }
+    }
+
+    public void deletePermission( final String name )
+        throws UserDataException
+    {
+        try
+        {
+            couch.delete( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ),
+                          config.getDatabaseUrl() );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to delete permission: %s. Reason: %s", e, name,
+                                         e.getMessage() );
+        }
     }
 
 }

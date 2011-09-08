@@ -21,11 +21,13 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.DenormalizedCouchDoc;
 
 import com.google.gson.annotations.Expose;
 
 public class Permission
     extends AbstractCouchDocument
+    implements DenormalizedCouchDoc
 {
 
     public static final String WILDCARD = "*";
@@ -45,14 +47,15 @@ public class Permission
     private String name;
 
     @Expose( deserialize = false )
-    private final String docType = NAMESPACE;
+    private final String doctype = NAMESPACE;
 
-    public Permission()
+    Permission()
     {}
 
     public Permission( final String firstPart, final String... nameParts )
     {
         setName( name( firstPart, nameParts ) );
+        calculateDenormalizedFields();
     }
 
     public String getName()
@@ -63,7 +66,6 @@ public class Permission
     void setName( final String name )
     {
         this.name = name;
-        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
     @Override
@@ -110,9 +112,15 @@ public class Permission
             + ( ( parts != null && parts.length > 0 ) ? ( ":" + join( parts, ":" ) ) : "" );
     }
 
-    public String getDocType()
+    public String getDoctype()
     {
-        return docType;
+        return doctype;
+    }
+
+    @Override
+    public void calculateDenormalizedFields()
+    {
+        setCouchDocId( namespaceId( NAMESPACE, name ) );
     }
 
 }
