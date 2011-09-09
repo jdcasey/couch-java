@@ -23,8 +23,7 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.commonjava.auth.couch.model.User;
 
-public class ShiroUser
-    extends User
+public class ShiroUserUtils
 {
 
     private static final String DEFAULT_REALM = "default";

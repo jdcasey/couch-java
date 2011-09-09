@@ -31,7 +31,7 @@ import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
-import org.commonjava.auth.shiro.couch.model.ShiroUser;
+import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
 import org.commonjava.couch.db.CouchManager;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -121,7 +121,7 @@ public class CouchRealmTest
         User user = new User( User.ADMIN );
         user.setPasswordDigest( passwordManager.digestPassword( "password" ) );
 
-        subject.login( ShiroUser.getAuthenticationToken( user ) );
+        subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
 
         System.out.println( subject );
     }
@@ -134,7 +134,7 @@ public class CouchRealmTest
 
         User user = new User( User.ADMIN );
         user.setPasswordDigest( passwordManager.digestPassword( "password" ) );
-        subject.login( ShiroUser.getAuthenticationToken( user ) );
+        subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
 
         Permission perm = new Permission( "test", "read" );
         manager.storePermission( perm );

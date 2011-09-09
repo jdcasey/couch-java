@@ -43,7 +43,7 @@ import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.model.ShiroPermission;
-import org.commonjava.auth.shiro.couch.model.ShiroUser;
+import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
 import org.commonjava.util.logging.Logger;
 
 @Singleton
@@ -188,7 +188,7 @@ public class CouchRealm
                                                "Cannot retrieve user. System configuration is invalid." );
         }
 
-        return ShiroUser.getAuthenticationInfo( user );
+        return ShiroUserUtils.getAuthenticationInfo( user );
     }
 
 }
