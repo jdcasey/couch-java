@@ -128,10 +128,18 @@ public class CouchManager
         {
             createDatabase( dbUrl );
         }
+        else
+        {
+            LOGGER.info( "Database already exists: " + dbUrl );
+        }
 
         if ( !appExists( dbUrl, appName ) )
         {
             installApplication( app, dbUrl );
+        }
+        else
+        {
+            LOGGER.info( "App: " + app.getCouchDocId() + " already exists in db: " + dbUrl );
         }
     }
 
@@ -483,6 +491,7 @@ public class CouchManager
     public void createDatabase( final String url )
         throws CouchDBException
     {
+        LOGGER.info( "Creating database: " + url );
         HttpPut request = new HttpPut( url );
         executeHttp( request, SC_CREATED, "Failed to create database" );
     }
@@ -491,6 +500,8 @@ public class CouchManager
         throws CouchDBException
     {
         String url = buildDocUrl( dbUrl, app, true );
+        LOGGER.info( "Installing app at: " + url );
+
         HttpPut request = new HttpPut( url );
         try
         {
@@ -716,6 +727,11 @@ public class CouchManager
             client = new DefaultHttpClient( ccm );
         }
         return client;
+    }
+
+    protected CouchAppReader getAppReader()
+    {
+        return appReader;
     }
 
 }
