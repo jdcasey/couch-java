@@ -78,7 +78,7 @@ public class UserAdminResource
             if ( created )
             {
                 builder =
-                    Response.created( uriInfo.getAbsolutePathBuilder().build( user.getUsername() ) );
+                    Response.created( uriInfo.getAbsolutePathBuilder().path( user.getUsername() ).build() );
             }
             else
             {
@@ -129,7 +129,8 @@ public class UserAdminResource
             }
 
             dataManager.storeUser( toUpdate, false );
-            builder = Response.created( uriInfo.getAbsolutePathBuilder().build() );
+            builder =
+                Response.created( uriInfo.getAbsolutePathBuilder().build( user.getUsername() ) );
         }
         catch ( UserDataException e )
         {

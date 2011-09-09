@@ -18,8 +18,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
@@ -32,7 +30,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Path( "/admin/permission" )
 @RequestScoped
-@RequiresAuthentication
+// @RequiresAuthentication
 public class PermissionAdminResource
 {
 
@@ -54,8 +52,8 @@ public class PermissionAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
+        // Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Permission permission =
@@ -69,7 +67,7 @@ public class PermissionAdminResource
         {
             dataManager.storePermission( permission );
             builder =
-                Response.created( uriInfo.getAbsolutePathBuilder().build( permission.getName() ) );
+                Response.created( uriInfo.getAbsolutePathBuilder().path( permission.getName() ).build() );
         }
         catch ( UserDataException e )
         {
@@ -85,8 +83,8 @@ public class PermissionAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
+        // Permission.ADMIN ) );
 
         try
         {
@@ -107,13 +105,13 @@ public class PermissionAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
+        // Permission.ADMIN ) );
 
         try
         {
             Permission permission = dataManager.getPermission( name );
-            logger.info( "Returning permission: %s", permission );
+            logger.info( "Returning permission: %s for name: '%s'", permission, name );
 
             return Response.ok().entity( restSerializer.toJson( permission ) ).build();
         }
@@ -128,8 +126,8 @@ public class PermissionAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
+        // Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try

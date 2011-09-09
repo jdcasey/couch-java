@@ -69,7 +69,8 @@ public class RoleAdminResource
         try
         {
             dataManager.storeRole( role );
-            builder = Response.created( uriInfo.getAbsolutePathBuilder().build( role.getName() ) );
+            builder =
+                Response.created( uriInfo.getAbsolutePathBuilder().path( role.getName() ).build() );
         }
         catch ( UserDataException e )
         {
