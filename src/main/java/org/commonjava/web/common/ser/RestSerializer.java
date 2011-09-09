@@ -1,6 +1,7 @@
 package org.commonjava.web.common.ser;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
@@ -50,8 +51,28 @@ public class RestSerializer
 
         try
         {
-            T result =
-                getGson().fromJson( new InputStreamReader( req.getInputStream(), encoding ), type );
+            return fromStream( req.getInputStream(), encoding, type, postProcessors );
+        }
+        catch ( IOException e )
+        {
+            logger.error( "Failed to deserialize type: %s from HttpServletRequest body. Error: %s",
+                          e, type.getName(), e.getMessage() );
+            throw new WebApplicationException(
+                                               Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
+        }
+    }
+
+    public <T> T fromStream( final InputStream stream, String encoding, final Class<T> type,
+                             final DeserializerPostProcessor<T>... postProcessors )
+    {
+        if ( encoding == null )
+        {
+            encoding = "UTF-8";
+        }
+
+        try
+        {
+            T result = getGson().fromJson( new InputStreamReader( stream, encoding ), type );
 
             if ( result != null )
             {
@@ -65,15 +86,38 @@ public class RestSerializer
         }
         catch ( UnsupportedEncodingException e )
         {
-            logger.error( "Failed to deserialize type: %s from HttpServletRequest body. Error: %s",
-                          e, type.getName(), e.getMessage() );
+            logger.error( "Failed to deserialize type: %s. Error: %s", e, type.getName(),
+                          e.getMessage() );
             throw new WebApplicationException(
                                                Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
         }
-        catch ( IOException e )
+    }
+
+    public <T> T fromStreamMulti( final InputStream stream, String encoding, final Type type,
+                                  final DeserializerPostProcessor<T>... postProcessors )
+    {
+        if ( encoding == null )
         {
-            logger.error( "Failed to deserialize type: %s from HttpServletRequest body. Error: %s",
-                          e, type.getName(), e.getMessage() );
+            encoding = "UTF-8";
+        }
+
+        try
+        {
+            T result = getGson().fromJson( new InputStreamReader( stream, encoding ), type );
+
+            if ( result != null )
+            {
+                for ( DeserializerPostProcessor<T> proc : postProcessors )
+                {
+                    proc.process( result );
+                }
+            }
+
+            return result;
+        }
+        catch ( UnsupportedEncodingException e )
+        {
+            logger.error( "Failed to deserialize type: %s. Error: %s", e, type, e.getMessage() );
             throw new WebApplicationException(
                                                Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
         }
