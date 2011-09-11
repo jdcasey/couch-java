@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.commonjava.web</groupId>
+    <artifactId>rest-app-parent</artifactId>
+    <version>1-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>couch-rest-test-harness</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>CouchDB REST Test Harness</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-ext</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.web</groupId>
+      <artifactId>configuration-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.web</groupId>
+      <artifactId>configuration-dotconf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.web</groupId>
+      <artifactId>web-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.auth</groupId>
+      <artifactId>shiro-couch</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.couch</groupId>
+      <artifactId>couch-user-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.junit</groupId>
+      <artifactId>arquillian-junit-container</artifactId>
+      <version>1.0.0.CR4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+       <groupId>org.jboss.as</groupId>
+       <artifactId>jboss-as-arquillian-container-managed</artifactId>
+       <version>7.0.1.Final</version>
+       <scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.commonjava.couch</groupId>
+    	<artifactId>couch-test-harness</artifactId>
+    </dependency>
+  </dependencies>
+</project>
