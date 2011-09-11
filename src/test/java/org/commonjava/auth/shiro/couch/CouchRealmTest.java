@@ -17,10 +17,10 @@
  ******************************************************************************/
 package org.commonjava.auth.shiro.couch;
 
-import static org.commonjava.auth.shiro.couch.fixture.LoggingFixture.setupLogging;
 import static org.commonjava.auth.shiro.couch.test.CouchShiroTestFixture.clearSubject;
 import static org.commonjava.auth.shiro.couch.test.CouchShiroTestFixture.setupSecurityManager;
 import static org.commonjava.auth.shiro.couch.test.CouchShiroTestFixture.teardownSecurityManager;
+import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 
 import org.apache.log4j.Level;
 import org.apache.shiro.SecurityUtils;

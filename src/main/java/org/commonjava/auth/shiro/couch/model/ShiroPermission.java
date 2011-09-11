@@ -23,6 +23,8 @@ public class ShiroPermission
     implements org.apache.shiro.authz.Permission
 {
 
+    // private final Logger logger = new Logger( getClass() );
+
     private final Permission permission;
 
     public ShiroPermission( final Permission permission )
@@ -33,9 +35,13 @@ public class ShiroPermission
     @Override
     public boolean implies( final org.apache.shiro.authz.Permission p )
     {
+        // logger.info( "Checking whether permission: '%s' implies permission: '%s'",
+        // this.permission.getName(), ( (ShiroPermission) p ).permission.getName() );
+
         String name = permission.getName();
         if ( name.equals( Permission.WILDCARD ) )
         {
+            // logger.info( "YES(1)" );
             return true;
         }
 
@@ -45,9 +51,13 @@ public class ShiroPermission
             String prefix = name.substring( 0, name.length() - Permission.WILDCARD.length() );
 
             String permName = perm.permission.getName();
-            return permName.length() > prefix.length() && permName.startsWith( prefix );
+            boolean result = permName.length() > prefix.length() && permName.startsWith( prefix );
+            // logger.info( result ? "YES(2)" : "NO(2)" );
+
+            return result;
         }
 
+        // logger.info( "NO(3)" );
         return false;
     }
 

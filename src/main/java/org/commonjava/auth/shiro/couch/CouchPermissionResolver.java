@@ -55,6 +55,8 @@ public class CouchPermissionResolver
     @Override
     public Permission resolvePermission( final String permissionName )
     {
+        // logger.info( "Resolving permission: %s", permissionName );
+
         try
         {
             org.commonjava.auth.couch.model.Permission perm =
@@ -79,6 +81,8 @@ public class CouchPermissionResolver
     @Override
     public Collection<Permission> resolvePermissionsInRole( final String roleName )
     {
+        // logger.info( "Resolving permissions for role: %s", roleName );
+
         final Set<Permission> perms = new HashSet<Permission>();
 
         Role role;
