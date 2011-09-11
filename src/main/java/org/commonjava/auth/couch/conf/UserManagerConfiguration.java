@@ -27,6 +27,4 @@ public interface UserManagerConfiguration
 
     String getDatabaseUrl();
 
-    String getLogicApplication();
-
 }

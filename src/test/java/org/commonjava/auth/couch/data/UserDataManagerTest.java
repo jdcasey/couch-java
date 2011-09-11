@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.commonjava.auth.couch.data;
 
-import static org.commonjava.auth.couch.fixture.LoggingFixture.setupLogging;
+import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;

@@ -21,7 +21,6 @@ import javax.enterprise.inject.Alternative;
 import javax.inject.Named;
 
 import org.commonjava.auth.couch.data.PasswordManager;
-import org.commonjava.auth.couch.data.UserViewRequest;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.config.annotation.ConfigName;
@@ -46,17 +45,14 @@ public class DefaultUserManagerConfig
 
     private String databaseUrl;
 
-    private String logicApplication = UserViewRequest.APPLICATION_RESOURCE;
-
     public DefaultUserManagerConfig()
     {}
 
-    public DefaultUserManagerConfig( final String databaseUrl, final String logicApplication,
-                                     final String adminEmail, final String adminPassword,
-                                     final String adminFirstName, final String adminLastName )
+    public DefaultUserManagerConfig( final String databaseUrl, final String adminEmail,
+                                     final String adminPassword, final String adminFirstName,
+                                     final String adminLastName )
     {
         this.databaseUrl = databaseUrl;
-        this.logicApplication = logicApplication;
         this.adminEmail = adminEmail;
         this.adminPassword = adminPassword;
         this.adminFirstName = adminFirstName;
@@ -131,18 +127,6 @@ public class DefaultUserManagerConfig
     public void setDatabaseUrl( final String databaseUrl )
     {
         this.databaseUrl = databaseUrl;
-    }
-
-    @Override
-    public String getLogicApplication()
-    {
-        return logicApplication;
-    }
-
-    @ConfigName( "db.application" )
-    public void setLogicApplication( final String logicApplication )
-    {
-        this.logicApplication = logicApplication;
     }
 
 }

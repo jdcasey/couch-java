@@ -29,7 +29,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
-import org.commonjava.auth.couch.data.UserViewRequest.View;
+import org.commonjava.auth.couch.data.UserAppDescription.View;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
@@ -63,31 +63,35 @@ public class UserDataManager
     public void install()
         throws UserDataException
     {
+        UserAppDescription description = new UserAppDescription();
         try
         {
-            couch.initialize( config.getDatabaseUrl(), config.getLogicApplication(),
-                              UserViewRequest.APPLICATION_RESOURCE );
+            couch.initialize( config.getDatabaseUrl(), description );
         }
         catch ( CouchDBException e )
         {
             throw new UserDataException(
                                          "Failed to initialize user-management database: %s (application: %s). Reason: %s",
-                                         e, config.getDatabaseUrl(),
-                                         UserViewRequest.APPLICATION_RESOURCE, e.getMessage() );
+                                         e, config.getDatabaseUrl(), description, e.getMessage() );
         }
     }
 
     public void setupAdminInformation()
         throws UserDataException
     {
-        Permission permission = new Permission( Permission.WILDCARD );
-        Role role = new Role( Role.ADMIN, permission );
+        storePermission( new Permission( Permission.WILDCARD ) );
+        storePermission( new Permission( Permission.NAMESPACE, Permission.ADMIN ) );
+        storePermission( new Permission( Role.NAMESPACE, Permission.ADMIN ) );
+        storePermission( new Permission( User.NAMESPACE, Permission.ADMIN ) );
+
+        Role role = new Role( Role.ADMIN );
+        role.addPermission( Permission.WILDCARD );
+
+        storeRole( role, true );
 
         User user = config.createInitialAdminUser( passwordManager );
-        user.addRole( role );
+        user.addRole( Role.ADMIN );
 
-        storePermission( permission );
-        storeRole( role, true );
         storeUser( user, true );
     }
 
