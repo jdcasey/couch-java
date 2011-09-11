@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.commonjava.couch.db;
 
-import static org.commonjava.couch.fixture.LoggingFixture.setupLogging;
+import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -28,8 +28,10 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.StoreAction;
+import org.commonjava.couch.db.model.SimpleAppDescription;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.fixture.TestUser;
+import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.couch.model.io.Serializer;
@@ -84,7 +86,12 @@ public class CouchManagerOpsTest
     public void storeAndReadUserListingFromView()
         throws Exception
     {
-        mgr.installApplication( new CouchAppReader().readAppDefinition( "test-app" ), DB_URL );
+        CouchApp app =
+            new CouchAppReader().readAppDefinition( new SimpleAppDescription( "test-app",
+                                                                              "test-app",
+                                                                              "test-view" ) );
+
+        mgr.installApplication( app, DB_URL );
 
         mgr.store( new TestUser( "user1", "User", "Name", "user@nowhere.com" ), DB_URL, false );
         mgr.store( new TestUser( "user2", "Another", "Name", "user2@nowhere.com" ), DB_URL, false );

@@ -19,14 +19,15 @@ package org.commonjava.couch.model.io;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.io.IOUtils.readLines;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.List;
+import java.util.Set;
 
 import org.codehaus.plexus.component.annotations.Component;
+import org.commonjava.couch.db.CouchDBException;
+import org.commonjava.couch.db.model.AppDescription;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchAppView;
 
@@ -37,43 +38,23 @@ public class CouchAppReader
 
     private static final String VIEW_SUBPATH = "/views/";
 
-    private static final String VIEWS_LISTING = "/views.lst";
-
     private static final String MAP_JS = "/map.js";
 
     private static final String REDUCE_JS = "/reduce.js";
 
-    public CouchApp readAppDefinition( final String appName )
-        throws IOException
-    {
-        return readAppDefinition( appName, appName );
-    }
-
-    public CouchApp readAppDefinition( final String appName, final String appResource )
-        throws IOException
+    public CouchApp readAppDefinition( final AppDescription description )
+        throws IOException, CouchDBException
     {
         ClassLoader cloader = Thread.currentThread().getContextClassLoader();
+        String appName = description.getAppName();
 
         CouchApp app = new CouchApp( appName );
 
-        String appBase = APP_BASEPATH + appName;
-        String viewListing = appBase + VIEWS_LISTING;
-
-        List<String> listing = null;
-        InputStream in = cloader.getResourceAsStream( viewListing );
-        if ( in != null )
-        {
-            try
-            {
-                listing = readLines( in );
-            }
-            finally
-            {
-                closeQuietly( in );
-            }
-        }
+        String appBase = APP_BASEPATH + description.getClasspathAppResource();
 
         String viewBase = appBase + VIEW_SUBPATH;
+
+        Set<String> listing = description.getViewNames();
         if ( listing != null )
         {
             for ( String view : listing )
@@ -83,20 +64,24 @@ public class CouchAppReader
 
                 String map = null;
 
-                in = cloader.getResourceAsStream( mapPath );
-                StringWriter sWriter = new StringWriter();
-                if ( in != null )
+                InputStream in = cloader.getResourceAsStream( mapPath );
+                if ( in == null )
                 {
-                    try
-                    {
-                        copy( in, sWriter );
-                    }
-                    finally
-                    {
-                        closeQuietly( in );
-                    }
-                    map = sWriter.toString();
+                    throw new CouchDBException(
+                                                "Cannot read view: %s in CouchDB application: %s (classpath resource: %s)",
+                                                view, appName, mapPath );
                 }
+
+                StringWriter sWriter = new StringWriter();
+                try
+                {
+                    copy( in, sWriter );
+                }
+                finally
+                {
+                    closeQuietly( in );
+                }
+                map = sWriter.toString();
 
                 String reduce = null;
 

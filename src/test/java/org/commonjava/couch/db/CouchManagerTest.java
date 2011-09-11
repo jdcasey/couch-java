@@ -17,13 +17,14 @@
  ******************************************************************************/
 package org.commonjava.couch.db;
 
-import static org.commonjava.couch.fixture.LoggingFixture.setupLogging;
+import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
 import org.apache.log4j.Level;
+import org.commonjava.couch.db.model.SimpleAppDescription;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.couch.model.io.Serializer;
@@ -76,7 +77,8 @@ public class CouchManagerTest
 
         assertThat( mgr.exists( url ), is( true ) );
 
-        CouchApp app = new CouchAppReader().readAppDefinition( "test-app" );
+        CouchApp app =
+            new CouchAppReader().readAppDefinition( new SimpleAppDescription( "test-app" ) );
 
         mgr.installApplication( app, url );
 

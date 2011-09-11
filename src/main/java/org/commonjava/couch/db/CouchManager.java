@@ -63,6 +63,7 @@ import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.handler.ResponseHandlerWithError;
 import org.commonjava.couch.db.handler.SerializedGetHandler;
+import org.commonjava.couch.db.model.AppDescription;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.model.CouchApp;
@@ -109,19 +110,19 @@ public class CouchManager
         this.appReader = new CouchAppReader();
     }
 
-    public void initialize( final String dbUrl, final String appName, final String appResource )
+    public void initialize( final String dbUrl, final AppDescription description )
         throws CouchDBException
     {
         CouchApp app;
         try
         {
-            app = appReader.readAppDefinition( appName, appResource );
+            app = appReader.readAppDefinition( description );
         }
         catch ( IOException e )
         {
             throw new CouchDBException(
                                         "Failed to retrieve application definition: %s. Reason: %s",
-                                        e, appResource, e.getMessage() );
+                                        e, description.getClasspathAppResource(), e.getMessage() );
         }
 
         if ( !dbExists( dbUrl ) )
@@ -133,7 +134,7 @@ public class CouchManager
             LOGGER.info( "Database already exists: " + dbUrl );
         }
 
-        if ( !appExists( dbUrl, appName ) )
+        if ( !appExists( dbUrl, description.getAppName() ) )
         {
             installApplication( app, dbUrl );
         }
@@ -255,6 +256,7 @@ public class CouchManager
         req.setParameter( ViewRequest.INCLUDE_DOCS, true );
 
         String url = buildViewUrl( dbUrl, req );
+        LOGGER.info( "Retrieving view listing from: " + url );
         HttpGet request = new HttpGet( url );
 
         CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( itemType );

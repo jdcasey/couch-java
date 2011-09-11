@@ -100,6 +100,7 @@ public class SerializedGetHandler<T>
                 CouchError err = null;
                 if ( out != null )
                 {
+                    LOGGER.info( "Body content: '" + new String( out.toByteArray() ) + "'" );
                     err =
                         serializer.toError( new ByteArrayInputStream( out.toByteArray() ), "UTF-8" );
                 }

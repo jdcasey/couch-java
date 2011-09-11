@@ -19,8 +19,12 @@ package org.commonjava.couch.db.model;
 
 import static org.commonjava.couch.util.UrlUtils.stringQueryParameter;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ViewRequest
 {
@@ -36,6 +40,8 @@ public class ViewRequest
     private final String application;
 
     private final String view;
+
+    private Set<String> views;
 
     private final Map<String, String> requestParameters = new HashMap<String, String>();
 
@@ -85,6 +91,32 @@ public class ViewRequest
     public Map<String, String> getRequestParameters()
     {
         return requestParameters;
+    }
+
+    public void setViews( final Collection<String> views )
+    {
+        this.views = new HashSet<String>( views );
+    }
+
+    public synchronized void addView( final String view )
+    {
+        if ( views == null )
+        {
+            views = new HashSet<String>();
+        }
+
+        views.add( view );
+    }
+
+    public Set<String> getViews()
+    {
+        Set<String> result = views;
+        if ( result == null )
+        {
+            result = Collections.emptySet();
+        }
+
+        return result;
     }
 
 }

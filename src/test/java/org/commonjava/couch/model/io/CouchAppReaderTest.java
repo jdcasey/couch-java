@@ -19,6 +19,8 @@ package org.commonjava.couch.model.io;
 
 import java.io.IOException;
 
+import org.commonjava.couch.db.CouchDBException;
+import org.commonjava.couch.db.model.SimpleAppDescription;
 import org.commonjava.couch.model.CouchApp;
 import org.junit.Test;
 
@@ -27,9 +29,10 @@ public class CouchAppReaderTest
 
     @Test
     public void readTestApp()
-        throws IOException
+        throws IOException, CouchDBException
     {
-        CouchApp app = new CouchAppReader().readAppDefinition( "test-app" );
+        CouchApp app =
+            new CouchAppReader().readAppDefinition( new SimpleAppDescription( "test-app" ) );
 
         System.out.println( app );
     }
