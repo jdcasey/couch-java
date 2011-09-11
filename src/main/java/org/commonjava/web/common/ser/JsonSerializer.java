@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -12,16 +14,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.commonjava.util.logging.Logger;
+import org.commonjava.web.common.model.Listing;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-public class RestSerializer
+public class JsonSerializer
 {
 
     private final Logger logger = new Logger( getClass() );
 
-    RestSerializer()
+    JsonSerializer()
     {}
 
     private Gson getGson()
@@ -30,12 +34,12 @@ public class RestSerializer
         return builder.create();
     }
 
-    public String toJson( final Object src )
+    public String toString( final Object src )
     {
         return getGson().toJson( src );
     }
 
-    public String toJson( final Object src, final Type type )
+    public String toString( final Object src, final Type type )
     {
         return getGson().toJson( src, type );
     }
@@ -93,8 +97,9 @@ public class RestSerializer
         }
     }
 
-    public <T> T fromStreamMulti( final InputStream stream, String encoding, final Type type,
-                                  final DeserializerPostProcessor<T>... postProcessors )
+    public <T> Listing<T> listingFromStream( final InputStream stream, String encoding,
+                                             final TypeToken<Listing<T>> token,
+                                             final DeserializerPostProcessor<T>... postProcessors )
     {
         if ( encoding == null )
         {
@@ -103,13 +108,21 @@ public class RestSerializer
 
         try
         {
-            T result = getGson().fromJson( new InputStreamReader( stream, encoding ), type );
+            Listing<T> result =
+                getGson().fromJson( new InputStreamReader( stream, encoding ), token.getType() );
 
-            if ( result != null )
+            if ( result != null && result.getItems() != null )
             {
-                for ( DeserializerPostProcessor<T> proc : postProcessors )
+                List<T> items = result.getItems();
+                Collections.reverse( items );
+
+                result = new Listing<T>( items );
+                for ( T item : result )
                 {
-                    proc.process( result );
+                    for ( DeserializerPostProcessor<T> proc : postProcessors )
+                    {
+                        proc.process( item );
+                    }
                 }
             }
 
@@ -117,7 +130,9 @@ public class RestSerializer
         }
         catch ( UnsupportedEncodingException e )
         {
-            logger.error( "Failed to deserialize type: %s. Error: %s", e, type, e.getMessage() );
+            logger.error( "Failed to deserialize type: %s. Error: %s", e, token.getType(),
+                          e.getMessage() );
+
             throw new WebApplicationException(
                                                Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
         }
