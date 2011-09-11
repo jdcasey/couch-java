@@ -17,14 +17,17 @@
  ******************************************************************************/
 package org.commonjava.web.fd.model;
 
+import static org.apache.commons.codec.digest.DigestUtils.sha512Hex;
 import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.DenormalizedCouchDoc;
 
 import com.google.gson.annotations.Expose;
 
 public class Workspace
     extends AbstractCouchDocument
+    implements DenormalizedCouchDoc
 {
 
     public static final String NAMESPACE = "workspace";
@@ -34,16 +37,14 @@ public class Workspace
     private String pathName;
 
     @Expose( deserialize = false )
-    private final String docType = NAMESPACE;
+    private final String doctype = NAMESPACE;
 
     Workspace()
     {}
 
-    public Workspace( final String name, final String pathName )
+    public Workspace( final String name )
     {
         this.name = name;
-        this.pathName = pathName;
-        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
     }
 
     public String getName()
@@ -111,9 +112,16 @@ public class Workspace
         return true;
     }
 
-    public String getDocType()
+    public String getDoctype()
     {
-        return docType;
+        return doctype;
+    }
+
+    @Override
+    public void calculateDenormalizedFields()
+    {
+        setCouchDocId( namespaceId( NAMESPACE, this.name ) );
+        this.pathName = sha512Hex( this.name );
     }
 
 }

@@ -38,8 +38,6 @@ public class DefaultFileDepotConfiguration
 
     private File uploadDirectory = DEFAULT_UPLOAD_DIR;
 
-    private String logicApplication;
-
     private String databaseUrl;
 
     @Override
@@ -64,18 +62,6 @@ public class DefaultFileDepotConfiguration
     public void setDatabaseUrl( final String databaseUrl )
     {
         this.databaseUrl = databaseUrl;
-    }
-
-    @Override
-    public String getLogicApplication()
-    {
-        return logicApplication;
-    }
-
-    @ConfigName( "db.application" )
-    public void setLogicApplication( final String logicApplication )
-    {
-        this.logicApplication = logicApplication;
     }
 
 }

@@ -18,6 +18,7 @@
 package org.commonjava.web.fd.data;
 
 import static org.commonjava.auth.couch.model.Permission.ADMIN;
+import static org.commonjava.auth.couch.model.Permission.CREATE;
 import static org.commonjava.auth.couch.model.Permission.READ;
 import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
 
@@ -34,7 +35,7 @@ import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
-import org.commonjava.web.fd.data.WorkspaceViewRequest.View;
+import org.commonjava.web.fd.data.WorkspaceAppDescription.View;
 import org.commonjava.web.fd.model.Workspace;
 
 @Singleton
@@ -63,8 +64,7 @@ public class WorkspaceDataManager
     {
         try
         {
-            couch.initialize( config.getDatabaseUrl(), config.getLogicApplication(),
-                              WorkspaceViewRequest.APPLICATION_RESOURCE );
+            couch.initialize( config.getDatabaseUrl(), new WorkspaceAppDescription() );
 
             userMgr.install();
             userMgr.setupAdminInformation();
@@ -74,7 +74,7 @@ public class WorkspaceDataManager
             throw new WorkspaceDataException(
                                               "Failed to initialize workspace-management database: %s (application: %s). Reason: %s",
                                               e, config.getDatabaseUrl(),
-                                              WorkspaceViewRequest.APPLICATION_RESOURCE,
+                                              WorkspaceAppDescription.APPLICATION_RESOURCE,
                                               e.getMessage() );
         }
         catch ( UserDataException e )
@@ -85,12 +85,14 @@ public class WorkspaceDataManager
         }
     }
 
-    public void storeWorkspace( final Workspace workspace )
-        throws WorkspaceDataException, UserDataException
+    public boolean storeWorkspace( final Workspace workspace )
+        throws WorkspaceDataException
     {
+        boolean stored = false;
         try
         {
-            couch.store( workspace, config.getDatabaseUrl(), false );
+            workspace.calculateDenormalizedFields();
+            stored = couch.store( workspace, config.getDatabaseUrl(), false );
         }
         catch ( CouchDBException e )
         {
@@ -98,13 +100,27 @@ public class WorkspaceDataManager
                                               workspace, e.getMessage() );
         }
 
-        final String name = workspace.getName();
+        if ( stored )
+        {
+            final String name = workspace.getName();
 
-        final Map<String, Permission> perms =
-            userMgr.createPermissions( Workspace.NAMESPACE, name, ADMIN, READ );
+            try
+            {
+                final Map<String, Permission> perms =
+                    userMgr.createPermissions( Workspace.NAMESPACE, name, ADMIN, CREATE, READ );
 
-        userMgr.createRole( name + "-admin", perms.values() );
-        userMgr.createRole( name + "-read", perms.get( READ ) );
+                userMgr.createRole( name + "-admin", perms.values() );
+                userMgr.createRole( name + "-user", perms.get( READ ), perms.get( CREATE ) );
+            }
+            catch ( UserDataException e )
+            {
+                throw new WorkspaceDataException(
+                                                  "Failed to add permissions and roles for controlling workspace: %s. Reason: %s",
+                                                  e, workspace.getName(), e.getMessage() );
+            }
+        }
+
+        return stored;
     }
 
     public Workspace getWorkspace( final String name )
@@ -119,6 +135,21 @@ public class WorkspaceDataManager
         {
             throw new WorkspaceDataException( "Failed to read workspace: %s. Reason: %s", e, name,
                                               e.getMessage() );
+        }
+    }
+
+    public void deleteWorkspace( final String name )
+        throws WorkspaceDataException
+    {
+        try
+        {
+            couch.delete( new CouchDocRef( namespaceId( Workspace.NAMESPACE, name ) ),
+                          config.getDatabaseUrl() );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new WorkspaceDataException( "Failed to delete workspace: %s. Reason: %s", e,
+                                              name, e.getMessage() );
         }
     }
 

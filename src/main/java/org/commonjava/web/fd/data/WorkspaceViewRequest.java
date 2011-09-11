@@ -19,33 +19,15 @@ package org.commonjava.web.fd.data;
 
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.web.fd.config.FileDepotConfiguration;
+import org.commonjava.web.fd.data.WorkspaceAppDescription.View;
 
 public class WorkspaceViewRequest
     extends ViewRequest
 {
 
-    public static final String APPLICATION_RESOURCE = "workspace-logic";
-
-    public enum View
-    {
-        WORKSPACES( "workspaces" );
-
-        String name;
-
-        private View( final String name )
-        {
-            this.name = name;
-        }
-
-        public String viewName()
-        {
-            return name;
-        }
-    }
-
     public WorkspaceViewRequest( final FileDepotConfiguration config, final View view )
     {
-        super( config.getLogicApplication(), view.viewName() );
+        super( WorkspaceAppDescription.APPLICATION_RESOURCE, view.viewName() );
         setParameter( INCLUDE_DOCS, true );
     }
 

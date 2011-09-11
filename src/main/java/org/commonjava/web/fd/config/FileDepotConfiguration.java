@@ -26,6 +26,4 @@ public interface FileDepotConfiguration
 
     String getDatabaseUrl();
 
-    String getLogicApplication();
-
 }

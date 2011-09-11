@@ -51,6 +51,10 @@
     </dependency> -->
     <dependency>
     	<groupId>org.commonjava.web</groupId>
+    	<artifactId>restful-user-manager</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.commonjava.web</groupId>
     	<artifactId>configuration-api</artifactId>
     </dependency>
     <dependency>

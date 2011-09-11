@@ -1,3 +1,5 @@
 function (doc){
-	emit( doc._id, doc._rev );
+	if ( doc.doctype == 'workspace' ){
+		emit( doc._id, doc._rev );
+	}
 }

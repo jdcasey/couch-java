@@ -71,12 +71,14 @@ public class FileResource
     private WorkspaceDataManager wsDataManager;
 
     @PUT
-    @Path( "{name}/{description}" )
+    @Path( "{name}" )
     public Response save( @PathParam( "workspaceName" ) final String workspaceName,
                           @PathParam( "name" ) final String filename,
-                          @PathParam( "description" ) final String description,
                           @Context final HttpServletRequest request )
     {
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.CREATE ) );
+
         InputStream in = null;
         try
         {
@@ -122,7 +124,7 @@ public class FileResource
             closeQuietly( out );
         }
 
-        return Response.created( UriBuilder.fromResource( getClass() ).build( filename ) ).build();
+        return Response.created( UriBuilder.fromResource( getClass() ).path( filename ).build() ).build();
     }
 
     @DELETE
@@ -130,7 +132,8 @@ public class FileResource
     public Response delete( @PathParam( "workspaceName" ) final String workspaceName,
                             @PathParam( "name" ) final String filename )
     {
-        SecurityUtils.getSubject().checkPermission( "edit:file" );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.READ ) );
 
         File f;
         try
@@ -177,7 +180,6 @@ public class FileResource
         }
 
         SecurityUtils.getSubject().checkPermission( Permission.name( Workspace.NAMESPACE,
-                                                                     ws.getPathName(),
                                                                      Permission.READ ) );
 
         final File dir = new File( config.getUploadDirectory(), ws.getPathName() );
@@ -196,9 +198,12 @@ public class FileResource
 
     @GET
     @Path( "list" )
-    @Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_XML } )
+    @Produces( { MediaType.APPLICATION_JSON } )
     public Listing<FileInfo> list( @PathParam( "workspaceName" ) final String workspaceName )
     {
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.READ ) );
+
         try
         {
             return getFiles( workspaceName );
@@ -215,7 +220,8 @@ public class FileResource
     @Produces( MediaType.TEXT_PLAIN )
     public String listText( @PathParam( "workspaceName" ) final String workspaceName )
     {
-        SecurityUtils.getSubject().checkPermission( "view:file-info" );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.READ ) );
 
         final StringBuilder sb = new StringBuilder();
         try
@@ -241,11 +247,12 @@ public class FileResource
 
     @GET
     @Path( "{name}" )
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Produces( { MediaType.APPLICATION_JSON } )
     public FileInfo getFileInfo( @PathParam( "workspaceName" ) final String workspaceName,
                                  @PathParam( "name" ) final String filename )
     {
-        logger.info( "\n\nXML-INFO: %s. Configuration is: %s\n\n", filename, config );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.READ ) );
 
         try
         {
@@ -264,7 +271,8 @@ public class FileResource
     public Response getFileInfoText( @PathParam( "workspaceName" ) final String workspaceName,
                                      @PathParam( "name" ) final String filename )
     {
-        logger.info( "\n\nTXT-INFO: %s. Configuration is: %s\n\n", filename, config );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.READ ) );
 
         String result;
         try
@@ -331,9 +339,8 @@ public class FileResource
     public Response getFile( @PathParam( "workspaceName" ) final String workspaceName,
                              @PathParam( "name" ) final String filename )
     {
-        SecurityUtils.getSubject().checkPermission( "view:file" );
-
-        logger.info( "\n\nDOWNLOAD: %s. Configuration is: %s\n\n", filename, config );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Workspace.NAMESPACE,
+                                                                 Permission.READ ) );
 
         File f;
         try
@@ -351,10 +358,11 @@ public class FileResource
 
         if ( f.exists() )
         {
-            return Response.ok( f ).header( "Content-Disposition",
-                                            "attachment; filename=\"" + filename + "\"" )
+            return Response.ok( f ).build();
+            // return Response.ok( f ).header( "Content-Disposition",
+            // "attachment; filename=\"" + filename + "\"" ).build();
+
             // .header( "Content-Disposition", "inline; filename=\"" + filename + "\"" )
-            .build();
         }
         else
         {
