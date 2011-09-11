@@ -12,30 +12,22 @@
   
   <name>RESTful wrapper for Couch-User-Manager</name>
   
-  <properties>
-    <slf4jVersion>1.6.2</slf4jVersion>
-  </properties>
-  
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4jVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-ext</artifactId>
-      <version>${slf4jVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4jVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
-      <version>${slf4jVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.commonjava.web</groupId>
@@ -65,14 +57,14 @@
     <dependency>
       <groupId>org.jboss.arquillian.junit</groupId>
       <artifactId>arquillian-junit-container</artifactId>
-      <version>1.0.0.CR4</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
        <groupId>org.jboss.as</groupId>
        <artifactId>jboss-as-arquillian-container-managed</artifactId>
-       <version>7.0.1.Final</version>
-       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.web</groupId>
+      <artifactId>couch-rest-test-harness</artifactId>
     </dependency>
   </dependencies>
 </project>

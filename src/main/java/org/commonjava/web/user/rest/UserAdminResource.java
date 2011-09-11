@@ -1,7 +1,5 @@
 package org.commonjava.web.user.rest;
 
-import java.security.acl.Group;
-
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +28,7 @@ import org.commonjava.auth.couch.model.User;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.DenormalizerPostProcessor;
-import org.commonjava.web.common.ser.RestSerializer;
+import org.commonjava.web.common.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -49,7 +47,7 @@ public class UserAdminResource
     private PasswordManager passwordManager;
 
     @Inject
-    private RestSerializer restSerializer;
+    private JsonSerializer jsonSerializer;
 
     @Context
     private UriInfo uriInfo;
@@ -61,12 +59,11 @@ public class UserAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( User.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( User.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         User user =
-            restSerializer.fromRequestBody( request, User.class,
+            jsonSerializer.fromRequestBody( request, User.class,
                                             new DenormalizerPostProcessor<User>() );
 
         logger.info( "\n\nGot user: %s\n\n", user );
@@ -101,12 +98,11 @@ public class UserAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response store( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( User.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( User.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         User user =
-            restSerializer.fromRequestBody( request, User.class,
+            jsonSerializer.fromRequestBody( request, User.class,
                                             new DenormalizerPostProcessor<User>() );
 
         logger.info( "\n\nGot user: %s\n\n", user );
@@ -129,8 +125,7 @@ public class UserAdminResource
             }
 
             dataManager.storeUser( toUpdate, false );
-            builder =
-                Response.created( uriInfo.getAbsolutePathBuilder().build( user.getUsername() ) );
+            builder = Response.ok( uriInfo.getAbsolutePathBuilder().build( user.getUsername() ) );
         }
         catch ( UserDataException e )
         {
@@ -146,16 +141,15 @@ public class UserAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( User.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( User.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
             Listing<User> listing = new Listing<User>( dataManager.getAllUsers() );
-            TypeToken<Listing<Group>> tt = new TypeToken<Listing<Group>>()
+            TypeToken<Listing<User>> tt = new TypeToken<Listing<User>>()
             {};
 
-            return Response.ok().entity( restSerializer.toJson( listing, tt.getType() ) ).build();
+            return Response.ok().entity( jsonSerializer.toString( listing, tt.getType() ) ).build();
         }
         catch ( UserDataException e )
         {
@@ -168,15 +162,14 @@ public class UserAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( User.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( User.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
             User user = dataManager.getUser( name );
             logger.info( "Returning group: %s", user );
 
-            return Response.ok().entity( restSerializer.toJson( user ) ).build();
+            return Response.ok().entity( jsonSerializer.toString( user ) ).build();
         }
         catch ( UserDataException e )
         {
@@ -189,8 +182,7 @@ public class UserAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( User.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( User.NAMESPACE, Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try

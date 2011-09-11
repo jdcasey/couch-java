@@ -18,19 +18,21 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.DenormalizerPostProcessor;
-import org.commonjava.web.common.ser.RestSerializer;
+import org.commonjava.web.common.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
 
 @Path( "/admin/permission" )
 @RequestScoped
-// @RequiresAuthentication
+@RequiresAuthentication
 public class PermissionAdminResource
 {
 
@@ -40,7 +42,7 @@ public class PermissionAdminResource
     private UserDataManager dataManager;
 
     @Inject
-    private RestSerializer restSerializer;
+    private JsonSerializer jsonSerializer;
 
     @Context
     private UriInfo uriInfo;
@@ -52,12 +54,12 @@ public class PermissionAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Permission permission =
-            restSerializer.fromRequestBody( request, Permission.class,
+            jsonSerializer.fromRequestBody( request, Permission.class,
                                             new DenormalizerPostProcessor<Permission>() );
 
         logger.info( "\n\nGot permission: %s\n\n", permission );
@@ -83,8 +85,8 @@ public class PermissionAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         try
         {
@@ -92,7 +94,7 @@ public class PermissionAdminResource
             TypeToken<Listing<Permission>> tt = new TypeToken<Listing<Permission>>()
             {};
 
-            return Response.ok().entity( restSerializer.toJson( listing, tt.getType() ) ).build();
+            return Response.ok().entity( jsonSerializer.toString( listing, tt.getType() ) ).build();
         }
         catch ( UserDataException e )
         {
@@ -105,15 +107,15 @@ public class PermissionAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         try
         {
             Permission permission = dataManager.getPermission( name );
             logger.info( "Returning permission: %s for name: '%s'", permission, name );
 
-            return Response.ok().entity( restSerializer.toJson( permission ) ).build();
+            return Response.ok().entity( jsonSerializer.toString( permission ) ).build();
         }
         catch ( UserDataException e )
         {
@@ -126,8 +128,8 @@ public class PermissionAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        // SecurityUtils.getSubject().checkPermission( Permission.name( Permission.NAMESPACE,
-        // Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try

@@ -27,7 +27,7 @@ import org.commonjava.auth.couch.model.Role;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.DenormalizerPostProcessor;
-import org.commonjava.web.common.ser.RestSerializer;
+import org.commonjava.web.common.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -43,7 +43,7 @@ public class RoleAdminResource
     private UserDataManager dataManager;
 
     @Inject
-    private RestSerializer restSerializer;
+    private JsonSerializer jsonSerializer;
 
     @Context
     private UriInfo uriInfo;
@@ -55,12 +55,11 @@ public class RoleAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Role.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Role role =
-            restSerializer.fromRequestBody( request, Role.class,
+            jsonSerializer.fromRequestBody( request, Role.class,
                                             new DenormalizerPostProcessor<Role>() );
 
         logger.info( "\n\nGot role: %s\n\n", role );
@@ -86,12 +85,11 @@ public class RoleAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response store( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Role.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Role role =
-            restSerializer.fromRequestBody( request, Role.class,
+            jsonSerializer.fromRequestBody( request, Role.class,
                                             new DenormalizerPostProcessor<Role>() );
 
         logger.info( "\n\nGot role: %s\n\n", role );
@@ -110,7 +108,7 @@ public class RoleAdminResource
             }
 
             dataManager.storeRole( toUpdate );
-            builder = Response.created( uriInfo.getAbsolutePathBuilder().build() );
+            builder = Response.ok( uriInfo.getAbsolutePathBuilder().build() );
         }
         catch ( UserDataException e )
         {
@@ -126,8 +124,7 @@ public class RoleAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Role.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
@@ -135,7 +132,7 @@ public class RoleAdminResource
             TypeToken<Listing<Role>> tt = new TypeToken<Listing<Role>>()
             {};
 
-            return Response.ok().entity( restSerializer.toJson( listing, tt.getType() ) ).build();
+            return Response.ok().entity( jsonSerializer.toString( listing, tt.getType() ) ).build();
         }
         catch ( UserDataException e )
         {
@@ -148,15 +145,14 @@ public class RoleAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Role.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
             Role role = dataManager.getRole( name );
             logger.info( "Returning role: %s", role );
 
-            return Response.ok().entity( restSerializer.toJson( role ) ).build();
+            return Response.ok().entity( jsonSerializer.toString( role ) ).build();
         }
         catch ( UserDataException e )
         {
@@ -169,8 +165,7 @@ public class RoleAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Role.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try
