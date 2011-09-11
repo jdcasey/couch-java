@@ -41,12 +41,6 @@ public class Group
         this.constituents = new ArrayList<String>( Arrays.asList( constituents ) );
     }
 
-    public Group( final String name, final Repository... constituents )
-    {
-        this.name = name;
-        setConstituentProxies( Arrays.asList( constituents ) );
-    }
-
     public String getName()
     {
         return name;

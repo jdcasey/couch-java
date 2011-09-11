@@ -44,6 +44,15 @@ public class Downloader
 
     private TLRepositoryCredentialsProvider credProvider;
 
+    public Downloader()
+    {}
+
+    public Downloader( final ProxyConfiguration config )
+    {
+        this.config = config;
+        setup();
+    }
+
     @PostConstruct
     protected void setup()
     {
@@ -58,7 +67,7 @@ public class Downloader
         client = hc;
     }
 
-    public File download( final List<Repository> repos, final String path )
+    public File downloadFirst( final List<Repository> repos, final String path )
     {
         File target = null;
 

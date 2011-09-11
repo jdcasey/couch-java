@@ -18,7 +18,7 @@ import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.DenormalizationException;
 import org.commonjava.couch.util.JoinString;
 import org.commonjava.web.maven.proxy.conf.ProxyConfiguration;
-import org.commonjava.web.maven.proxy.data.ProxyViewRequest.View;
+import org.commonjava.web.maven.proxy.data.ProxyAppDescription.View;
 import org.commonjava.web.maven.proxy.model.Group;
 import org.commonjava.web.maven.proxy.model.Repository;
 
@@ -279,23 +279,26 @@ public class ProxyDataManager
     public void install()
         throws ProxyDataException
     {
+        ProxyAppDescription description = new ProxyAppDescription();
+
         try
         {
-            couch.initialize( config.getDatabaseUrl(), config.getLogicApplication(),
-                              ProxyViewRequest.APPLICATION_RESOURCE );
+            couch.initialize( config.getDatabaseUrl(), description );
 
             userMgr.install();
             userMgr.setupAdminInformation();
 
             userMgr.storePermission( new Permission( Repository.NAMESPACE, Permission.ADMIN ) );
             userMgr.storePermission( new Permission( Group.NAMESPACE, Permission.ADMIN ) );
+            userMgr.storePermission( new Permission( Repository.NAMESPACE, Permission.READ ) );
+            userMgr.storePermission( new Permission( Group.NAMESPACE, Permission.READ ) );
         }
         catch ( CouchDBException e )
         {
             throw new ProxyDataException(
                                           "Failed to initialize proxy-management database: %s (application: %s). Reason: %s",
-                                          e, config.getDatabaseUrl(),
-                                          ProxyViewRequest.APPLICATION_RESOURCE, e.getMessage() );
+                                          e, config.getDatabaseUrl(), description.getAppName(),
+                                          e.getMessage() );
         }
         catch ( UserDataException e )
         {

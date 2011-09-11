@@ -2,34 +2,15 @@ package org.commonjava.web.maven.proxy.data;
 
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.web.maven.proxy.conf.ProxyConfiguration;
+import org.commonjava.web.maven.proxy.data.ProxyAppDescription.View;
 
 public class ProxyViewRequest
     extends ViewRequest
 {
 
-    public static final String APPLICATION_RESOURCE = "proxy-logic";
-
-    public enum View
-    {
-        ALL_GROUPS( "all-groups" ), ALL_REPOSITORIES( "all-repositories" ), GROUP_REPOSITORIES(
-            "group-repositories" );
-
-        String name;
-
-        private View( final String name )
-        {
-            this.name = name;
-        }
-
-        public String viewName()
-        {
-            return name;
-        }
-    }
-
     public ProxyViewRequest( final ProxyConfiguration config, final View view )
     {
-        super( config.getLogicApplication(), view.viewName() );
+        super( ProxyAppDescription.APP_NAME, view.viewName() );
         setParameter( INCLUDE_DOCS, true );
     }
 

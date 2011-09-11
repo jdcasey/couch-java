@@ -42,8 +42,8 @@ public class RepositoryAccessResource
     public Response getContent( @PathParam( "name" ) final String name,
                                 @PathParam( "path" ) final String path )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE, name,
-                                                                     Permission.READ ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Repository.NAMESPACE, name,
+                                                                 Permission.READ ) );
 
         // TODO:
         // 1. directory request (ends with "/")...browse somehow??

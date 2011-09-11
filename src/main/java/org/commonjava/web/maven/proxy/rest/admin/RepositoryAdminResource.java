@@ -24,7 +24,7 @@ import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.DenormalizerPostProcessor;
-import org.commonjava.web.common.ser.RestSerializer;
+import org.commonjava.web.common.ser.JsonSerializer;
 import org.commonjava.web.maven.proxy.data.ProxyDataException;
 import org.commonjava.web.maven.proxy.data.ProxyDataManager;
 import org.commonjava.web.maven.proxy.model.Repository;
@@ -43,7 +43,7 @@ public class RepositoryAdminResource
     private ProxyDataManager proxyManager;
 
     @Inject
-    private RestSerializer restSerializer;
+    private JsonSerializer restSerializer;
 
     @Context
     private UriInfo uriInfo;
@@ -55,8 +55,8 @@ public class RepositoryAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Repository.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Repository repository =
@@ -68,9 +68,15 @@ public class RepositoryAdminResource
         ResponseBuilder builder;
         try
         {
-            proxyManager.storeRepository( repository );
-            builder =
-                Response.created( uriInfo.getAbsolutePathBuilder().build( repository.getName() ) );
+            if ( proxyManager.storeRepository( repository, true ) )
+            {
+                builder =
+                    Response.created( uriInfo.getAbsolutePathBuilder().path( repository.getName() ).build() );
+            }
+            else
+            {
+                builder = Response.status( Status.CONFLICT ).entity( "Repository already exists." );
+            }
         }
         catch ( ProxyDataException e )
         {
@@ -86,8 +92,8 @@ public class RepositoryAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response store( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Repository.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Repository repository =
@@ -126,8 +132,8 @@ public class RepositoryAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Repository.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         try
         {
@@ -136,7 +142,7 @@ public class RepositoryAdminResource
             TypeToken<Listing<Repository>> tt = new TypeToken<Listing<Repository>>()
             {};
 
-            return Response.ok().entity( restSerializer.toJson( listing, tt.getType() ) ).build();
+            return Response.ok().entity( restSerializer.toString( listing, tt.getType() ) ).build();
         }
         catch ( ProxyDataException e )
         {
@@ -149,15 +155,22 @@ public class RepositoryAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Repository.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         try
         {
             Repository repo = proxyManager.getRepository( name );
             logger.info( "Returning repository: %s", repo );
 
-            return Response.ok().entity( restSerializer.toJson( repo ) ).build();
+            if ( repo == null )
+            {
+                return Response.status( Status.NOT_FOUND ).build();
+            }
+            else
+            {
+                return Response.ok().entity( restSerializer.toString( repo ) ).build();
+            }
         }
         catch ( ProxyDataException e )
         {
@@ -170,8 +183,8 @@ public class RepositoryAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Repository.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Repository.NAMESPACE,
+                                                                 Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try

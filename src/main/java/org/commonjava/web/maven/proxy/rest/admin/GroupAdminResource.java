@@ -24,7 +24,7 @@ import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.DenormalizerPostProcessor;
-import org.commonjava.web.common.ser.RestSerializer;
+import org.commonjava.web.common.ser.JsonSerializer;
 import org.commonjava.web.maven.proxy.data.ProxyDataException;
 import org.commonjava.web.maven.proxy.data.ProxyDataManager;
 import org.commonjava.web.maven.proxy.model.Group;
@@ -43,7 +43,7 @@ public class GroupAdminResource
     private ProxyDataManager proxyManager;
 
     @Inject
-    private RestSerializer restSerializer;
+    private JsonSerializer restSerializer;
 
     @Context
     private UriInfo uriInfo;
@@ -55,8 +55,7 @@ public class GroupAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Group.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Group group =
@@ -68,8 +67,16 @@ public class GroupAdminResource
         ResponseBuilder builder;
         try
         {
-            proxyManager.storeGroup( group );
-            builder = Response.created( uriInfo.getAbsolutePathBuilder().build( group.getName() ) );
+            boolean added = proxyManager.storeGroup( group, true );
+            if ( added )
+            {
+                builder =
+                    Response.created( uriInfo.getAbsolutePathBuilder().path( group.getName() ).build() );
+            }
+            else
+            {
+                builder = Response.status( Status.CONFLICT ).entity( "Group already exists." );
+            }
         }
         catch ( ProxyDataException e )
         {
@@ -85,8 +92,7 @@ public class GroupAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response store( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Group.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
         Group group =
@@ -123,8 +129,7 @@ public class GroupAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Group.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
@@ -132,7 +137,7 @@ public class GroupAdminResource
             TypeToken<Listing<Group>> tt = new TypeToken<Listing<Group>>()
             {};
 
-            return Response.ok().entity( restSerializer.toJson( listing, tt.getType() ) ).build();
+            return Response.ok().entity( restSerializer.toString( listing, tt.getType() ) ).build();
         }
         catch ( ProxyDataException e )
         {
@@ -145,15 +150,21 @@ public class GroupAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Group.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
             Group group = proxyManager.getGroup( name );
             logger.info( "Returning group: %s", group );
 
-            return Response.ok().entity( restSerializer.toJson( group ) ).build();
+            if ( group != null )
+            {
+                return Response.ok().entity( restSerializer.toString( group ) ).build();
+            }
+            else
+            {
+                return Response.status( Status.NOT_FOUND ).build();
+            }
         }
         catch ( ProxyDataException e )
         {
@@ -166,8 +177,7 @@ public class GroupAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE,
-                                                                     Permission.ADMIN ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Group.NAMESPACE, Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try

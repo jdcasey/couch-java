@@ -7,8 +7,6 @@ public interface ProxyConfiguration
 
     String getDatabaseUrl();
 
-    String getLogicApplication();
-
     File getRepositoryRootDirectory();
 
 }

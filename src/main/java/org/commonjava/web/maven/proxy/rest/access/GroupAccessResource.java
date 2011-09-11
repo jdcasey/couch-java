@@ -44,8 +44,8 @@ public class GroupAccessResource
     public Response getProxyContent( @PathParam( "name" ) final String name,
                                      @PathParam( "path" ) final String path )
     {
-        SecurityUtils.getSubject().checkPermission( Permission.name( Group.NAMESPACE, name,
-                                                                     Permission.READ ) );
+        SecurityUtils.getSubject().isPermitted( Permission.name( Group.NAMESPACE, name,
+                                                                 Permission.READ ) );
 
         // TODO:
         // 1. directory request (ends with "/")...browse somehow??
@@ -74,7 +74,7 @@ public class GroupAccessResource
                                                Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
         }
 
-        File target = downloader.download( repos, path );
+        File target = downloader.downloadFirst( repos, path );
 
         String mimeType = new MimetypesFileTypeMap().getContentType( target );
         return Response.ok( target, mimeType ).build();

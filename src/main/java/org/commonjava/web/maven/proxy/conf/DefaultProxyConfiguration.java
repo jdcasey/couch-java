@@ -8,7 +8,6 @@ import javax.inject.Named;
 import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 import org.commonjava.web.config.section.ConfigurationSectionListener;
-import org.commonjava.web.maven.proxy.data.ProxyViewRequest;
 
 @SectionName( ConfigurationSectionListener.DEFAULT_SECTION )
 @Alternative
@@ -22,20 +21,12 @@ public class DefaultProxyConfiguration
 
     private File repositoryRootDirectory = DEFAULT_REPO_ROOT_DIR;
 
-    private String logicApplication = ProxyViewRequest.APPLICATION_RESOURCE;
-
     private String databaseUrl;
 
     @Override
     public String getDatabaseUrl()
     {
         return databaseUrl;
-    }
-
-    @Override
-    public String getLogicApplication()
-    {
-        return logicApplication;
     }
 
     @Override
@@ -48,12 +39,6 @@ public class DefaultProxyConfiguration
     public void setRepositoryRootDirectory( final File repositoryRootDirectory )
     {
         this.repositoryRootDirectory = repositoryRootDirectory;
-    }
-
-    @ConfigName( "db.application" )
-    public void setLogicApplication( final String logicApplication )
-    {
-        this.logicApplication = logicApplication;
     }
 
     @ConfigName( "db.url" )
