@@ -32,6 +32,7 @@ import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
+import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.db.CouchManager;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -60,13 +61,15 @@ public class CouchRealmTest
         passwordManager = new PasswordManager();
 
         config = new DefaultUserManagerConfig();
-        config.setDatabaseUrl( "http://developer.commonjava.org/db/test-shiro" );
         config.setAdminEmail( "admin@nowhere.com" );
         config.setAdminFirstName( "Admin" );
         config.setAdminLastName( "User" );
         config.setAdminPassword( "password" );
 
-        couch = new CouchManager();
+        couch =
+            new CouchManager(
+                              new DefaultCouchDBConfiguration(
+                                                               "http://developer.commonjava.org/db/test-shiro" ) );
 
         manager = new UserDataManager( config, passwordManager, couch );
 
@@ -80,9 +83,9 @@ public class CouchRealmTest
     public void setupDB()
         throws Exception
     {
-        if ( couch.dbExists( config.getDatabaseUrl() ) )
+        if ( couch.dbExists() )
         {
-            couch.dropDatabase( config.getDatabaseUrl() );
+            couch.dropDatabase();
         }
         manager.install();
 
@@ -103,7 +106,7 @@ public class CouchRealmTest
     public void teardownDB()
         throws Exception
     {
-        couch.dropDatabase( config.getDatabaseUrl() );
+        couch.dropDatabase();
         clearSubject();
     }
 
@@ -139,7 +142,7 @@ public class CouchRealmTest
         Permission perm = new Permission( "test", "read" );
         manager.storePermission( perm );
 
-        subject.checkPermission( "test:read" );
+        subject.isPermitted( "test:read" );
 
         System.out.println( subject );
     }

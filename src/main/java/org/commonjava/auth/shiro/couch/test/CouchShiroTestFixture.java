@@ -12,9 +12,11 @@ import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.shiro.couch.CouchPermissionResolver;
 import org.commonjava.auth.shiro.couch.CouchRealm;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.model.io.CouchAppReader;
-import org.commonjava.couch.model.io.Serializer;
+import org.commonjava.couch.io.CouchAppReader;
+import org.commonjava.couch.io.CouchHttpClient;
+import org.commonjava.couch.io.Serializer;
 
 public final class CouchShiroTestFixture
 {
@@ -24,11 +26,16 @@ public final class CouchShiroTestFixture
     private CouchShiroTestFixture()
     {}
 
-    public static void setupSecurityManager( final UserManagerConfiguration config,
+    public static void setupSecurityManager( final CouchDBConfiguration couchConfig,
+                                             final UserManagerConfiguration userConfig,
                                              final Realm... fallbackRealms )
     {
-        CouchManager couch = new CouchManager( new Serializer(), new CouchAppReader() );
-        UserDataManager mgr = new UserDataManager( config, new PasswordManager(), couch );
+        Serializer serializer = new Serializer();
+        CouchManager couch =
+            new CouchManager( couchConfig, new CouchHttpClient( couchConfig, serializer ),
+                              serializer, new CouchAppReader() );
+
+        UserDataManager mgr = new UserDataManager( userConfig, new PasswordManager(), couch );
 
         CouchRealm realm = new CouchRealm( mgr, new CouchPermissionResolver( mgr ) );
         realm.setupSecurityManager( fallbackRealms );
