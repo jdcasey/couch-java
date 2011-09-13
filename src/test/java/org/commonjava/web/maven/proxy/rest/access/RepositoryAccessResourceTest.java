@@ -41,7 +41,10 @@ public class RepositoryAccessResourceTest
     public static void clearRepoRootDir()
         throws IOException
     {
-        forceDelete( repoRoot );
+        if ( repoRoot != null && repoRoot.exists() )
+        {
+            forceDelete( repoRoot );
+        }
     }
 
     @Before

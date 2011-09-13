@@ -34,7 +34,6 @@ public class DownloaderTest
         repoRoot.mkdirs();
 
         config = new DefaultProxyConfiguration();
-        config.setDatabaseUrl( null );
         config.setRepositoryRootDirectory( repoRoot );
 
         downloader = new Downloader( config );

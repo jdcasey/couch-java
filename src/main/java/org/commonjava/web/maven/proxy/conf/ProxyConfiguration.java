@@ -5,8 +5,6 @@ import java.io.File;
 public interface ProxyConfiguration
 {
 
-    String getDatabaseUrl();
-
     File getRepositoryRootDirectory();
 
 }

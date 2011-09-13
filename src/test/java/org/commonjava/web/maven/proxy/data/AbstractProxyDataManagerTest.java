@@ -6,6 +6,8 @@ import org.apache.log4j.Level;
 import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataManager;
+import org.commonjava.couch.conf.CouchDBConfiguration;
+import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.web.maven.proxy.conf.DefaultProxyConfiguration;
 import org.junit.After;
@@ -32,27 +34,27 @@ public class AbstractProxyDataManagerTest
         setupLogging( Level.DEBUG );
 
         config = new DefaultProxyConfiguration();
-        config.setDatabaseUrl( "http://developer.commonjava.org/db/test-aprox" );
 
-        umConfig =
-            new DefaultUserManagerConfig( config.getDatabaseUrl(), "admin@nowhere.com", "password",
-                                          "Admin", "User" );
+        umConfig = new DefaultUserManagerConfig( "admin@nowhere.com", "password", "Admin", "User" );
 
-        couch = new CouchManager();
+        CouchDBConfiguration couchConfig =
+            new DefaultCouchDBConfiguration( "http://developer.commonjava.org/db/test-aprox" );
+
+        couch = new CouchManager( couchConfig );
 
         passwordManager = new PasswordManager();
         userManager = new UserDataManager( umConfig, passwordManager, couch );
 
-        manager = new ProxyDataManager( config, userManager, couch );
+        manager = new ProxyDataManager( config, userManager, couchConfig, couch );
     }
 
     @Before
     public void setupDB()
         throws Exception
     {
-        if ( couch.dbExists( config.getDatabaseUrl() ) )
+        if ( couch.dbExists() )
         {
-            couch.dropDatabase( config.getDatabaseUrl() );
+            couch.dropDatabase();
         }
         manager.install();
     }
@@ -61,7 +63,7 @@ public class AbstractProxyDataManagerTest
     public void teardownDB()
         throws Exception
     {
-        couch.dropDatabase( config.getDatabaseUrl() );
+        couch.dropDatabase();
     }
 
 }

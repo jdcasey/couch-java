@@ -42,7 +42,10 @@ public class GroupAccessResourceTest
     public static void clearRepoRootDir()
         throws IOException
     {
-        forceDelete( repoRoot );
+        if ( repoRoot != null && repoRoot.exists() )
+        {
+            forceDelete( repoRoot );
+        }
     }
 
     @Before

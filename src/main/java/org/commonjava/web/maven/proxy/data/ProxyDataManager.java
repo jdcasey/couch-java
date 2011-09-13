@@ -1,6 +1,6 @@
 package org.commonjava.web.maven.proxy.data;
 
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.model.CouchDocRef;
@@ -35,14 +36,18 @@ public class ProxyDataManager
     @Inject
     private ProxyConfiguration config;
 
+    @Inject
+    private CouchDBConfiguration couchConfig;
+
     public ProxyDataManager()
     {}
 
     public ProxyDataManager( final ProxyConfiguration config, final UserDataManager userMgr,
-                             final CouchManager couch )
+                             final CouchDBConfiguration couchConfig, final CouchManager couch )
     {
         this.config = config;
         this.userMgr = userMgr;
+        this.couchConfig = couchConfig;
         this.couch = couch;
     }
 
@@ -52,7 +57,7 @@ public class ProxyDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Repository.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Repository.class );
+                                      Repository.class );
         }
         catch ( CouchDBException e )
         {
@@ -67,7 +72,7 @@ public class ProxyDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Group.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Group.class );
+                                      Group.class );
         }
         catch ( CouchDBException e )
         {
@@ -82,7 +87,7 @@ public class ProxyDataManager
         try
         {
             return couch.getViewListing( new ProxyViewRequest( config, View.ALL_GROUPS ),
-                                         config.getDatabaseUrl(), Group.class );
+                                         Group.class );
         }
         catch ( CouchDBException e )
         {
@@ -97,7 +102,7 @@ public class ProxyDataManager
         try
         {
             return couch.getViewListing( new ProxyViewRequest( config, View.ALL_REPOSITORIES ),
-                                         config.getDatabaseUrl(), Repository.class );
+                                         Repository.class );
         }
         catch ( CouchDBException e )
         {
@@ -112,8 +117,7 @@ public class ProxyDataManager
         try
         {
             return couch.getViewListing( new ProxyViewRequest( config, View.GROUP_REPOSITORIES,
-                                                               groupName ),
-                                         config.getDatabaseUrl(), Repository.class );
+                                                               groupName ), Repository.class );
         }
         catch ( CouchDBException e )
         {
@@ -134,7 +138,7 @@ public class ProxyDataManager
         try
         {
             repository.calculateDenormalizedFields();
-            boolean result = couch.store( repository, config.getDatabaseUrl(), skipIfExists );
+            boolean result = couch.store( repository, skipIfExists );
 
             userMgr.createPermissions( Repository.NAMESPACE, repository.getName(),
                                        Permission.ADMIN, Permission.READ );
@@ -177,8 +181,7 @@ public class ProxyDataManager
             Set<String> missing = new HashSet<String>();
             for ( String repoName : group.getConstituents() )
             {
-                if ( !couch.exists( new CouchDocRef( namespaceId( Repository.NAMESPACE, repoName ) ),
-                                    config.getDatabaseUrl() ) )
+                if ( !couch.exists( new CouchDocRef( namespaceId( Repository.NAMESPACE, repoName ) ) ) )
                 {
                     missing.add( repoName );
                 }
@@ -191,7 +194,7 @@ public class ProxyDataManager
                                               group.getName(), new JoinString( ", ", missing ) );
             }
 
-            boolean result = couch.store( group, config.getDatabaseUrl(), skipIfExists );
+            boolean result = couch.store( group, skipIfExists );
 
             userMgr.createPermissions( Group.NAMESPACE, group.getName(), Permission.ADMIN,
                                        Permission.READ );
@@ -221,7 +224,7 @@ public class ProxyDataManager
     {
         try
         {
-            couch.delete( proxy, config.getDatabaseUrl() );
+            couch.delete( proxy );
         }
         catch ( CouchDBException e )
         {
@@ -235,8 +238,7 @@ public class ProxyDataManager
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( Repository.NAMESPACE, name ) ),
-                          config.getDatabaseUrl() );
+            couch.delete( new CouchDocRef( namespaceId( Repository.NAMESPACE, name ) ) );
         }
         catch ( CouchDBException e )
         {
@@ -250,7 +252,7 @@ public class ProxyDataManager
     {
         try
         {
-            couch.delete( group, config.getDatabaseUrl() );
+            couch.delete( group );
         }
         catch ( CouchDBException e )
         {
@@ -265,8 +267,7 @@ public class ProxyDataManager
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( Group.NAMESPACE, name ) ),
-                          config.getDatabaseUrl() );
+            couch.delete( new CouchDocRef( namespaceId( Group.NAMESPACE, name ) ) );
         }
         catch ( CouchDBException e )
         {
@@ -283,7 +284,7 @@ public class ProxyDataManager
 
         try
         {
-            couch.initialize( config.getDatabaseUrl(), description );
+            couch.initialize( description );
 
             userMgr.install();
             userMgr.setupAdminInformation();
@@ -297,14 +298,14 @@ public class ProxyDataManager
         {
             throw new ProxyDataException(
                                           "Failed to initialize proxy-management database: %s (application: %s). Reason: %s",
-                                          e, config.getDatabaseUrl(), description.getAppName(),
-                                          e.getMessage() );
+                                          e, couchConfig.getDatabaseUrl(),
+                                          description.getAppName(), e.getMessage() );
         }
         catch ( UserDataException e )
         {
             throw new ProxyDataException(
                                           "Failed to initialize admin user/privilege information in proxy-management database: %s. Reason: %s",
-                                          e, config.getDatabaseUrl(), e.getMessage() );
+                                          e, couchConfig.getDatabaseUrl(), e.getMessage() );
         }
     }
 }

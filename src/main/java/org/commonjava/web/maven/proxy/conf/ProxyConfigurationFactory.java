@@ -30,6 +30,8 @@ import javax.inject.Singleton;
 
 import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
+import org.commonjava.couch.conf.CouchDBConfiguration;
+import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.web.config.ConfigurationException;
 import org.commonjava.web.config.DefaultConfigurationListener;
 import org.commonjava.web.config.dotconf.DotConfConfigurationReader;
@@ -45,10 +47,13 @@ public class ProxyConfigurationFactory
 
     private DefaultUserManagerConfig userManagerConfig;
 
+    private DefaultCouchDBConfiguration couchConfig;
+
     public ProxyConfigurationFactory()
         throws ConfigurationException
     {
-        super( DefaultProxyConfiguration.class, DefaultUserManagerConfig.class );
+        super( DefaultProxyConfiguration.class, DefaultUserManagerConfig.class,
+               DefaultCouchDBConfiguration.class );
     }
 
     // @Inject
@@ -85,12 +90,14 @@ public class ProxyConfigurationFactory
     @Default
     public UserManagerConfiguration getUserManagerConfiguration()
     {
-        if ( userManagerConfig.getDatabaseUrl() == null )
-        {
-            userManagerConfig.setDatabaseUrl( proxyConfig.getDatabaseUrl() );
-        }
-
         return userManagerConfig;
+    }
+
+    @Produces
+    @Default
+    public CouchDBConfiguration getCouchDBConfiguration()
+    {
+        return couchConfig;
     }
 
     @Override
@@ -99,6 +106,7 @@ public class ProxyConfigurationFactory
     {
         proxyConfig = getConfiguration( DefaultProxyConfiguration.class );
         userManagerConfig = getConfiguration( DefaultUserManagerConfig.class );
+        couchConfig = getConfiguration( DefaultCouchDBConfiguration.class );
     }
 
 }

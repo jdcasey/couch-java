@@ -21,14 +21,6 @@ public class DefaultProxyConfiguration
 
     private File repositoryRootDirectory = DEFAULT_REPO_ROOT_DIR;
 
-    private String databaseUrl;
-
-    @Override
-    public String getDatabaseUrl()
-    {
-        return databaseUrl;
-    }
-
     @Override
     public File getRepositoryRootDirectory()
     {
@@ -39,12 +31,6 @@ public class DefaultProxyConfiguration
     public void setRepositoryRootDirectory( final File repositoryRootDirectory )
     {
         this.repositoryRootDirectory = repositoryRootDirectory;
-    }
-
-    @ConfigName( "db.url" )
-    public void setDatabaseUrl( final String databaseUrl )
-    {
-        this.databaseUrl = databaseUrl;
     }
 
 }

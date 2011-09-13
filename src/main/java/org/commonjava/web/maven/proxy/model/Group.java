@@ -1,6 +1,6 @@
 package org.commonjava.web.maven.proxy.model;
 
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
