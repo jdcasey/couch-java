@@ -31,6 +31,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.commonjava.web</groupId>
+      <artifactId>configuration-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>1.4</version>

@@ -15,13 +15,25 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.couch.model.io;
+package org.commonjava.couch.io.json;
 
 import java.lang.reflect.Type;
 
-public interface SerializationAdapter
+import org.commonjava.couch.db.action.CouchDocumentAction;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+public class CouchDocumentActionAdapter
+    implements JsonSerializer<CouchDocumentAction>
 {
 
-    Type typeLiteral();
+    @Override
+    public JsonElement serialize( final CouchDocumentAction src, final Type typeOfSrc,
+                                  final JsonSerializationContext context )
+    {
+        return context.serialize( src.getDocument() );
+    }
 
 }

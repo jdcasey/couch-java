@@ -43,7 +43,13 @@ public final class UrlUtils
                                    final String... parts )
         throws MalformedURLException
     {
-        StringBuilder urlBuilder = new StringBuilder( baseUrl );
+        StringBuilder urlBuilder = new StringBuilder();
+
+        if ( parts.length < 1 || !parts[0].startsWith( baseUrl ) )
+        {
+            urlBuilder.append( baseUrl );
+        }
+
         for ( String part : parts )
         {
             if ( part.startsWith( "/" ) )
@@ -51,7 +57,7 @@ public final class UrlUtils
                 part = part.substring( 1 );
             }
 
-            if ( urlBuilder.charAt( urlBuilder.length() - 1 ) != '/' )
+            if ( urlBuilder.length() > 0 && urlBuilder.charAt( urlBuilder.length() - 1 ) != '/' )
             {
                 urlBuilder.append( "/" );
             }
@@ -79,5 +85,103 @@ public final class UrlUtils
         }
 
         return new URL( urlBuilder.toString() ).toExternalForm();
+    }
+
+    public static UrlInfo parseUrlInfo( final String url )
+    {
+        return new UrlInfo( url );
+    }
+
+    public static final class UrlInfo
+    {
+        private final String url;
+
+        private String user;
+
+        private String password;
+
+        private final String host;
+
+        private int port;
+
+        private UrlInfo( final String u )
+        {
+            String resultUrl = u;
+
+            URL url;
+            try
+            {
+                url = new URL( u );
+            }
+            catch ( MalformedURLException e )
+            {
+                throw new IllegalArgumentException( "Failed to parse repository URL: '" + u
+                    + "'. Reason: " + e.getMessage(), e );
+            }
+
+            String userInfo = url.getUserInfo();
+            if ( userInfo != null && user == null && password == null )
+            {
+                user = userInfo;
+                password = null;
+
+                int idx = userInfo.indexOf( ':' );
+                if ( idx > 0 )
+                {
+                    user = userInfo.substring( 0, idx );
+                    password = userInfo.substring( idx + 1 );
+
+                    StringBuilder sb = new StringBuilder();
+                    idx = this.url.indexOf( "://" );
+                    sb.append( this.url.substring( 0, idx + 3 ) );
+
+                    idx = this.url.indexOf( "@" );
+                    if ( idx > 0 )
+                    {
+                        sb.append( this.url.substring( idx + 1 ) );
+                    }
+
+                    resultUrl = sb.toString();
+                }
+            }
+
+            this.url = resultUrl;
+
+            host = url.getHost();
+            if ( url.getPort() < 0 )
+            {
+                port = url.getProtocol().equals( "https" ) ? 443 : 80;
+            }
+            else
+            {
+                port = url.getPort();
+            }
+        }
+
+        public String getUrl()
+        {
+            return url;
+        }
+
+        public String getUser()
+        {
+            return user;
+        }
+
+        public String getPassword()
+        {
+            return password;
+        }
+
+        public String getHost()
+        {
+            return host;
+        }
+
+        public int getPort()
+        {
+            return port;
+        }
+
     }
 }

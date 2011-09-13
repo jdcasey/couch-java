@@ -15,7 +15,7 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.couch.model.io;
+package org.commonjava.couch.io.json;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

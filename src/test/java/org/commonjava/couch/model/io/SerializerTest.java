@@ -32,6 +32,8 @@ import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.fixture.TestUser;
+import org.commonjava.couch.io.Serializer;
+import org.commonjava.couch.io.json.CouchObjectListDeserializer;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchAppView;
 import org.commonjava.couch.model.CouchDocument;

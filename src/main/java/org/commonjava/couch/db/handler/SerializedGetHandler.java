@@ -32,9 +32,9 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.commonjava.couch.db.CouchDBException;
+import org.commonjava.couch.io.Serializer;
+import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchError;
-import org.commonjava.couch.model.io.SerializationAdapter;
-import org.commonjava.couch.model.io.Serializer;
 
 public class SerializedGetHandler<T>
     implements ResponseHandlerWithError<T>

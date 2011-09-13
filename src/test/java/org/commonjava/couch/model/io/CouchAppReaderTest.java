@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.model.SimpleAppDescription;
+import org.commonjava.couch.io.CouchAppReader;
 import org.commonjava.couch.model.CouchApp;
 import org.junit.Test;
 

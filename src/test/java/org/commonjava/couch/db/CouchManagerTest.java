@@ -24,19 +24,28 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 
 import org.apache.log4j.Level;
+import org.commonjava.couch.conf.CouchDBConfiguration;
+import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.db.model.SimpleAppDescription;
+import org.commonjava.couch.io.CouchAppReader;
+import org.commonjava.couch.io.CouchHttpClient;
+import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.model.CouchApp;
-import org.commonjava.couch.model.io.CouchAppReader;
-import org.commonjava.couch.model.io.Serializer;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class CouchManagerTest
 {
 
-    private static final String DB_BASE = "http://developer.commonjava.org/db/";
+    private static final String DB_URL = "http://developer.commonjava.org/db/test-couch-manager";
 
-    CouchManager mgr = new CouchManager( new Serializer(), new CouchAppReader() );
+    private final CouchDBConfiguration config = new DefaultCouchDBConfiguration( DB_URL );
+
+    private final Serializer serializer = new Serializer();
+
+    private final CouchManager mgr = new CouchManager( config, new CouchHttpClient( config,
+                                                                                    serializer ),
+                                                       serializer, new CouchAppReader() );
 
     @BeforeClass
     public static void initLogging()
@@ -48,46 +57,42 @@ public class CouchManagerTest
     public void createAndDropDB()
         throws CouchDBException
     {
-        String url = DB_BASE + "test-create-drop";
+        mgr.dropDatabase();
 
-        mgr.dropDatabase( url );
+        assertThat( mgr.exists( "/" ), is( false ) );
 
-        assertThat( mgr.exists( url ), is( false ) );
+        mgr.createDatabase();
 
-        mgr.createDatabase( url );
+        assertThat( mgr.exists( "/" ), is( true ) );
 
-        assertThat( mgr.exists( url ), is( true ) );
+        mgr.dropDatabase();
 
-        mgr.dropDatabase( url );
-
-        assertThat( mgr.exists( url ), is( false ) );
+        assertThat( mgr.exists( "/" ), is( false ) );
     }
 
     @Test
     public void createDBThenInstallAppThenDropDB()
         throws CouchDBException, IOException
     {
-        String url = DB_BASE + "test-create-install-drop";
+        mgr.dropDatabase();
 
-        mgr.dropDatabase( url );
+        assertThat( mgr.exists( "/" ), is( false ) );
 
-        assertThat( mgr.exists( url ), is( false ) );
+        mgr.createDatabase();
 
-        mgr.createDatabase( url );
-
-        assertThat( mgr.exists( url ), is( true ) );
+        assertThat( mgr.exists( "/" ), is( true ) );
 
         CouchApp app =
             new CouchAppReader().readAppDefinition( new SimpleAppDescription( "test-app" ) );
 
-        mgr.installApplication( app, url );
+        mgr.installApplication( app );
 
-        assertThat( mgr.exists( app, url ), is( true ) );
+        assertThat( mgr.exists( app ), is( true ) );
 
-        mgr.dropDatabase( url );
+        mgr.dropDatabase();
 
-        assertThat( mgr.exists( app, url ), is( false ) );
-        assertThat( mgr.exists( url ), is( false ) );
+        assertThat( mgr.exists( app ), is( false ) );
+        assertThat( mgr.exists( "/" ), is( false ) );
     }
 
 }

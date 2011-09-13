@@ -15,22 +15,13 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.couch.db.action;
+package org.commonjava.couch.io.json;
 
-import java.util.concurrent.CountDownLatch;
+import java.lang.reflect.Type;
 
-import org.commonjava.couch.db.CouchDBException;
-import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.model.CouchDocument;
-
-public interface CouchDocumentAction
-    extends Runnable
+public interface SerializationAdapter
 {
 
-    CouchDocument getDocument();
-
-    CouchDBException getError();
-
-    void prepareExecution( final CountDownLatch latch, final CouchManager manager );
+    Type typeLiteral();
 
 }

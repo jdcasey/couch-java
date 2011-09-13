@@ -37,8 +37,6 @@ public class DeleteAction
 
     private CountDownLatch latch;
 
-    private String baseUrl;
-
     private CouchManager manager;
 
     public DeleteAction( final CouchDocument document )
@@ -97,7 +95,7 @@ public class DeleteAction
     {
         try
         {
-            manager.delete( document, baseUrl );
+            manager.delete( document );
         }
         catch ( CouchDBException e )
         {
@@ -116,10 +114,8 @@ public class DeleteAction
     }
 
     @Override
-    public void prepareExecution( final CountDownLatch latch, final String baseUrl,
-                                  final CouchManager manager )
+    public void prepareExecution( final CountDownLatch latch, final CouchManager manager )
     {
-        this.baseUrl = baseUrl;
         this.manager = manager;
         this.latch = latch;
     }

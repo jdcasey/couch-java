@@ -22,12 +22,12 @@ import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.commonjava.couch.util.UrlUtils.buildUrl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,41 +41,37 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.Logger;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
-import org.commonjava.couch.db.handler.ResponseHandlerWithError;
 import org.commonjava.couch.db.handler.SerializedGetHandler;
 import org.commonjava.couch.db.model.AppDescription;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.db.model.ViewRequest;
+import org.commonjava.couch.io.CouchAppReader;
+import org.commonjava.couch.io.CouchHttpClient;
+import org.commonjava.couch.io.Serializer;
+import org.commonjava.couch.io.json.CouchObjectListDeserializer;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
-import org.commonjava.couch.model.io.CouchAppReader;
-import org.commonjava.couch.model.io.CouchObjectListDeserializer;
-import org.commonjava.couch.model.io.SerializationAdapter;
-import org.commonjava.couch.model.io.Serializer;
 import org.commonjava.couch.util.ToString;
-import org.commonjava.couch.util.UrlUtils;
 
 public class CouchManager
 {
@@ -92,25 +88,39 @@ public class CouchManager
 
     private final Serializer serializer;
 
-    private HttpClient client;
-
     private final ExecutorService exec = Executors.newCachedThreadPool();
 
     private final CouchAppReader appReader;
 
-    public CouchManager( final Serializer serializer, final CouchAppReader appReader )
-    {
-        this.serializer = serializer;
-        this.appReader = appReader;
-    }
+    @Inject
+    private CouchDBConfiguration config;
 
-    public CouchManager()
+    @Inject
+    private CouchHttpClient client;
+
+    protected CouchManager()
     {
         this.serializer = new Serializer();
         this.appReader = new CouchAppReader();
     }
 
-    public void initialize( final String dbUrl, final AppDescription description )
+    public CouchManager( final CouchDBConfiguration config, final CouchHttpClient client,
+                         final Serializer serializer, final CouchAppReader appReader )
+    {
+        this.config = config;
+        this.client = client;
+        this.serializer = serializer;
+        this.appReader = appReader;
+    }
+
+    public CouchManager( final CouchDBConfiguration config )
+    {
+        this.config = config;
+        this.serializer = new Serializer();
+        this.appReader = new CouchAppReader();
+    }
+
+    public void initialize( final AppDescription description )
         throws CouchDBException
     {
         CouchApp app;
@@ -125,33 +135,34 @@ public class CouchManager
                                         e, description.getClasspathAppResource(), e.getMessage() );
         }
 
-        if ( !dbExists( dbUrl ) )
+        if ( !dbExists() )
         {
-            createDatabase( dbUrl );
+            createDatabase();
         }
         else
         {
-            LOGGER.info( "Database already exists: " + dbUrl );
+            LOGGER.info( "Database already exists: " + config.getDatabaseUrl() );
         }
 
-        if ( !appExists( dbUrl, description.getAppName() ) )
+        if ( !appExists( description.getAppName() ) )
         {
-            installApplication( app, dbUrl );
+            installApplication( app );
         }
         else
         {
-            LOGGER.info( "App: " + app.getCouchDocId() + " already exists in db: " + dbUrl );
+            LOGGER.info( "App: " + app.getCouchDocId() + " already exists in db: "
+                + config.getDatabaseUrl() );
         }
     }
 
-    public void store( final Collection<? extends CouchDocument> documents, final String dbUrl,
+    public void store( final Collection<? extends CouchDocument> documents,
                        final boolean skipIfExists, final boolean allOrNothing )
         throws CouchDBException
     {
         Set<StoreAction> toStore = new HashSet<StoreAction>();
         for ( CouchDocument doc : documents )
         {
-            if ( skipIfExists && documentRevisionExists( doc, dbUrl ) )
+            if ( skipIfExists && documentRevisionExists( doc ) )
             {
                 continue;
             }
@@ -159,18 +170,18 @@ public class CouchManager
             toStore.add( new StoreAction( doc, skipIfExists ) );
         }
 
-        modify( toStore, dbUrl, allOrNothing );
+        modify( toStore, allOrNothing );
         // threadedExecute( toStore, dbUrl );
     }
 
-    public void delete( final Collection<? extends CouchDocument> documents, final String dbUrl,
+    public void delete( final Collection<? extends CouchDocument> documents,
                         final boolean allOrNothing )
         throws CouchDBException
     {
         Set<DeleteAction> toDelete = new HashSet<DeleteAction>();
         for ( CouchDocument doc : documents )
         {
-            if ( !documentRevisionExists( doc, dbUrl ) )
+            if ( !documentRevisionExists( doc ) )
             {
                 continue;
             }
@@ -178,21 +189,21 @@ public class CouchManager
             toDelete.add( new DeleteAction( doc ) );
         }
 
-        modify( toDelete, dbUrl, allOrNothing );
+        modify( toDelete, allOrNothing );
         // threadedExecute( toDelete, dbUrl );
     }
 
     public void modify( final Collection<? extends CouchDocumentAction> actions,
-                        final String dbUrl, final boolean allOrNothing )
+                        final boolean allOrNothing )
         throws CouchDBException
     {
         BulkActionHolder bulk = new BulkActionHolder( actions, allOrNothing );
-        String body = getSerializer().toString( bulk );
+        String body = serializer.toString( bulk );
 
         String url;
         try
         {
-            url = buildUrl( dbUrl, null, BULK_DOCS );
+            url = buildUrl( config.getDatabaseUrl(), (Map<String, String>) null, BULK_DOCS );
         }
         catch ( MalformedURLException e )
         {
@@ -210,110 +221,117 @@ public class CouchManager
                                         e.getMessage() );
         }
 
-        HttpResponse response = executeHttp( request, "Bulk update failed" );
-        StatusLine statusLine = response.getStatusLine();
-        int code = statusLine.getStatusCode();
-        if ( code != SC_OK && code != SC_CREATED )
+        try
         {
-            String content = null;
-            HttpEntity entity = response.getEntity();
-            if ( entity != null )
+            HttpResponse response = client.executeHttpWithResponse( request, "Bulk update failed" );
+            StatusLine statusLine = response.getStatusLine();
+            int code = statusLine.getStatusCode();
+            if ( code != SC_OK && code != SC_CREATED )
             {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                InputStream in = null;
-                try
+                String content = null;
+                HttpEntity entity = response.getEntity();
+                if ( entity != null )
                 {
-                    in = entity.getContent();
-                    copy( in, baos );
-                }
-                catch ( IOException e )
-                {
-                    throw new CouchDBException(
-                                                "Error reading response content for error: %s\nError was: %s",
-                                                e, statusLine, e.getMessage() );
-                }
-                finally
-                {
-                    closeQuietly( in );
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    InputStream in = null;
+                    try
+                    {
+                        in = entity.getContent();
+                        copy( in, baos );
+                    }
+                    catch ( IOException e )
+                    {
+                        throw new CouchDBException(
+                                                    "Error reading response content for error: %s\nError was: %s",
+                                                    e, statusLine, e.getMessage() );
+                    }
+                    finally
+                    {
+                        closeQuietly( in );
+                    }
+
+                    content = new String( baos.toByteArray() );
                 }
 
-                content = new String( baos.toByteArray() );
+                throw new CouchDBException(
+                                            "Bulk operation failed. Status line: %s\nContent:\n----------\n\n%s",
+                                            statusLine, content );
             }
-
-            throw new CouchDBException(
-                                        "Bulk operation failed. Status line: %s\nContent:\n----------\n\n%s",
-                                        statusLine, content );
+        }
+        finally
+        {
+            client.cleanup( request );
         }
 
         // threadedExecute( new HashSet<CouchDocumentAction>( actions ), dbUrl );
     }
 
     public <T extends CouchDocument> List<T> getViewListing( final ViewRequest req,
-                                                             final String dbUrl,
                                                              final Class<T> itemType )
         throws CouchDBException
     {
         req.setParameter( ViewRequest.INCLUDE_DOCS, true );
 
-        String url = buildViewUrl( dbUrl, req );
+        String url = buildViewUrl( req );
         LOGGER.info( "Retrieving view listing from: " + url );
         HttpGet request = new HttpGet( url );
 
         CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( itemType );
 
         CouchObjectList<T> listing =
-            executeHttpWithResponse( request,
-                                     deser.typeLiteral(),
-                                     new ToString(
-                                                   "Failed to retrieve contents for view request: %s",
-                                                   req ), deser );
+            client.executeHttpAndReturn( request,
+                                         deser.typeLiteral(),
+                                         new ToString(
+                                                       "Failed to retrieve contents for view request: %s",
+                                                       req ), deser );
 
         return listing.getItems();
     }
 
-    public <V> V getView( final ViewRequest req, final String dbUrl, final Class<V> type )
+    public <V> V getView( final ViewRequest req, final Class<V> type )
         throws CouchDBException
     {
-        String url = buildViewUrl( dbUrl, req );
+        String url = buildViewUrl( req );
         HttpGet request = new HttpGet( url );
-        return executeHttpWithResponse( request,
-                                        type,
-                                        new ToString(
-                                                      "Failed to retrieve contents for view request: %s",
-                                                      req ) );
+        return client.executeHttpAndReturn( request,
+                                            type,
+                                            new ToString(
+                                                          "Failed to retrieve contents for view request: %s",
+                                                          req ) );
     }
 
-    public <T> T getDocument( final CouchDocRef ref, final String dbUrl, final Class<T> docType )
+    public <T> T getDocument( final CouchDocRef ref, final Class<T> docType )
         throws CouchDBException
     {
-        if ( !documentRevisionExists( ref, dbUrl ) )
+        if ( !documentRevisionExists( ref ) )
         {
             return null;
         }
 
-        String url = buildDocUrl( dbUrl, ref, true );
+        String url = buildDocUrl( ref, true );
         HttpGet get = new HttpGet( url );
 
-        return executeHttpWithResponse( get, new SerializedGetHandler<T>( serializer, docType ),
-                                        new ToString( "Failed to retrieve document: %s", ref ) );
+        return client.executeHttpAndReturn( get,
+                                            new SerializedGetHandler<T>( serializer, docType ),
+                                            new ToString( "Failed to retrieve document: %s", ref ) );
     }
 
-    public boolean store( final CouchDocument doc, final String dbUrl, final boolean skipIfExists )
+    public boolean store( final CouchDocument doc, final boolean skipIfExists )
         throws CouchDBException
     {
-        if ( skipIfExists && documentRevisionExists( doc, dbUrl ) )
+        if ( skipIfExists && documentRevisionExists( doc ) )
         {
             return false;
         }
 
-        HttpPost request = new HttpPost( dbUrl );
+        HttpPost request = new HttpPost( config.getDatabaseUrl() );
         try
         {
-            request.setHeader( "Referer", dbUrl );
-            String src = getSerializer().toString( doc );
+            request.setHeader( "Referer", config.getDatabaseUrl() );
+            String src = serializer.toString( doc );
             request.setEntity( new StringEntity( src, "application/json", "UTF-8" ) );
 
-            executeHttp( request, SC_CREATED, "Failed to store document" );
+            client.executeHttp( request, SC_CREATED, "Failed to store document" );
         }
         catch ( UnsupportedEncodingException e )
         {
@@ -324,25 +342,26 @@ public class CouchManager
         return true;
     }
 
-    public void delete( final CouchDocument doc, final String dbUrl )
+    public void delete( final CouchDocument doc )
         throws CouchDBException
     {
-        if ( !documentRevisionExists( doc, dbUrl ) )
+        if ( !documentRevisionExists( doc ) )
         {
             return;
         }
 
-        String url = buildDocUrl( dbUrl, doc, true );
+        String url = buildDocUrl( doc, true );
         HttpDelete request = new HttpDelete( url );
-        executeHttp( request, SC_OK, "Failed to delete document" );
+        client.executeHttp( request, SC_OK, "Failed to delete document" );
     }
 
-    public boolean viewExists( final String baseUrl, final String appName, final String viewName )
+    public boolean viewExists( final String appName, final String viewName )
         throws CouchDBException
     {
         try
         {
-            return exists( buildUrl( baseUrl, null, APP_BASE, appName, VIEW_BASE, viewName ) );
+            return exists( buildUrl( config.getDatabaseUrl(), (Map<String, String>) null, APP_BASE,
+                                     appName, VIEW_BASE, viewName ) );
         }
         catch ( MalformedURLException e )
         {
@@ -356,12 +375,13 @@ public class CouchManager
         }
     }
 
-    public boolean appExists( final String baseUrl, final String appName )
+    public boolean appExists( final String appName )
         throws CouchDBException
     {
         try
         {
-            return exists( buildUrl( baseUrl, null, APP_BASE, appName ) );
+            return exists( buildUrl( config.getDatabaseUrl(), (Map<String, String>) null, APP_BASE,
+                                     appName ) );
         }
         catch ( MalformedURLException e )
         {
@@ -375,143 +395,171 @@ public class CouchManager
         }
     }
 
-    public boolean documentRevisionExists( final CouchDocument doc, final String dbUrl )
+    public boolean documentRevisionExists( final CouchDocument doc )
         throws CouchDBException
     {
-        String docUrl = buildDocUrl( dbUrl, doc, doc.getCouchDocRev() != null );
+        String docUrl = buildDocUrl( doc, doc.getCouchDocRev() != null );
         boolean exists = false;
 
         HttpHead request = new HttpHead( docUrl );
-        HttpResponse response = executeHttp( request, "Failed to ping database URL" );
-
-        StatusLine statusLine = response.getStatusLine();
-        if ( statusLine.getStatusCode() == SC_OK )
+        try
         {
-            exists = true;
-        }
-        else if ( statusLine.getStatusCode() != SC_NOT_FOUND )
-        {
-            HttpEntity entity = response.getEntity();
-            CouchError error;
+            HttpResponse response =
+                client.executeHttpWithResponse( request, "Failed to ping database URL" );
 
-            try
+            StatusLine statusLine = response.getStatusLine();
+            if ( statusLine.getStatusCode() == SC_OK )
             {
-                error = getSerializer().toError( entity );
+                exists = true;
             }
-            catch ( IOException e )
+            else if ( statusLine.getStatusCode() != SC_NOT_FOUND )
             {
+                HttpEntity entity = response.getEntity();
+                CouchError error;
+
+                try
+                {
+                    error = serializer.toError( entity );
+                }
+                catch ( IOException e )
+                {
+                    throw new CouchDBException(
+                                                "Failed to ping database URL: %s.\nReason: %s\nError: Cannot read error status: %s",
+                                                e, docUrl, statusLine, e.getMessage() );
+                }
+
                 throw new CouchDBException(
-                                            "Failed to ping database URL: %s.\nReason: %s\nError: Cannot read error status: %s",
-                                            e, docUrl, statusLine, e.getMessage() );
+                                            "Failed to ping database URL: %s.\nReason: %s\nError: %s",
+                                            docUrl, statusLine, error );
             }
 
-            throw new CouchDBException( "Failed to ping database URL: %s.\nReason: %s\nError: %s",
-                                        docUrl, statusLine, error );
+            if ( exists )
+            {
+                Header etag = response.getFirstHeader( "Etag" );
+                String rev = etag.getValue();
+                if ( rev.startsWith( "\"" ) || rev.startsWith( "'" ) )
+                {
+                    rev = rev.substring( 1 );
+                }
+
+                if ( rev.endsWith( "\"" ) || rev.endsWith( "'" ) )
+                {
+                    rev = rev.substring( 0, rev.length() - 1 );
+                }
+
+                doc.setCouchDocRev( rev );
+            }
         }
-
-        if ( exists )
+        finally
         {
-            Header etag = response.getFirstHeader( "Etag" );
-            String rev = etag.getValue();
-            if ( rev.startsWith( "\"" ) || rev.startsWith( "'" ) )
-            {
-                rev = rev.substring( 1 );
-            }
-
-            if ( rev.endsWith( "\"" ) || rev.endsWith( "'" ) )
-            {
-                rev = rev.substring( 0, rev.length() - 1 );
-            }
-
-            doc.setCouchDocRev( rev );
+            client.cleanup( request );
         }
 
         return exists;
     }
 
-    public boolean exists( final CouchDocument doc, final String dbUrl )
+    public boolean exists( final CouchDocument doc )
         throws CouchDBException
     {
-        String docUrl = buildDocUrl( dbUrl, doc, false );
+        String docUrl = buildDocUrl( doc, false );
         return exists( docUrl );
     }
 
-    public boolean exists( final String url )
+    public boolean exists( final String path )
         throws CouchDBException
     {
         boolean exists = false;
 
-        HttpHead request = new HttpHead( url );
-        HttpResponse response = executeHttp( request, "Failed to ping database URL" );
-
-        StatusLine statusLine = response.getStatusLine();
-        if ( statusLine.getStatusCode() == SC_OK )
+        String url;
+        try
         {
-            exists = true;
+            url = buildUrl( config.getDatabaseUrl(), path );
         }
-        else if ( statusLine.getStatusCode() != SC_NOT_FOUND )
+        catch ( MalformedURLException e )
         {
-            HttpEntity entity = response.getEntity();
-            CouchError error;
+            throw new CouchDBException( "Invalid path: %s. Reason: %s", e, path, e.getMessage() );
+        }
 
-            try
+        HttpHead request = new HttpHead( url );
+        try
+        {
+            HttpResponse response =
+                client.executeHttpWithResponse( request, "Failed to ping database URL" );
+
+            StatusLine statusLine = response.getStatusLine();
+            if ( statusLine.getStatusCode() == SC_OK )
             {
-                error = getSerializer().toError( entity );
+                exists = true;
             }
-            catch ( IOException e )
+            else if ( statusLine.getStatusCode() != SC_NOT_FOUND )
             {
+                HttpEntity entity = response.getEntity();
+                CouchError error;
+
+                try
+                {
+                    error = serializer.toError( entity );
+                }
+                catch ( IOException e )
+                {
+                    throw new CouchDBException(
+                                                "Failed to ping database URL: %s.\nReason: %s\nError: Cannot read error status: %s",
+                                                e, url, statusLine, e.getMessage() );
+                }
+
                 throw new CouchDBException(
-                                            "Failed to ping database URL: %s.\nReason: %s\nError: Cannot read error status: %s",
-                                            e, url, statusLine, e.getMessage() );
+                                            "Failed to ping database URL: %s.\nReason: %s\nError: %s",
+                                            url, statusLine, error );
             }
-
-            throw new CouchDBException( "Failed to ping database URL: %s.\nReason: %s\nError: %s",
-                                        url, statusLine, error );
+        }
+        finally
+        {
+            client.cleanup( request );
         }
 
         return exists;
     }
 
-    public boolean dbExists( final String url )
+    public boolean dbExists()
         throws CouchDBException
     {
-        return exists( url );
+        return exists( "/" );
     }
 
-    public void dropDatabase( final String url )
+    public void dropDatabase()
         throws CouchDBException
     {
-        if ( !dbExists( url ) )
+        if ( !dbExists() )
         {
             return;
         }
 
-        HttpDelete request = new HttpDelete( url );
-        executeHttp( request, SC_OK, "Failed to drop database" );
+        HttpDelete request = new HttpDelete( config.getDatabaseUrl() );
+        client.executeHttp( request, SC_OK, "Failed to drop database" );
     }
 
-    public void createDatabase( final String url )
+    public void createDatabase()
         throws CouchDBException
     {
-        LOGGER.info( "Creating database: " + url );
-        HttpPut request = new HttpPut( url );
-        executeHttp( request, SC_CREATED, "Failed to create database" );
+        LOGGER.info( "Creating database: " + config.getDatabaseUrl() );
+        HttpPut request = new HttpPut( config.getDatabaseUrl() );
+        client.executeHttp( request, SC_CREATED, "Failed to create database" );
     }
 
-    public void installApplication( final CouchApp app, final String dbUrl )
+    public void installApplication( final CouchApp app )
         throws CouchDBException
     {
-        String url = buildDocUrl( dbUrl, app, true );
+        String url = buildDocUrl( app, true );
         LOGGER.info( "Installing app at: " + url );
 
         HttpPut request = new HttpPut( url );
         try
         {
-            request.setHeader( "Referer", dbUrl );
-            String appJson = getSerializer().toString( app );
+            request.setHeader( "Referer", config.getDatabaseUrl() );
+            String appJson = serializer.toString( app );
             request.setEntity( new StringEntity( appJson, "application/json", "UTF-8" ) );
 
-            executeHttp( request, SC_CREATED, "Failed to store application document" );
+            client.executeHttp( request, SC_CREATED, "Failed to store application document" );
         }
         catch ( UnsupportedEncodingException e )
         {
@@ -520,115 +568,13 @@ public class CouchManager
         }
     }
 
-    protected HttpResponse executeHttp( final HttpRequestBase request, final String failureMessage )
-        throws CouchDBException
-    {
-        return executeHttp( request, null, failureMessage );
-    }
-
-    protected HttpResponse executeHttp( final HttpRequestBase request,
-                                        final Integer expectedStatus, final Object failureMessage )
-        throws CouchDBException
-    {
-        String url = request.getURI().toString();
-
-        try
-        {
-            HttpResponse response = getClient().execute( request );
-            StatusLine statusLine = response.getStatusLine();
-            if ( expectedStatus != null && statusLine.getStatusCode() != expectedStatus )
-            {
-                HttpEntity entity = response.getEntity();
-                CouchError error = getSerializer().toError( entity );
-                throw new CouchDBException( "%s: %s.\nHTTP Response: %s\nError: %s",
-                                            failureMessage, url, statusLine, error );
-            }
-
-            return response;
-        }
-        catch ( UnsupportedEncodingException e )
-        {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
-        }
-        catch ( ClientProtocolException e )
-        {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
-        }
-        catch ( IOException e )
-        {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
-        }
-        finally
-        {
-            cleanup( request );
-        }
-    }
-
-    protected <T> T executeHttpWithResponse( final HttpRequestBase request, final Type type,
-                                             final Object failureMessage,
-                                             final SerializationAdapter... adapters )
-        throws CouchDBException
-    {
-        return executeHttpWithResponse( request, new SerializedGetHandler<T>( getSerializer(),
-                                                                              type, adapters ),
-                                        failureMessage );
-    }
-
-    protected <T> T executeHttpWithResponse( final HttpRequestBase request,
-                                             final ResponseHandlerWithError<T> handler,
-                                             final Object failureMessage )
-        throws CouchDBException
-    {
-        String url = request.getURI().toString();
-
-        try
-        {
-            T result = getClient().execute( request, handler );
-            if ( result == null && handler.getError() != null )
-            {
-                throw handler.getError();
-            }
-
-            return result;
-        }
-        catch ( UnsupportedEncodingException e )
-        {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
-        }
-        catch ( ClientProtocolException e )
-        {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
-        }
-        catch ( IOException e )
-        {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
-        }
-        finally
-        {
-            cleanup( request );
-        }
-    }
-
-    protected void cleanup( final HttpRequestBase request )
-    {
-        request.abort();
-        getClient().getConnectionManager().closeExpiredConnections();
-        getClient().getConnectionManager().closeIdleConnections( 2, TimeUnit.SECONDS );
-    }
-
-    protected String buildViewUrl( final String baseUrl, final ViewRequest req )
+    protected String buildViewUrl( final ViewRequest req )
         throws CouchDBException
     {
         try
         {
-            return buildUrl( baseUrl, req.getRequestParameters(), APP_BASE, req.getApplication(),
-                             VIEW_BASE, req.getView() );
+            return buildUrl( config.getDatabaseUrl(), req.getRequestParameters(), APP_BASE,
+                             req.getApplication(), VIEW_BASE, req.getView() );
         }
         catch ( MalformedURLException e )
         {
@@ -637,8 +583,7 @@ public class CouchManager
         }
     }
 
-    protected String buildDocUrl( final String baseUrl, final CouchDocument doc,
-                                  final boolean includeRevision )
+    protected String buildDocUrl( final CouchDocument doc, final boolean includeRevision )
         throws CouchDBException
     {
         try
@@ -647,11 +592,13 @@ public class CouchManager
             if ( includeRevision && doc.getCouchDocRev() != null )
             {
                 Map<String, String> params = Collections.singletonMap( REV, doc.getCouchDocRev() );
-                url = buildUrl( baseUrl, params, doc.getCouchDocId() );
+                url = buildUrl( config.getDatabaseUrl(), params, doc.getCouchDocId() );
             }
             else
             {
-                url = buildUrl( baseUrl, null, doc.getCouchDocId() );
+                url =
+                    buildUrl( config.getDatabaseUrl(), (Map<String, String>) null,
+                              doc.getCouchDocId() );
             }
 
             return url;
@@ -665,21 +612,13 @@ public class CouchManager
         }
     }
 
-    protected String buildUrl( final String baseUrl, final Map<String, String> params,
-                               final String... parts )
-        throws MalformedURLException
-    {
-        return UrlUtils.buildUrl( baseUrl, params, parts );
-    }
-
-    protected void threadedExecute( final Set<? extends CouchDocumentAction> actions,
-                                    final String dbUrl )
+    protected void threadedExecute( final Set<? extends CouchDocumentAction> actions )
         throws CouchDBException
     {
         CountDownLatch latch = new CountDownLatch( actions.size() );
         for ( CouchDocumentAction action : actions )
         {
-            action.prepareExecution( latch, dbUrl, this );
+            action.prepareExecution( latch, this );
             exec.execute( action );
         }
 
@@ -712,23 +651,6 @@ public class CouchManager
         {
             throw new CouchDBException( "Failed to execute %d actions.", errors.size() ).withNestedErrors( errors );
         }
-    }
-
-    protected Serializer getSerializer()
-    {
-        return serializer;
-    }
-
-    protected synchronized HttpClient getClient()
-    {
-        if ( client == null )
-        {
-            ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
-            ccm.setMaxTotal( 20 );
-
-            client = new DefaultHttpClient( ccm );
-        }
-        return client;
     }
 
     protected CouchAppReader getAppReader()

@@ -33,8 +33,6 @@ public class StoreAction
 
     private CouchManager manager;
 
-    private String baseUrl;
-
     private CountDownLatch latch;
 
     private CouchDBException error;
@@ -56,7 +54,7 @@ public class StoreAction
     {
         try
         {
-            manager.store( document, baseUrl, skipIfExists );
+            manager.store( document, skipIfExists );
         }
         catch ( CouchDBException e )
         {
@@ -75,10 +73,8 @@ public class StoreAction
     }
 
     @Override
-    public void prepareExecution( final CountDownLatch latch, final String baseUrl,
-                                  final CouchManager manager )
+    public void prepareExecution( final CountDownLatch latch, final CouchManager manager )
     {
-        this.baseUrl = baseUrl;
         this.manager = manager;
         this.latch = latch;
     }

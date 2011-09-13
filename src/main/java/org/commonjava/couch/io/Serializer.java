@@ -15,7 +15,7 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.couch.model.io;
+package org.commonjava.couch.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,8 @@ import java.lang.reflect.Type;
 import org.apache.http.HttpEntity;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
+import org.commonjava.couch.io.json.CouchDocumentActionAdapter;
+import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
 
