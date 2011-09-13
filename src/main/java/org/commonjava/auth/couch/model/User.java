@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.commonjava.auth.couch.model;
 
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.Arrays;
 import java.util.HashSet;

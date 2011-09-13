@@ -43,16 +43,12 @@ public class DefaultUserManagerConfig
 
     private String adminLastName;
 
-    private String databaseUrl;
-
     public DefaultUserManagerConfig()
     {}
 
-    public DefaultUserManagerConfig( final String databaseUrl, final String adminEmail,
-                                     final String adminPassword, final String adminFirstName,
-                                     final String adminLastName )
+    public DefaultUserManagerConfig( final String adminEmail, final String adminPassword,
+                                     final String adminFirstName, final String adminLastName )
     {
-        this.databaseUrl = databaseUrl;
         this.adminEmail = adminEmail;
         this.adminPassword = adminPassword;
         this.adminFirstName = adminFirstName;
@@ -115,18 +111,6 @@ public class DefaultUserManagerConfig
     public void setAdminLastName( final String adminLastName )
     {
         this.adminLastName = adminLastName;
-    }
-
-    @Override
-    public String getDatabaseUrl()
-    {
-        return databaseUrl;
-    }
-
-    @ConfigName( "database.url" )
-    public void setDatabaseUrl( final String databaseUrl )
-    {
-        this.databaseUrl = databaseUrl;
     }
 
 }

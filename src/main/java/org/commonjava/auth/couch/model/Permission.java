@@ -18,7 +18,7 @@
 package org.commonjava.auth.couch.model;
 
 import static org.apache.commons.lang.StringUtils.join;
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
 import org.commonjava.couch.model.DenormalizedCouchDoc;

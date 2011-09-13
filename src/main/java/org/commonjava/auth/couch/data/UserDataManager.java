@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.commonjava.auth.couch.data;
 
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,16 +27,19 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserAppDescription.View;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.model.CouchDocRef;
 
+@Singleton
 public class UserDataManager
 {
 
@@ -45,6 +48,9 @@ public class UserDataManager
 
     @Inject
     private UserManagerConfiguration config;
+
+    @Inject
+    private CouchDBConfiguration couchConfig;
 
     @Inject
     private PasswordManager passwordManager;
@@ -66,13 +72,14 @@ public class UserDataManager
         UserAppDescription description = new UserAppDescription();
         try
         {
-            couch.initialize( config.getDatabaseUrl(), description );
+            couch.initialize( description );
         }
         catch ( CouchDBException e )
         {
             throw new UserDataException(
                                          "Failed to initialize user-management database: %s (application: %s). Reason: %s",
-                                         e, config.getDatabaseUrl(), description, e.getMessage() );
+                                         e, couchConfig.getDatabaseUrl(), description,
+                                         e.getMessage() );
         }
     }
 
@@ -101,7 +108,7 @@ public class UserDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ),
-                                      config.getDatabaseUrl(), User.class );
+                                      User.class );
         }
         catch ( CouchDBException e )
         {
@@ -116,7 +123,7 @@ public class UserDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Permission.class );
+                                      Permission.class );
         }
         catch ( CouchDBException e )
         {
@@ -131,7 +138,7 @@ public class UserDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Role.class );
+                                      Role.class );
         }
         catch ( CouchDBException e )
         {
@@ -146,8 +153,7 @@ public class UserDataManager
         UserViewRequest req = new UserViewRequest( config, View.USER_ROLES );
         try
         {
-            return new HashSet<Role>( couch.getViewListing( req, config.getDatabaseUrl(),
-                                                            Role.class ) );
+            return new HashSet<Role>( couch.getViewListing( req, Role.class ) );
         }
         catch ( CouchDBException e )
         {
@@ -162,8 +168,7 @@ public class UserDataManager
         UserViewRequest req = new UserViewRequest( config, View.ROLE_PERMISSIONS );
         try
         {
-            return new HashSet<Permission>( couch.getViewListing( req, config.getDatabaseUrl(),
-                                                                  Permission.class ) );
+            return new HashSet<Permission>( couch.getViewListing( req, Permission.class ) );
         }
         catch ( CouchDBException e )
         {
@@ -177,7 +182,7 @@ public class UserDataManager
     {
         try
         {
-            return couch.store( perm, config.getDatabaseUrl(), true );
+            return couch.store( perm, true );
         }
         catch ( CouchDBException e )
         {
@@ -197,7 +202,7 @@ public class UserDataManager
     {
         try
         {
-            return couch.store( role, config.getDatabaseUrl(), skipIfExists );
+            return couch.store( role, skipIfExists );
         }
         catch ( CouchDBException e )
         {
@@ -217,7 +222,7 @@ public class UserDataManager
     {
         try
         {
-            return couch.store( user, config.getDatabaseUrl(), true );
+            return couch.store( user, true );
         }
         catch ( CouchDBException e )
         {
@@ -280,8 +285,7 @@ public class UserDataManager
         try
         {
             List<User> users =
-                couch.getViewListing( new UserViewRequest( config, View.ALL_USERS ),
-                                      config.getDatabaseUrl(), User.class );
+                couch.getViewListing( new UserViewRequest( config, View.ALL_USERS ), User.class );
 
             return new HashSet<User>( users );
         }
@@ -297,8 +301,7 @@ public class UserDataManager
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( User.NAMESPACE, name ) ),
-                          config.getDatabaseUrl() );
+            couch.delete( new CouchDocRef( namespaceId( User.NAMESPACE, name ) ) );
         }
         catch ( CouchDBException e )
         {
@@ -313,8 +316,7 @@ public class UserDataManager
         try
         {
             List<Role> roles =
-                couch.getViewListing( new UserViewRequest( config, View.ALL_ROLES ),
-                                      config.getDatabaseUrl(), Role.class );
+                couch.getViewListing( new UserViewRequest( config, View.ALL_ROLES ), Role.class );
 
             return new HashSet<Role>( roles );
         }
@@ -330,8 +332,7 @@ public class UserDataManager
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ),
-                          config.getDatabaseUrl() );
+            couch.delete( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ) );
         }
         catch ( CouchDBException e )
         {
@@ -347,7 +348,7 @@ public class UserDataManager
         {
             List<Permission> permissions =
                 couch.getViewListing( new UserViewRequest( config, View.ALL_PERMISSIONS ),
-                                      config.getDatabaseUrl(), Permission.class );
+                                      Permission.class );
 
             return new HashSet<Permission>( permissions );
         }
@@ -363,8 +364,7 @@ public class UserDataManager
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ),
-                          config.getDatabaseUrl() );
+            couch.delete( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ) );
         }
         catch ( CouchDBException e )
         {

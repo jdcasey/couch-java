@@ -25,6 +25,4 @@ public interface UserManagerConfiguration
 
     User createInitialAdminUser( final PasswordManager passwordManager );
 
-    String getDatabaseUrl();
-
 }
