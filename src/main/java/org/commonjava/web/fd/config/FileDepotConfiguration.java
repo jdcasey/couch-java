@@ -24,6 +24,4 @@ public interface FileDepotConfiguration
 
     File getUploadDirectory();
 
-    String getDatabaseUrl();
-
 }

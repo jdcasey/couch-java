@@ -38,8 +38,6 @@ public class DefaultFileDepotConfiguration
 
     private File uploadDirectory = DEFAULT_UPLOAD_DIR;
 
-    private String databaseUrl;
-
     @Override
     public File getUploadDirectory()
     {
@@ -50,18 +48,6 @@ public class DefaultFileDepotConfiguration
     public void setUploadDirectory( final File uploadDir )
     {
         this.uploadDirectory = uploadDir;
-    }
-
-    @Override
-    public String getDatabaseUrl()
-    {
-        return databaseUrl;
-    }
-
-    @ConfigName( "database.url" )
-    public void setDatabaseUrl( final String databaseUrl )
-    {
-        this.databaseUrl = databaseUrl;
     }
 
 }

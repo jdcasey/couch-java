@@ -30,6 +30,8 @@ import javax.inject.Singleton;
 
 import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
+import org.commonjava.couch.conf.CouchDBConfiguration;
+import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.web.config.ConfigurationException;
 import org.commonjava.web.config.DefaultConfigurationListener;
 import org.commonjava.web.config.dotconf.DotConfConfigurationReader;
@@ -45,10 +47,13 @@ public class FileDepotConfigurationFactory
 
     private DefaultUserManagerConfig userManagerConfig;
 
+    private DefaultCouchDBConfiguration couchConfig;
+
     public FileDepotConfigurationFactory()
         throws ConfigurationException
     {
-        super( DefaultFileDepotConfiguration.class, DefaultUserManagerConfig.class );
+        super( DefaultFileDepotConfiguration.class, DefaultUserManagerConfig.class,
+               DefaultCouchDBConfiguration.class );
     }
 
     // @Inject
@@ -86,12 +91,12 @@ public class FileDepotConfigurationFactory
     @Default
     public UserManagerConfiguration getUserManagerConfiguration()
     {
-        if ( userManagerConfig.getDatabaseUrl() == null )
-        {
-            userManagerConfig.setDatabaseUrl( fileDepotConfig.getDatabaseUrl() );
-        }
-
         return userManagerConfig;
+    }
+
+    public CouchDBConfiguration getCouchDBConfiguration()
+    {
+        return couchConfig;
     }
 
     @Override
@@ -100,6 +105,7 @@ public class FileDepotConfigurationFactory
     {
         fileDepotConfig = getConfiguration( DefaultFileDepotConfiguration.class );
         userManagerConfig = getConfiguration( DefaultUserManagerConfig.class );
+        couchConfig = getConfiguration( DefaultCouchDBConfiguration.class );
     }
 
 }

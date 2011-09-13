@@ -18,7 +18,7 @@
 package org.commonjava.web.fd.model;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha512Hex;
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
 import org.commonjava.couch.model.DenormalizedCouchDoc;

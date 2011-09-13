@@ -20,7 +20,7 @@ package org.commonjava.web.fd.data;
 import static org.commonjava.auth.couch.model.Permission.ADMIN;
 import static org.commonjava.auth.couch.model.Permission.CREATE;
 import static org.commonjava.auth.couch.model.Permission.READ;
-import static org.commonjava.auth.couch.util.IdUtils.namespaceId;
+import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +31,7 @@ import javax.inject.Singleton;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.model.CouchDocRef;
@@ -50,6 +51,9 @@ public class WorkspaceDataManager
     @Inject
     private FileDepotConfiguration config;
 
+    @Inject
+    private CouchDBConfiguration couchConfig;
+
     public WorkspaceDataManager()
     {}
 
@@ -64,7 +68,7 @@ public class WorkspaceDataManager
     {
         try
         {
-            couch.initialize( config.getDatabaseUrl(), new WorkspaceAppDescription() );
+            couch.initialize( new WorkspaceAppDescription() );
 
             userMgr.install();
             userMgr.setupAdminInformation();
@@ -73,7 +77,7 @@ public class WorkspaceDataManager
         {
             throw new WorkspaceDataException(
                                               "Failed to initialize workspace-management database: %s (application: %s). Reason: %s",
-                                              e, config.getDatabaseUrl(),
+                                              e, couchConfig.getDatabaseUrl(),
                                               WorkspaceAppDescription.APPLICATION_RESOURCE,
                                               e.getMessage() );
         }
@@ -81,7 +85,7 @@ public class WorkspaceDataManager
         {
             throw new WorkspaceDataException(
                                               "Failed to initialize admin user/privilege information in workspace-management database: %s. Reason: %s",
-                                              e, config.getDatabaseUrl(), e.getMessage() );
+                                              e, couchConfig.getDatabaseUrl(), e.getMessage() );
         }
     }
 
@@ -92,7 +96,7 @@ public class WorkspaceDataManager
         try
         {
             workspace.calculateDenormalizedFields();
-            stored = couch.store( workspace, config.getDatabaseUrl(), false );
+            stored = couch.store( workspace, false );
         }
         catch ( CouchDBException e )
         {
@@ -129,7 +133,7 @@ public class WorkspaceDataManager
         try
         {
             return couch.getDocument( new CouchDocRef( namespaceId( Workspace.NAMESPACE, name ) ),
-                                      config.getDatabaseUrl(), Workspace.class );
+                                      Workspace.class );
         }
         catch ( CouchDBException e )
         {
@@ -143,8 +147,7 @@ public class WorkspaceDataManager
     {
         try
         {
-            couch.delete( new CouchDocRef( namespaceId( Workspace.NAMESPACE, name ) ),
-                          config.getDatabaseUrl() );
+            couch.delete( new CouchDocRef( namespaceId( Workspace.NAMESPACE, name ) ) );
         }
         catch ( CouchDBException e )
         {
@@ -159,7 +162,7 @@ public class WorkspaceDataManager
         try
         {
             return couch.getViewListing( new WorkspaceViewRequest( config, View.WORKSPACES ),
-                                         config.getDatabaseUrl(), Workspace.class );
+                                         Workspace.class );
         }
         catch ( CouchDBException e )
         {
