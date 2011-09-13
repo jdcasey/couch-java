@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataException;
@@ -72,14 +73,17 @@ public abstract class AbstractRESTCouchTest
         // setup the security manager.
         realm.setupSecurityManager();
 
-        http = new DefaultHttpClient();
+        ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
+        ccm.setMaxTotal( 20 );
+
+        http = new DefaultHttpClient( ccm );
     }
 
     @After
     public void teardownFixtures()
         throws Exception
     {
-        couch.dropDatabase( config.getDatabaseUrl() );
+        couch.dropDatabase();
     }
 
     protected void assertLocationHeader( final HttpResponse response, final String value )

@@ -10,12 +10,15 @@ import org.cjtest.fixture.TestUserManagerConfigProducer;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.User;
-import org.commonjava.auth.couch.util.IdUtils;
 import org.commonjava.auth.shiro.couch.CouchRealm;
+import org.commonjava.couch.change.CouchChangeListener;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.db.model.AppDescription;
+import org.commonjava.couch.io.CouchHttpClient;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.test.fixture.LoggingFixture;
+import org.commonjava.couch.util.IdUtils;
 import org.commonjava.couch.util.UrlUtils;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
@@ -28,6 +31,35 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 
 public class TestWarArchiveBuilder
 {
+
+    private static final Package[] STD_PACKAGES = {
+        Logger.class.getPackage(),
+        CouchHttpClient.class.getPackage(),
+        CouchChangeListener.class.getPackage(),
+        JsonSerializer.class.getPackage(),
+        Listing.class.getPackage(),
+        UrlUtils.class.getPackage(),
+        CouchManager.class.getPackage(),
+        CouchDBConfiguration.class.getPackage(),
+        CouchDocument.class.getPackage(),
+        IdUtils.class.getPackage(),
+        User.class.getPackage(),
+        UserDataManager.class.getPackage(),
+        UserManagerConfiguration.class.getPackage(),
+        LoggingFixture.class.getPackage(),
+        AbstractRESTCouchTest.class.getPackage(),
+        CouchRealm.class.getPackage() };
+
+    private static final String[] STD_PACKAGE_ROOTS = {
+        "org.apache.http",
+        "org.apache.shiro",
+        "org.apache.commons.lang",
+        "org.apache.commons.codec",
+        "org.apache.commons.io",
+        "org.apache.log4j",
+        "com.google.gson",
+        "org.slf4j",
+        "org.apache.commons.logging" };
 
     private final WebArchive war;
 
@@ -122,24 +154,8 @@ public class TestWarArchiveBuilder
 
     public TestWarArchiveBuilder withStandardContents()
     {
-        war.addPackages( true, Logger.class.getPackage(), JsonSerializer.class.getPackage(),
-                         Listing.class.getPackage(), UrlUtils.class.getPackage(),
-                         CouchManager.class.getPackage(), CouchDocument.class.getPackage(),
-                         IdUtils.class.getPackage(), User.class.getPackage(),
-                         UserDataManager.class.getPackage(),
-                         UserManagerConfiguration.class.getPackage(),
-                         LoggingFixture.class.getPackage(),
-                         AbstractRESTCouchTest.class.getPackage(), CouchRealm.class.getPackage() );
-
-        war.addPackages( true, "org.apache.http" );
-        war.addPackages( true, "org.apache.shiro" );
-        war.addPackages( true, "org.apache.commons.lang" );
-        war.addPackages( true, "org.apache.commons.codec" );
-        war.addPackages( true, "org.apache.commons.io" );
-        war.addPackages( true, "org.apache.log4j" );
-        war.addPackages( true, "com.google.gson" );
-        war.addPackages( true, "org.slf4j" );
-        war.addPackages( true, "org.apache.commons.logging" );
+        war.addPackages( true, STD_PACKAGES );
+        war.addPackages( true, STD_PACKAGE_ROOTS );
 
         war.addAsWebInfResource( EmptyAsset.INSTANCE, "beans.xml" );
 
