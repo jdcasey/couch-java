@@ -5,16 +5,13 @@ import java.util.List;
 public class CouchDocChange
 {
 
-    private int sequence;
+    private final int sequence;
 
-    private String id;
+    private final String id;
 
-    private List<String> revisions;
+    private final List<String> revisions;
 
-    private boolean deleted;
-
-    CouchDocChange()
-    {}
+    private final boolean deleted;
 
     public CouchDocChange( final int sequence, final String id, final List<String> revisions,
                            final boolean deleted )
@@ -45,24 +42,11 @@ public class CouchDocChange
         return deleted;
     }
 
-    protected void setSequence( final int sequence )
+    @Override
+    public String toString()
     {
-        this.sequence = sequence;
-    }
-
-    protected void setId( final String id )
-    {
-        this.id = id;
-    }
-
-    protected void setRevisions( final List<String> revisions )
-    {
-        this.revisions = revisions;
-    }
-
-    protected void setDeleted( final boolean deleted )
-    {
-        this.deleted = deleted;
+        return String.format( "CouchDocChange [sequence=%s, id=%s, revisions=%s, deleted=%s]",
+                              sequence, id, revisions, deleted );
     }
 
 }

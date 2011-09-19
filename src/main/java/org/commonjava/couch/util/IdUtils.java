@@ -23,6 +23,16 @@ public final class IdUtils
     private IdUtils()
     {}
 
+    public static String nonNamespaceId( final String namespace, final String namespaceId )
+    {
+        if ( !namespaceId.startsWith( namespace ) )
+        {
+            return namespaceId;
+        }
+
+        return namespaceId.substring( namespace.length() + 1 );
+    }
+
     public static String namespaceId( final String namespace, final String id )
     {
         return namespace + ":" + id;

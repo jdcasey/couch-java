@@ -1,36 +1,290 @@
 package org.commonjava.couch.change;
 
-import javax.annotation.PostConstruct;
+import static org.commonjava.couch.util.UrlUtils.buildUrl;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.commonjava.couch.change.dispatch.CouchChangeDispatcher;
+import org.commonjava.couch.conf.CouchDBConfiguration;
+import org.commonjava.couch.db.CouchDBException;
+import org.commonjava.couch.db.CouchManager;
+import org.commonjava.couch.io.CouchHttpClient;
+import org.commonjava.couch.io.Serializer;
+import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.CouchDocRef;
+import org.commonjava.util.logging.Logger;
+
+import com.google.gson.annotations.SerializedName;
 
 @Singleton
 public class CouchChangeListener
+    implements Runnable
 {
 
-    // @Inject
+    private static final String CHANGE_LISTENER_DOCID = "change-listener-metadata";
+
+    private static final String CHANGES_SERVICE = "_changes";
+
+    private final Logger logger = new Logger( getClass() );
+
+    @Inject
     private CouchChangeDispatcher dispatcher;
 
-    private HttpClient client;
+    @Inject
+    private CouchDBConfiguration config;
+
+    @Inject
+    private CouchHttpClient http;
+
+    @Inject
+    private CouchManager couch;
+
+    private final Serializer serializer;
+
+    private ChangeListenerMetadata metadata;
+
+    private Thread listenerThread;
+
+    private boolean running = false;
+
+    private final Object internalLock = new Object();
 
     public CouchChangeListener()
-    {}
+    {
+        serializer = new Serializer();
+    }
 
-    public CouchChangeListener( final CouchChangeDispatcher dispatcher )
+    public CouchChangeListener( final CouchChangeDispatcher dispatcher, final CouchHttpClient http,
+                                final CouchDBConfiguration config, final CouchManager couch,
+                                final Serializer serializer )
     {
         this.dispatcher = dispatcher;
-        initClient();
+        this.http = http;
+        this.config = config;
+        this.couch = couch;
+        this.serializer = serializer;
     }
 
-    @PostConstruct
-    private void initClient()
+    public synchronized void startup()
+        throws CouchDBException
     {
-        client = new DefaultHttpClient();
+        metadata =
+            couch.getDocument( new CouchDocRef( CHANGE_LISTENER_DOCID ),
+                               ChangeListenerMetadata.class );
+        if ( metadata == null )
+        {
+            metadata = new ChangeListenerMetadata();
+        }
+
+        listenerThread = new Thread( this );
+        listenerThread.start();
+
+        synchronized ( internalLock )
+        {
+            while ( !running )
+            {
+                System.out.println( "Waiting 1s for change listener to startup..." );
+                try
+                {
+                    internalLock.wait( 1000 );
+                }
+                catch ( InterruptedException e )
+                {
+                    logger.info( "Interrupted..." );
+                    break;
+                }
+            }
+        }
     }
 
-    public void listen()
-    {}
+    public void shutdown()
+        throws CouchDBException
+    {
+        listenerThread.interrupt();
+
+        while ( listenerThread.isAlive() )
+        {
+            synchronized ( internalLock )
+            {
+                try
+                {
+                    internalLock.wait( 2000 );
+                }
+                catch ( InterruptedException e )
+                {
+                    break;
+                }
+            }
+        }
+
+        if ( metadata.getLastProcessedSequenceId() < 1 )
+        {
+            couch.store( metadata, false );
+        }
+
+        running = false;
+
+        synchronized ( this )
+        {
+            notifyAll();
+        }
+    }
+
+    public boolean isRunning()
+    {
+        return running;
+    }
+
+    @Override
+    public void run()
+    {
+        CouchDocChangeDeserializer docDeserializer = new CouchDocChangeDeserializer();
+
+        all: while ( !Thread.interrupted() )
+        {
+            HttpGet get;
+            try
+            {
+                String url =
+                    buildUrl( config.getDatabaseUrl(), metadata.getUrlParameters(), CHANGES_SERVICE );
+
+                get = new HttpGet( url );
+            }
+            catch ( MalformedURLException e )
+            {
+                logger.error( "Failed to construct changes URL for db: %s. Reason: %s", e,
+                              config.getDatabaseUrl(), e.getMessage() );
+                break;
+            }
+
+            String encoding = null;
+            try
+            {
+                HttpResponse response =
+                    http.executeHttpWithResponse( get, "Failed to open changes stream." );
+
+                if ( response.getEntity() == null )
+                {
+                    logger.error( "Changes stream did not return a response body." );
+                    break;
+                }
+
+                Header encodingHeader = response.getEntity().getContentEncoding();
+                if ( encodingHeader == null )
+                {
+                    encoding = "UTF-8";
+                }
+                else
+                {
+                    encoding = encodingHeader.getValue();
+                }
+
+                InputStream stream = response.getEntity().getContent();
+
+                running = true;
+                synchronized ( internalLock )
+                {
+                    internalLock.notify();
+                }
+
+                CouchDocChangeList changes =
+                    serializer.fromJson( stream, encoding, CouchDocChangeList.class,
+                                         docDeserializer );
+
+                for ( CouchDocChange change : changes )
+                {
+                    if ( !change.getId().equals( CHANGE_LISTENER_DOCID ) )
+                    {
+                        metadata.setLastProcessedSequenceId( change.getSequence() );
+                        dispatcher.documentChanged( change );
+                    }
+                }
+
+            }
+            catch ( CouchDBException e )
+            {
+                logger.error( "Failed to read changes stream for db: %s. Reason: %s", e,
+                              config.getDatabaseUrl(), e.getMessage() );
+                break;
+            }
+            catch ( UnsupportedEncodingException e )
+            {
+                logger.error( "Invalid content encoding for changes response: %s. Reason: %s", e,
+                              encoding, e.getMessage() );
+                break;
+            }
+            catch ( IOException e )
+            {
+                logger.error( "Error reading changes response content. Reason: %s", e,
+                              e.getMessage() );
+                break;
+            }
+            finally
+            {
+                http.cleanup( get );
+            }
+
+            try
+            {
+                Thread.sleep( 2000 );
+            }
+            catch ( InterruptedException e )
+            {
+                break all;
+            }
+        }
+
+        synchronized ( internalLock )
+        {
+            internalLock.notify();
+        }
+    }
+
+    static final class ChangeListenerMetadata
+        extends AbstractCouchDocument
+    {
+
+        @SerializedName( "last_seq" )
+        private int lastProcessedSequenceId;
+
+        ChangeListenerMetadata()
+        {
+            setCouchDocId( CHANGE_LISTENER_DOCID );
+        }
+
+        public Map<String, String> getUrlParameters()
+        {
+            Map<String, String> params = new HashMap<String, String>();
+            // params.put( "feed", "continuous" );
+            if ( lastProcessedSequenceId > 0 )
+            {
+                params.put( "since", Integer.toString( lastProcessedSequenceId ) );
+            }
+
+            return params;
+        }
+
+        int getLastProcessedSequenceId()
+        {
+            return lastProcessedSequenceId;
+        }
+
+        void setLastProcessedSequenceId( final int lastProcessedSequenceId )
+        {
+            this.lastProcessedSequenceId = lastProcessedSequenceId;
+        }
+
+    }
 
 }
