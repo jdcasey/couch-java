@@ -25,13 +25,11 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Set;
 
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.model.AppDescription;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchAppView;
 
-@Component( role = CouchAppReader.class )
 public class CouchAppReader
 {
     private static final String APP_BASEPATH = "couchapps/";
