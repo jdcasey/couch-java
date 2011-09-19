@@ -20,44 +20,34 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.commonjava.web</groupId>
-    <artifactId>webapp-parent</artifactId>
-    <version>1-SNAPSHOT</version>
+    <groupId>org.commonjava.couch.web</groupId>
+    <artifactId>couch-web</artifactId>
+    <version>1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>web-common</artifactId>
-  <version>0.1-SNAPSHOT</version>
 
   <name>Common Web Datatypes and Utilities</name>
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-    </dependency>
-    <dependency>
     	<groupId>com.google.code.gson</groupId>
     	<artifactId>gson</artifactId>
     	<optional>true</optional>
     </dependency>
-    <dependency>
-    	<groupId>org.commonjava.util</groupId>
-    	<artifactId>logging</artifactId>
-    </dependency>
+    
     <dependency>
     	<groupId>org.jboss.spec.javax.servlet</groupId>
     	<artifactId>jboss-servlet-api_3.0_spec</artifactId>
     	<optional>true</optional>
     </dependency>
+    
     <dependency>
     	<groupId>org.jboss.resteasy</groupId>
     	<artifactId>jaxrs-api</artifactId>
     	<optional>true</optional>
     </dependency>
+    
     <dependency>
     	<groupId>org.commonjava.couch</groupId>
     	<artifactId>couch-app-support</artifactId>
