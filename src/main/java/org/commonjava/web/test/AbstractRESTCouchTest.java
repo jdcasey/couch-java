@@ -23,7 +23,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.PasswordManager;
-import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.couch.db.CouchManager;
@@ -44,7 +43,7 @@ public abstract class AbstractRESTCouchTest
     protected JsonSerializer serializer;
 
     @Inject
-    protected UserDataManager dataManager;
+    protected UserDataManager userManager;
 
     @Inject
     protected UserManagerConfiguration config;
@@ -64,11 +63,13 @@ public abstract class AbstractRESTCouchTest
     {}
 
     @Before
-    public void setupFixtures()
-        throws UserDataException
+    public final void setupRESTCouchTest()
+        throws Exception
     {
-        dataManager.install();
-        dataManager.setupAdminInformation();
+        couch.dropDatabase();
+
+        userManager.install();
+        userManager.setupAdminInformation();
 
         // setup the security manager.
         realm.setupSecurityManager();
@@ -80,7 +81,7 @@ public abstract class AbstractRESTCouchTest
     }
 
     @After
-    public void teardownFixtures()
+    public final void teardownRESTCouchTest()
         throws Exception
     {
         couch.dropDatabase();
