@@ -24,8 +24,8 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.db.model.ViewRequest;
+import org.commonjava.couch.io.CouchAppReader;
 import org.commonjava.couch.model.CouchApp;
-import org.commonjava.couch.model.io.CouchAppReader;
 import org.commonjava.maven.mdd.db.session.DependencyDBSession;
 import org.commonjava.maven.mdd.model.DependencyRelationship;
 
@@ -48,7 +48,7 @@ public class DependencyDatabase
     {
         try
         {
-            getCouch().dropDatabase( session.getBaseUrl() );
+            getCouch().dropDatabase();
         }
         catch ( CouchDBException e )
         {
@@ -62,9 +62,9 @@ public class DependencyDatabase
     {
         try
         {
-            if ( !getCouch().dbExists( session.getBaseUrl() ) )
+            if ( !getCouch().dbExists() )
             {
-                getCouch().createDatabase( session.getBaseUrl() );
+                getCouch().createDatabase();
             }
         }
         catch ( CouchDBException e )
@@ -76,11 +76,12 @@ public class DependencyDatabase
         String app = session.getLogicApplication();
         try
         {
-            if ( !getCouch().appExists( session.getBaseUrl(), app ) )
+            if ( !getCouch().appExists( app ) )
             {
                 CouchApp application =
-                    new CouchAppReader().readAppDefinition( DependencyDBSession.LOGIC_APPLICATION_RESOURCE_BASE );
-                getCouch().installApplication( application, session.getBaseUrl() );
+                    new CouchAppReader().readAppDefinition( new MDDAppDescription() );
+
+                getCouch().installApplication( application );
             }
         }
         catch ( CouchDBException e )
@@ -112,7 +113,7 @@ public class DependencyDatabase
 
             for ( String view : views )
             {
-                if ( !getCouch().viewExists( url, session.getLogicApplication(), view ) )
+                if ( !getCouch().viewExists( MDDAppDescription.APP_NAME, view ) )
                 {
                     return false;
                 }
@@ -136,8 +137,7 @@ public class DependencyDatabase
         req.setParameter( KEY, projectKey );
         try
         {
-            return getCouch().getViewListing( req, session.getBaseUrl(),
-                                              DependencyRelationship.class );
+            return getCouch().getViewListing( req, DependencyRelationship.class );
         }
         catch ( CouchDBException e )
         {
@@ -155,8 +155,7 @@ public class DependencyDatabase
         req.setParameter( KEY, projectKey );
         try
         {
-            return getCouch().getViewListing( req, session.getBaseUrl(),
-                                              DependencyRelationship.class );
+            return getCouch().getViewListing( req, DependencyRelationship.class );
         }
         catch ( CouchDBException e )
         {
@@ -172,7 +171,7 @@ public class DependencyDatabase
     {
         try
         {
-            getCouch().store( rels, session.getBaseUrl(), true, false );
+            getCouch().store( rels, true, false );
         }
         catch ( CouchDBException e )
         {
@@ -204,7 +203,7 @@ public class DependencyDatabase
     {
         try
         {
-            getCouch().store( rel, session.getBaseUrl(), true );
+            getCouch().store( rel, true );
         }
         catch ( CouchDBException e )
         {
@@ -226,7 +225,7 @@ public class DependencyDatabase
 
         try
         {
-            getCouch().delete( rels, session.getBaseUrl(), false );
+            getCouch().delete( rels, false );
         }
         catch ( CouchDBException e )
         {
@@ -240,7 +239,7 @@ public class DependencyDatabase
     {
         try
         {
-            getCouch().delete( rel, session.getBaseUrl() );
+            getCouch().delete( rel );
         }
         catch ( CouchDBException e )
         {
@@ -264,7 +263,7 @@ public class DependencyDatabase
     {
         try
         {
-            return getCouch().exists( rel, session.getBaseUrl() );
+            return getCouch().exists( rel );
         }
         catch ( CouchDBException e )
         {

@@ -1,21 +1,33 @@
 <!--
   Copyright (C) 2011  John Casey
   
-  This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
   
-  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
   
-  You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU Affero General Public
+  License along with this program.  If not, see 
+  <http://www.gnu.org/licenses/>.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.commonjava.couch.web</groupId>
+    <artifactId>couch-web</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
 
-  <groupId>org.commonjava.poc</groupId>
-  <artifactId>maven-dependency-db</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>maven-dependency-database</artifactId>
 
-  <name>Maven Dependency-DB Proof-of-Concept</name>
+  <name>Maven Dependency Database</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,6 +55,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>2.0.12</version>
+    </dependency>
+    
+    <dependency>
       <groupId>org.apache.maven.mae.components</groupId>
       <artifactId>mae-dependency-grapher</artifactId>
       <version>${maeVersion}</version>
@@ -55,52 +73,23 @@
       <groupId>org.apache.maven.mae.components</groupId>
       <artifactId>mae-project-tools</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-    	<version>4.1.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>1.6.2</version>
     </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>args4j</groupId>
-      <artifactId>args4j</artifactId>
-      <version>2.0.12</version>
-    </dependency>
+    
     <dependency>
     	<groupId>org.commonjava.couch</groupId>
     	<artifactId>couch-app-support</artifactId>
-    	<version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   
