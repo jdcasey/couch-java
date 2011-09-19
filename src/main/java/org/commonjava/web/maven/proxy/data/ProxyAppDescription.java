@@ -14,7 +14,7 @@ public class ProxyAppDescription
     public enum View
     {
         ALL_GROUPS( "all-groups" ), ALL_REPOSITORIES( "all-repositories" ), GROUP_REPOSITORIES(
-            "group-repositories" );
+            "group-repositories" ), REPOSITORY_GROUPS( "repository-groups" );
 
         String name;
 

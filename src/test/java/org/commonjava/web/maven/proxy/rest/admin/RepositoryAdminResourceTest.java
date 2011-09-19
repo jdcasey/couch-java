@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.maven.proxy.AbstractAProxLiveTest;
 import org.commonjava.web.maven.proxy.model.Repository;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -21,7 +22,7 @@ import com.google.gson.reflect.TypeToken;
 
 @RunWith( Arquillian.class )
 public class RepositoryAdminResourceTest
-    extends AbstractAProxRESTTest
+    extends AbstractAProxLiveTest
 {
 
     private static final String BASE_URL = "http://localhost:8080/test/api/1.0/admin/repository";

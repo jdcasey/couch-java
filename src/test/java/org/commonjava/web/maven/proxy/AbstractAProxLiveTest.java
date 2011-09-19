@@ -1,4 +1,4 @@
-package org.commonjava.web.maven.proxy.rest.admin;
+package org.commonjava.web.maven.proxy;
 
 import static org.apache.commons.io.IOUtils.copy;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -16,27 +16,32 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.cjtest.fixture.TestUserManagerConfigProducer;
 import org.commonjava.auth.couch.data.UserAppDescription;
+import org.commonjava.couch.change.CouchChangeListener;
+import org.commonjava.web.maven.proxy.change.RepositoryDeletionListener;
 import org.commonjava.web.maven.proxy.conf.DefaultProxyConfiguration;
 import org.commonjava.web.maven.proxy.conf.ProxyConfiguration;
 import org.commonjava.web.maven.proxy.data.ProxyAppDescription;
-import org.commonjava.web.maven.proxy.data.ProxyDataException;
 import org.commonjava.web.maven.proxy.data.ProxyDataManager;
+import org.commonjava.web.maven.proxy.fixture.AProxTestPropertiesProvider;
+import org.commonjava.web.maven.proxy.fixture.ProxyConfigProvider;
 import org.commonjava.web.maven.proxy.model.Repository;
 import org.commonjava.web.maven.proxy.rest.RESTApplication;
-import org.commonjava.web.maven.proxy.rest.admin.fixture.AProxTestPropertiesProvider;
-import org.commonjava.web.maven.proxy.rest.admin.fixture.ProxyConfigProvider;
 import org.commonjava.web.test.AbstractRESTCouchTest;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.After;
 import org.junit.Before;
 
-public class AbstractAProxRESTTest
+public class AbstractAProxLiveTest
     extends AbstractRESTCouchTest
 {
 
     @Inject
-    protected ProxyDataManager dataManager;
+    protected ProxyDataManager proxyManager;
+
+    @Inject
+    protected CouchChangeListener changeListener;
 
     @Deployment
     public static WebArchive createWar()
@@ -44,13 +49,15 @@ public class AbstractAProxRESTTest
         TestWarArchiveBuilder builder =
             new TestWarArchiveBuilder( AProxTestPropertiesProvider.class );
 
-        builder.withExtraClasses( ProxyConfigProvider.class, ProxyConfiguration.class,
+        builder.withExtraClasses( AbstractAProxLiveTest.class, AProxTestPropertiesProvider.class,
+                                  ProxyConfigProvider.class, ProxyConfiguration.class,
                                   TestUserManagerConfigProducer.class,
                                   DefaultProxyConfiguration.class );
 
         builder.withExtraPackages( true, RESTApplication.class.getPackage(),
                                    Repository.class.getPackage(),
-                                   ProxyDataManager.class.getPackage() );
+                                   ProxyDataManager.class.getPackage(),
+                                   RepositoryDeletionListener.class.getPackage() );
 
         builder.withAllStandards();
         builder.withApplication( new ProxyAppDescription() );
@@ -60,10 +67,28 @@ public class AbstractAProxRESTTest
     }
 
     @Before
-    public void setupProxyManager()
-        throws ProxyDataException
+    public final void setupAProxLiveTest()
+        throws Exception
     {
-        dataManager.install();
+        proxyManager.install();
+        changeListener.startup();
+    }
+
+    @After
+    public final void teardownAProxLiveTest()
+        throws Exception
+    {
+        changeListener.shutdown();
+        while ( changeListener.isRunning() )
+        {
+            synchronized ( changeListener )
+            {
+                System.out.println( "Waiting 2s for change listener to shutdown..." );
+                changeListener.wait( 2000 );
+            }
+        }
+
+        couch.dropDatabase();
     }
 
     protected String getString( final String url, final int expectedStatus )

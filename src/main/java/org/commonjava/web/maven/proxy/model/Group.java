@@ -76,6 +76,16 @@ public class Group
         return constituents.add( repository );
     }
 
+    public boolean removeConstituent( final Repository constituent )
+    {
+        return constituent == null ? false : removeConstituent( constituent.getName() );
+    }
+
+    public boolean removeConstituent( final String repository )
+    {
+        return constituents == null ? false : constituents.remove( repository );
+    }
+
     public void setConstituents( final List<String> constituents )
     {
         this.constituents = constituents;

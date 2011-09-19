@@ -1,4 +1,4 @@
-package org.commonjava.web.maven.proxy.rest.admin.fixture;
+package org.commonjava.web.maven.proxy.fixture;
 
 import java.util.Properties;
 

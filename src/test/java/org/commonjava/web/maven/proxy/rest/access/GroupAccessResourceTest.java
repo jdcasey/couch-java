@@ -9,11 +9,11 @@ import java.io.IOException;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
+import org.commonjava.web.maven.proxy.AbstractAProxLiveTest;
 import org.commonjava.web.maven.proxy.data.ProxyDataException;
+import org.commonjava.web.maven.proxy.fixture.ProxyConfigProvider;
 import org.commonjava.web.maven.proxy.model.Group;
 import org.commonjava.web.maven.proxy.model.Repository;
-import org.commonjava.web.maven.proxy.rest.admin.AbstractAProxRESTTest;
-import org.commonjava.web.maven.proxy.rest.admin.fixture.ProxyConfigProvider;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 
 @RunWith( Arquillian.class )
 public class GroupAccessResourceTest
-    extends AbstractAProxRESTTest
+    extends AbstractAProxLiveTest
 {
 
     private static final String BASE_URL = "http://localhost:8080/test/api/1.0/group/test/";
@@ -52,11 +52,11 @@ public class GroupAccessResourceTest
     public void setupTest()
         throws ProxyDataException
     {
-        dataManager.storeRepository( new Repository( "dummy", "http://www.nowhere.com/" ) );
-        dataManager.storeRepository( new Repository( "central",
+        proxyManager.storeRepository( new Repository( "dummy", "http://www.nowhere.com/" ) );
+        proxyManager.storeRepository( new Repository( "central",
                                                      "http://repo1.maven.apache.org/maven2/" ) );
 
-        dataManager.storeGroup( new Group( "test", "dummy", "central" ) );
+        proxyManager.storeGroup( new Group( "test", "dummy", "central" ) );
     }
 
     @Test

@@ -16,7 +16,7 @@ public class Repository
     extends AbstractCouchDocument
     implements DenormalizedCouchDoc
 {
-    public static final String NAMESPACE = "proxy";
+    public static final String NAMESPACE = "repository";
 
     private String name;
 

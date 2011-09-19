@@ -2,6 +2,7 @@ package org.commonjava.web.maven.proxy.data;
 
 import static org.commonjava.couch.util.IdUtils.namespaceId;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
+import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.DenormalizationException;
 import org.commonjava.couch.util.JoinString;
@@ -126,6 +128,40 @@ public class ProxyDataManager
         }
     }
 
+    public Set<Group> getGroupsForRepository( final String repo )
+        throws ProxyDataException
+    {
+        try
+        {
+            ProxyViewRequest req = new ProxyViewRequest( config, View.REPOSITORY_GROUPS );
+            req.setParameter( ViewRequest.KEY, repo );
+
+            List<Group> groups = couch.getViewListing( req, Group.class );
+
+            return new HashSet<Group>( groups );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new ProxyDataException(
+                                          "Failed to lookup groups containing repository: %s. Reason: %s",
+                                          e, repo, e.getMessage() );
+        }
+    }
+
+    public void storeRepositories( final Collection<Repository> repos )
+        throws ProxyDataException
+    {
+        try
+        {
+            couch.store( repos, false, false );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new ProxyDataException( "Failed to update %d repositories. Reason: %s", e,
+                                          repos.size(), e.getMessage() );
+        }
+    }
+
     public boolean storeRepository( final Repository proxy )
         throws ProxyDataException
     {
@@ -162,6 +198,20 @@ public class ProxyDataManager
             throw new ProxyDataException(
                                           "Failed to create permissions for repository: %s. Reason: %s",
                                           e, repository.getName(), e.getMessage() );
+        }
+    }
+
+    public void storeGroups( final Collection<Group> groups )
+        throws ProxyDataException
+    {
+        try
+        {
+            couch.store( groups, false, false );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new ProxyDataException( "Failed to update %d repository groups. Reason: %s", e,
+                                          groups.size(), e.getMessage() );
         }
     }
 

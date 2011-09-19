@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.maven.proxy.AbstractAProxLiveTest;
 import org.commonjava.web.maven.proxy.model.Group;
 import org.commonjava.web.maven.proxy.model.Repository;
 import org.hamcrest.BaseMatcher;
@@ -26,7 +27,7 @@ import com.google.gson.reflect.TypeToken;
 
 @RunWith( Arquillian.class )
 public class GroupAdminResourceTest
-    extends AbstractAProxRESTTest
+    extends AbstractAProxLiveTest
 {
 
     private static final String BASE_URL = "http://localhost:8080/test/api/1.0/admin/group";
@@ -35,9 +36,9 @@ public class GroupAdminResourceTest
     public void seedRepositoriesForGroupTests()
         throws Exception
     {
-        dataManager.storeRepository( new Repository( "central",
+        proxyManager.storeRepository( new Repository( "central",
                                                      "http://repo1.maven.apache.org/maven2/" ) );
-        dataManager.storeRepository( new Repository( "repo2", "http://repo1.maven.org/maven2/" ) );
+        proxyManager.storeRepository( new Repository( "repo2", "http://repo1.maven.org/maven2/" ) );
     }
 
     @Test
