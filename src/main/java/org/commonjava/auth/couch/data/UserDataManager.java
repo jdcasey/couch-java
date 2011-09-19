@@ -37,6 +37,7 @@ import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
+import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.model.CouchDocRef;
 
 @Singleton
@@ -420,8 +421,10 @@ public class UserDataManager
     {
         try
         {
-            List<User> users =
-                couch.getViewListing( new UserViewRequest( config, View.ROLE_USERS ), User.class );
+            UserViewRequest req = new UserViewRequest( config, View.ROLE_USERS );
+            req.setParameter( ViewRequest.KEY, role );
+
+            List<User> users = couch.getViewListing( req, User.class );
 
             return new HashSet<User>( users );
         }
@@ -438,9 +441,10 @@ public class UserDataManager
     {
         try
         {
-            List<Role> roles =
-                couch.getViewListing( new UserViewRequest( config, View.PERMISSION_ROLES ),
-                                      Role.class );
+            UserViewRequest req = new UserViewRequest( config, View.PERMISSION_ROLES );
+            req.setParameter( ViewRequest.KEY, permission );
+
+            List<Role> roles = couch.getViewListing( req, Role.class );
 
             return new HashSet<Role>( roles );
         }
