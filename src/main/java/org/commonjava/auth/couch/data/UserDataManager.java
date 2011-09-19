@@ -177,6 +177,20 @@ public class UserDataManager
         }
     }
 
+    public void storePermissions( final Collection<Permission> perms )
+        throws UserDataException
+    {
+        try
+        {
+            couch.store( perms, true, false );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to store %d permissions. Error: %s", e,
+                                         perms.size(), e.getMessage() );
+        }
+    }
+
     public boolean storePermission( final Permission perm )
         throws UserDataException
     {
@@ -187,6 +201,20 @@ public class UserDataManager
         catch ( CouchDBException e )
         {
             throw new UserDataException( "Failed to store permission: %s. Reason: %s", e, perm,
+                                         e.getMessage() );
+        }
+    }
+
+    public void storeRoles( final Collection<Role> roles )
+        throws UserDataException
+    {
+        try
+        {
+            couch.store( roles, false, false );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to update %d roles. Error: %s", e, roles.size(),
                                          e.getMessage() );
         }
     }
@@ -207,6 +235,20 @@ public class UserDataManager
         catch ( CouchDBException e )
         {
             throw new UserDataException( "Failed to store role: %s. Reason: %s", e, role,
+                                         e.getMessage() );
+        }
+    }
+
+    public void storeUsers( final Collection<User> users )
+        throws UserDataException
+    {
+        try
+        {
+            couch.store( users, false, false );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException( "Failed to update %d users. Error: %s", e, users.size(),
                                          e.getMessage() );
         }
     }
@@ -370,6 +412,43 @@ public class UserDataManager
         {
             throw new UserDataException( "Failed to delete permission: %s. Reason: %s", e, name,
                                          e.getMessage() );
+        }
+    }
+
+    public Set<User> getUsersForRole( final String role )
+        throws UserDataException
+    {
+        try
+        {
+            List<User> users =
+                couch.getViewListing( new UserViewRequest( config, View.ROLE_USERS ), User.class );
+
+            return new HashSet<User>( users );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException(
+                                         "Failed to lookup users belonging to role: %s. Reason: %s",
+                                         e, role, e.getMessage() );
+        }
+    }
+
+    public Set<Role> getRolesForPermission( final String permission )
+        throws UserDataException
+    {
+        try
+        {
+            List<Role> roles =
+                couch.getViewListing( new UserViewRequest( config, View.PERMISSION_ROLES ),
+                                      Role.class );
+
+            return new HashSet<Role>( roles );
+        }
+        catch ( CouchDBException e )
+        {
+            throw new UserDataException(
+                                         "Failed to lookup roles granting permission: %s. Reason: %s",
+                                         e, permission, e.getMessage() );
         }
     }
 

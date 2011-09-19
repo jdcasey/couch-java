@@ -17,7 +17,9 @@ public class UserAppDescription
         ALL_ROLES( "all-roles" ),
         ALL_PERMISSIONS( "all-permissions" ),
         USER_ROLES( "user-roles" ),
-        ROLE_PERMISSIONS( "role-permissions" );
+        ROLE_PERMISSIONS( "role-permissions" ),
+        ROLE_USERS( "role-users" ),
+        PERMISSION_ROLES( "permission-roles" );
 
         String name;
 
