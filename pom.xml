@@ -291,4 +291,14 @@
     <slf4jVersion>1.6.2</slf4jVersion>
     <shiroVersion>1.1.0</shiroVersion>
   </properties>
+  
+  <profiles>
+    <profile>
+      <id>experimental</id>
+      
+      <modules>
+        <module>couch-web-experimental/maven-dependency-database</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>

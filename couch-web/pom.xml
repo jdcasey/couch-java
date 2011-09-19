@@ -36,7 +36,6 @@
     <module>web-common</module>
     <module>restful-user-manager</module>
     <module>aprox</module>
-    <module>maven-dependency-database</module>
   </modules>
   
   <dependencyManagement>
