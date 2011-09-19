@@ -118,6 +118,7 @@ public class CouchManager
         this.config = config;
         this.serializer = new Serializer();
         this.appReader = new CouchAppReader();
+        this.client = new CouchHttpClient( config, serializer );
     }
 
     public void initialize( final AppDescription description )

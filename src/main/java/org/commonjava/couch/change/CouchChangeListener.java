@@ -111,26 +111,32 @@ public class CouchChangeListener
     public void shutdown()
         throws CouchDBException
     {
-        listenerThread.interrupt();
-
-        while ( listenerThread.isAlive() )
+        if ( listenerThread != null )
         {
-            synchronized ( internalLock )
+            listenerThread.interrupt();
+
+            while ( listenerThread.isAlive() )
             {
-                try
+                synchronized ( internalLock )
                 {
-                    internalLock.wait( 2000 );
-                }
-                catch ( InterruptedException e )
-                {
-                    break;
+                    try
+                    {
+                        internalLock.wait( 2000 );
+                    }
+                    catch ( InterruptedException e )
+                    {
+                        break;
+                    }
                 }
             }
         }
 
-        if ( metadata.getLastProcessedSequenceId() < 1 )
+        if ( metadata != null )
         {
-            couch.store( metadata, false );
+            if ( metadata.getLastProcessedSequenceId() < 1 )
+            {
+                couch.store( metadata, false );
+            }
         }
 
         running = false;
