@@ -20,6 +20,7 @@ package org.commonjava.couch.test.fixture;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.ConsoleAppender;
@@ -35,13 +36,18 @@ public class LoggingFixture
 
     public static void setupLogging( final Level level )
     {
+        setupLogging( level, Collections.<String, Level> emptyMap() );
+    }
+
+    public static void setupLogging( final Level level, final Map<String, Level> customLevels )
+    {
         final Configurator log4jConfigurator = new Configurator()
         {
             @Override
             public void doConfigure( final URL notUsed, final LoggerRepository repo )
             {
                 final ConsoleAppender cAppender = new ConsoleAppender( new SimpleLayout() );
-                cAppender.setThreshold( level );
+                cAppender.setThreshold( Level.ALL );
 
                 repo.setThreshold( level );
                 repo.getRootLogger().removeAllAppenders();
@@ -61,6 +67,13 @@ public class LoggingFixture
                 for ( final Category cat : cats )
                 {
                     cat.setLevel( level );
+                }
+
+                for ( Map.Entry<String, Level> customEntry : customLevels.entrySet() )
+                {
+                    String key = customEntry.getKey();
+                    Logger logger = repo.getLogger( key );
+                    logger.setLevel( customEntry.getValue() );
                 }
             }
         };
