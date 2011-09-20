@@ -46,7 +46,7 @@ public class CouchAppReader
         ClassLoader cloader = Thread.currentThread().getContextClassLoader();
         String appName = description.getAppName();
 
-        CouchApp app = new CouchApp( appName );
+        CouchApp app = new CouchApp( appName, description );
 
         String appBase = APP_BASEPATH + description.getClasspathAppResource();
 

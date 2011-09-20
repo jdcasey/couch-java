@@ -26,9 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.commonjava.auth.couch.change.event.UserManagerDeleteEvent;
+import org.commonjava.auth.couch.change.event.PermissionUpdateEvent;
+import org.commonjava.auth.couch.change.event.RoleUpdateEvent;
+import org.commonjava.auth.couch.change.event.UpdateType;
+import org.commonjava.auth.couch.change.event.UserUpdateEvent;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserAppDescription.View;
 import org.commonjava.auth.couch.model.Permission;
@@ -55,6 +61,18 @@ public class UserDataManager
 
     @Inject
     private PasswordManager passwordManager;
+
+    @Inject
+    private Event<UserUpdateEvent> userEvent;
+
+    @Inject
+    private Event<RoleUpdateEvent> roleEvent;
+
+    @Inject
+    private Event<PermissionUpdateEvent> permissionEvent;
+
+    @Inject
+    private Event<UserManagerDeleteEvent> deleteEvent;
 
     public UserDataManager()
     {}
@@ -184,6 +202,7 @@ public class UserDataManager
         try
         {
             couch.store( perms, true, false );
+            firePermissionEvent( UpdateType.ADD, perms );
         }
         catch ( CouchDBException e )
         {
@@ -197,7 +216,10 @@ public class UserDataManager
     {
         try
         {
-            return couch.store( perm, true );
+            boolean result = couch.store( perm, true );
+            firePermissionEvent( UpdateType.ADD, perm );
+
+            return result;
         }
         catch ( CouchDBException e )
         {
@@ -212,6 +234,7 @@ public class UserDataManager
         try
         {
             couch.store( roles, false, false );
+            fireRoleEvent( UpdateType.ADD_OR_UPDATE, roles );
         }
         catch ( CouchDBException e )
         {
@@ -231,7 +254,9 @@ public class UserDataManager
     {
         try
         {
-            return couch.store( role, skipIfExists );
+            boolean result = couch.store( role, skipIfExists );
+            fireRoleEvent( skipIfExists ? UpdateType.ADD : UpdateType.ADD_OR_UPDATE, role );
+            return result;
         }
         catch ( CouchDBException e )
         {
@@ -246,6 +271,7 @@ public class UserDataManager
         try
         {
             couch.store( users, false, false );
+            fireUserEvent( UpdateType.ADD_OR_UPDATE, users );
         }
         catch ( CouchDBException e )
         {
@@ -265,18 +291,15 @@ public class UserDataManager
     {
         try
         {
-            return couch.store( user, true );
+            boolean result = couch.store( user, skipIfExists );
+            fireUserEvent( skipIfExists ? UpdateType.ADD : UpdateType.ADD_OR_UPDATE, user );
+            return result;
         }
         catch ( CouchDBException e )
         {
             throw new UserDataException( "Failed to store user: %s. Reason: %s", e, user,
                                          e.getMessage() );
         }
-    }
-
-    protected final CouchManager getCouch()
-    {
-        return couch;
     }
 
     public Map<String, Permission> createPermissions( final String namespace, final String name,
@@ -345,6 +368,7 @@ public class UserDataManager
         try
         {
             couch.delete( new CouchDocRef( namespaceId( User.NAMESPACE, name ) ) );
+            fireDeleteEvent( UserManagerDeleteEvent.Type.USER, name );
         }
         catch ( CouchDBException e )
         {
@@ -376,6 +400,7 @@ public class UserDataManager
         try
         {
             couch.delete( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ) );
+            fireDeleteEvent( UserManagerDeleteEvent.Type.ROLE, name );
         }
         catch ( CouchDBException e )
         {
@@ -408,6 +433,7 @@ public class UserDataManager
         try
         {
             couch.delete( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ) );
+            fireDeleteEvent( UserManagerDeleteEvent.Type.PERMISSION, name );
         }
         catch ( CouchDBException e )
         {
@@ -453,6 +479,62 @@ public class UserDataManager
             throw new UserDataException(
                                          "Failed to lookup roles granting permission: %s. Reason: %s",
                                          e, permission, e.getMessage() );
+        }
+    }
+
+    private void fireUserEvent( final UpdateType type, final Collection<User> users )
+    {
+        if ( userEvent != null )
+        {
+            userEvent.fire( new UserUpdateEvent( type, users ) );
+        }
+    }
+
+    private void fireUserEvent( final UpdateType type, final User... users )
+    {
+        if ( userEvent != null )
+        {
+            userEvent.fire( new UserUpdateEvent( type, users ) );
+        }
+    }
+
+    private void fireRoleEvent( final UpdateType type, final Collection<Role> roles )
+    {
+        if ( roleEvent != null )
+        {
+            roleEvent.fire( new RoleUpdateEvent( type, roles ) );
+        }
+    }
+
+    private void fireRoleEvent( final UpdateType type, final Role... roles )
+    {
+        if ( roleEvent != null )
+        {
+            roleEvent.fire( new RoleUpdateEvent( type, roles ) );
+        }
+    }
+
+    private void firePermissionEvent( final UpdateType type, final Collection<Permission> perms )
+    {
+        if ( permissionEvent != null )
+        {
+            permissionEvent.fire( new PermissionUpdateEvent( type, perms ) );
+        }
+    }
+
+    private void firePermissionEvent( final UpdateType type, final Permission... perms )
+    {
+        if ( permissionEvent != null )
+        {
+            permissionEvent.fire( new PermissionUpdateEvent( type, perms ) );
+        }
+    }
+
+    private void fireDeleteEvent( final UserManagerDeleteEvent.Type type, final String... names )
+    {
+        if ( deleteEvent != null )
+        {
+            deleteEvent.fire( new UserManagerDeleteEvent( type, names ) );
         }
     }
 

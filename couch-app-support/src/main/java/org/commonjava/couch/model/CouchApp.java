@@ -22,6 +22,8 @@ import static org.apache.commons.lang.StringUtils.join;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.commonjava.couch.db.model.AppDescription;
+
 public class CouchApp
     extends AbstractCouchDocument
 {
@@ -34,20 +36,22 @@ public class CouchApp
 
     private Map<String, CouchAppView> views;
 
-    public CouchApp( final String id, final Map<String, CouchAppView> views )
+    private final AppDescription description;
+
+    public CouchApp( final String id, final Map<String, CouchAppView> views,
+                     final AppDescription description )
     {
+        this.description = description;
         setCouchDocId( DESIGN_PREFIX + id );
         this.views = views;
     }
 
-    public CouchApp( final String id )
+    public CouchApp( final String id, final AppDescription description )
     {
+        this.description = description;
         setCouchDocId( DESIGN_PREFIX + id );
         this.views = new HashMap<String, CouchAppView>();
     }
-
-    CouchApp()
-    {}
 
     public String getLanguage()
     {
@@ -84,6 +88,11 @@ public class CouchApp
     {
         return String.format( "CouchApp [id=%s]\nViews:\n\n%s", getCouchDocId(),
                               join( views.keySet(), "\n" ) );
+    }
+
+    public AppDescription getDescription()
+    {
+        return description;
     }
 
 }

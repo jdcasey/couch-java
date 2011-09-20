@@ -31,6 +31,7 @@ import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.model.CouchObjectList;
+import org.commonjava.couch.db.model.SimpleAppDescription;
 import org.commonjava.couch.fixture.TestUser;
 import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.io.json.CouchObjectListDeserializer;
@@ -152,7 +153,13 @@ public class SerializerTest
         Map<String, CouchAppView> views = new HashMap<String, CouchAppView>();
         views.put( "test-view", new CouchAppView( "function(doc){emit(doc._id,doc._rev );}" ) );
 
-        System.out.println( new Serializer().toString( new CouchApp( "test-app", views ) ) );
+        System.out.println( new Serializer().toString( new CouchApp(
+                                                                     "test-app",
+                                                                     views,
+                                                                     new SimpleAppDescription(
+                                                                                               "test-app",
+                                                                                               "test-app",
+                                                                                               "test-view" ) ) ) );
     }
 
     @Test

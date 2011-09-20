@@ -41,6 +41,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.apache.http.Header;
@@ -54,6 +55,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
+import org.commonjava.couch.change.j2ee.ApplicationEvent;
+import org.commonjava.couch.change.j2ee.DatabaseEvent;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
@@ -97,6 +100,12 @@ public class CouchManager
 
     @Inject
     private CouchHttpClient client;
+
+    @Inject
+    private Event<DatabaseEvent> dbEvent;
+
+    @Inject
+    private Event<ApplicationEvent> appEvent;
 
     protected CouchManager()
     {
@@ -537,6 +546,7 @@ public class CouchManager
 
         HttpDelete request = new HttpDelete( config.getDatabaseUrl() );
         client.executeHttp( request, SC_OK, "Failed to drop database" );
+        fireDBEvent( DatabaseEvent.Type.DROP, config.getDatabaseUrl() );
     }
 
     public void createDatabase()
@@ -545,6 +555,7 @@ public class CouchManager
         LOGGER.info( "Creating database: " + config.getDatabaseUrl() );
         HttpPut request = new HttpPut( config.getDatabaseUrl() );
         client.executeHttp( request, SC_CREATED, "Failed to create database" );
+        fireDBEvent( DatabaseEvent.Type.CREATE, config.getDatabaseUrl() );
     }
 
     public void installApplication( final CouchApp app )
@@ -561,6 +572,7 @@ public class CouchManager
             request.setEntity( new StringEntity( appJson, "application/json", "UTF-8" ) );
 
             client.executeHttp( request, SC_CREATED, "Failed to store application document" );
+            fireAppEvent( ApplicationEvent.Type.INSTALL, app.getDescription() );
         }
         catch ( UnsupportedEncodingException e )
         {
@@ -657,6 +669,22 @@ public class CouchManager
     protected CouchAppReader getAppReader()
     {
         return appReader;
+    }
+
+    private void fireDBEvent( final DatabaseEvent.Type type, final String url )
+    {
+        if ( dbEvent != null )
+        {
+            dbEvent.fire( new DatabaseEvent( type, url ) );
+        }
+    }
+
+    private void fireAppEvent( final ApplicationEvent.Type type, final AppDescription description )
+    {
+        if ( appEvent != null )
+        {
+            appEvent.fire( new ApplicationEvent( type, description ) );
+        }
     }
 
 }
