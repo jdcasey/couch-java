@@ -36,6 +36,7 @@
     <module>web-common</module>
     <module>restful-user-manager</module>
     <module>aprox</module>
+    <module>file-depot</module>
   </modules>
   
   <dependencyManagement>
