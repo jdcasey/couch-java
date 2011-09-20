@@ -162,18 +162,6 @@ public class SerializerTest
                                                                                                "test-view" ) ) ) );
     }
 
-    @Test
-    public void deserializeApp()
-    {
-        String src =
-            "{\"_id\":\"_design/test-app\",\"language\":\"javascript\",\"views\":{\"test-view\":{\n"
-                + "      \"map\":\"function(doc){emit(doc._id,doc._rev );}\"}}}";
-
-        CouchApp app = new Serializer().toDocument( src, CouchApp.class );
-
-        System.out.println( app );
-    }
-
     public class TestDoc
         implements CouchDocument
     {

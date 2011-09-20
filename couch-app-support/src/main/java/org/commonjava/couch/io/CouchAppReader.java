@@ -19,10 +19,12 @@ package org.commonjava.couch.io;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
+import static org.apache.commons.io.IOUtils.readLines;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Set;
 
 import org.commonjava.couch.db.CouchDBException;
@@ -73,7 +75,18 @@ public class CouchAppReader
                 StringWriter sWriter = new StringWriter();
                 try
                 {
-                    copy( in, sWriter );
+                    List<String> lines = readLines( in );
+                    for ( String line : lines )
+                    {
+                        String test = line.trim();
+                        if ( test.startsWith( "#" ) || test.startsWith( "/*" )
+                            || test.startsWith( "*" ) || test.startsWith( "//" ) )
+                        {
+                            continue;
+                        }
+                        sWriter.write( line );
+                        sWriter.write( '\n' );
+                    }
                 }
                 finally
                 {

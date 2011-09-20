@@ -36,7 +36,7 @@ public class CouchApp
 
     private Map<String, CouchAppView> views;
 
-    private final AppDescription description;
+    private transient final AppDescription description;
 
     public CouchApp( final String id, final Map<String, CouchAppView> views,
                      final AppDescription description )
