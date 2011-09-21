@@ -93,7 +93,13 @@ public class CouchChangeListener
         this.serializer = serializer;
     }
 
-    public synchronized void startup()
+    public void startup()
+        throws CouchDBException
+    {
+        startup( true );
+    }
+
+    public void startup( final boolean wait )
         throws CouchDBException
     {
         metadata =
@@ -105,21 +111,25 @@ public class CouchChangeListener
         }
 
         listenerThread = new Thread( this );
+        listenerThread.setDaemon( true );
         listenerThread.start();
 
-        synchronized ( internalLock )
+        if ( wait )
         {
-            while ( !running )
+            synchronized ( internalLock )
             {
-                System.out.println( "Waiting 1s for change listener to startup..." );
-                try
+                while ( !running )
                 {
-                    internalLock.wait( 1000 );
-                }
-                catch ( InterruptedException e )
-                {
-                    logger.info( "Interrupted..." );
-                    break;
+                    logger.info( "Waiting for change listener to startup..." );
+                    try
+                    {
+                        internalLock.wait( 100 );
+                    }
+                    catch ( InterruptedException e )
+                    {
+                        logger.info( "Interrupted..." );
+                        break;
+                    }
                 }
             }
         }
@@ -134,6 +144,7 @@ public class CouchChangeListener
 
             while ( listenerThread.isAlive() )
             {
+                logger.info( "Waiting for change-listener shutdown..." );
                 synchronized ( internalLock )
                 {
                     try
@@ -218,7 +229,7 @@ public class CouchChangeListener
                 running = true;
                 synchronized ( internalLock )
                 {
-                    internalLock.notify();
+                    internalLock.notifyAll();
                 }
 
                 CouchDocChangeList changes =
@@ -270,7 +281,7 @@ public class CouchChangeListener
 
         synchronized ( internalLock )
         {
-            internalLock.notify();
+            internalLock.notifyAll();
         }
     }
 

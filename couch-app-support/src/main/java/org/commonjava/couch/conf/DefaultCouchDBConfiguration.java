@@ -17,24 +17,25 @@
  ******************************************************************************/
 package org.commonjava.couch.conf;
 
-import javax.inject.Named;
+import javax.enterprise.inject.Alternative;
 
 import org.commonjava.couch.util.UrlUtils;
 import org.commonjava.couch.util.UrlUtils.UrlInfo;
-import org.commonjava.web.config.annotation.ConfigNames;
+import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 
 @SectionName( "database" )
-@Named( "dont-use-directly" )
+@Alternative
 public class DefaultCouchDBConfiguration
     implements CouchDBConfiguration
 {
 
-    private final UrlInfo urlInfo;
+    private static final int DEFAULT_MAX_CONNECTIONS = 20;
 
-    private final int maxConnections;
+    private UrlInfo urlInfo;
 
-    @ConfigNames( { "url", "maxConnections" } )
+    private int maxConnections;
+
     public DefaultCouchDBConfiguration( final String dbUrl, final int maxConnections )
     {
         this.urlInfo = UrlUtils.parseUrlInfo( dbUrl );
@@ -44,7 +45,22 @@ public class DefaultCouchDBConfiguration
     public DefaultCouchDBConfiguration( final String dbUrl )
     {
         this.urlInfo = UrlUtils.parseUrlInfo( dbUrl );
-        this.maxConnections = 20;
+        this.maxConnections = -1;
+    }
+
+    public DefaultCouchDBConfiguration()
+    {}
+
+    @ConfigName( "url" )
+    public void setDatabaseUrl( final String databaseUrl )
+    {
+        this.urlInfo = UrlUtils.parseUrlInfo( databaseUrl );
+    }
+
+    @ConfigName( "connections.max" )
+    public void setMaxConnections( final int maxConnections )
+    {
+        this.maxConnections = maxConnections;
     }
 
     @Override
@@ -80,7 +96,7 @@ public class DefaultCouchDBConfiguration
     @Override
     public int getMaxConnections()
     {
-        return maxConnections;
+        return maxConnections < 1 ? DEFAULT_MAX_CONNECTIONS : maxConnections;
     }
 
 }
