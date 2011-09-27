@@ -35,32 +35,35 @@
     <module>couch-as7-test-harness</module>
     <module>web-common</module>
     <module>restful-user-manager</module>
-    <module>aprox</module>
-    <module>file-depot</module>
   </modules>
   
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>couch-as7-test-harness</artifactId>
-        <version>${project.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>web-common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>restful-user-manager</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>artifact-dependency-database</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>couch-as7-test-harness</artifactId>
+      	<version>${couchJavaVersion}</version>
+      	<scope>test</scope>
+      </dependency>
+      <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>web-common</artifactId>
+      	<version>${couchJavaVersion}</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>restful-user-manager</artifactId>
+      	<version>${couchJavaVersion}</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>artifact-dependency-database</artifactId>
+      	<version>${couchJavaVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -74,6 +74,7 @@ import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
+import org.commonjava.couch.model.DenormalizedCouchDoc;
 import org.commonjava.couch.util.ToString;
 
 public class CouchManager
@@ -172,6 +173,11 @@ public class CouchManager
         Set<StoreAction> toStore = new HashSet<StoreAction>();
         for ( CouchDocument doc : documents )
         {
+            if ( doc instanceof DenormalizedCouchDoc )
+            {
+                ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+            }
+
             if ( skipIfExists && documentRevisionExists( doc ) )
             {
                 continue;
@@ -191,6 +197,11 @@ public class CouchManager
         Set<DeleteAction> toDelete = new HashSet<DeleteAction>();
         for ( CouchDocument doc : documents )
         {
+            if ( doc instanceof DenormalizedCouchDoc )
+            {
+                ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+            }
+
             if ( !documentRevisionExists( doc ) )
             {
                 continue;
@@ -207,6 +218,15 @@ public class CouchManager
                         final boolean allOrNothing )
         throws CouchDBException
     {
+        for ( CouchDocumentAction action : actions )
+        {
+            CouchDocument doc = action.getDocument();
+            if ( doc instanceof DenormalizedCouchDoc )
+            {
+                ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+            }
+        }
+
         BulkActionHolder bulk = new BulkActionHolder( actions, allOrNothing );
         String body = serializer.toString( bulk );
 
@@ -295,6 +315,15 @@ public class CouchManager
                                                        "Failed to retrieve contents for view request: %s",
                                                        req ), deser );
 
+        for ( T t : listing )
+        {
+            if ( t instanceof DenormalizedCouchDoc )
+            {
+                ( (DenormalizedCouchDoc) t ).calculateDenormalizedFields();
+            }
+
+        }
+
         return listing.getItems();
     }
 
@@ -321,14 +350,26 @@ public class CouchManager
         String url = buildDocUrl( ref, true );
         HttpGet get = new HttpGet( url );
 
-        return client.executeHttpAndReturn( get,
-                                            new SerializedGetHandler<T>( serializer, docType ),
-                                            new ToString( "Failed to retrieve document: %s", ref ) );
+        T result =
+            client.executeHttpAndReturn( get, new SerializedGetHandler<T>( serializer, docType ),
+                                         new ToString( "Failed to retrieve document: %s", ref ) );
+
+        if ( result instanceof DenormalizedCouchDoc )
+        {
+            ( (DenormalizedCouchDoc) result ).calculateDenormalizedFields();
+        }
+
+        return result;
     }
 
     public boolean store( final CouchDocument doc, final boolean skipIfExists )
         throws CouchDBException
     {
+        if ( doc instanceof DenormalizedCouchDoc )
+        {
+            ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+        }
+
         if ( skipIfExists && documentRevisionExists( doc ) )
         {
             return false;
@@ -355,6 +396,11 @@ public class CouchManager
     public void delete( final CouchDocument doc )
         throws CouchDBException
     {
+        if ( doc instanceof DenormalizedCouchDoc )
+        {
+            ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+        }
+
         if ( !documentRevisionExists( doc ) )
         {
             return;
@@ -408,6 +454,11 @@ public class CouchManager
     public boolean documentRevisionExists( final CouchDocument doc )
         throws CouchDBException
     {
+        if ( doc instanceof DenormalizedCouchDoc )
+        {
+            ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+        }
+
         String docUrl = buildDocUrl( doc, doc.getCouchDocRev() != null );
         boolean exists = false;
 
@@ -471,6 +522,11 @@ public class CouchManager
     public boolean exists( final CouchDocument doc )
         throws CouchDBException
     {
+        if ( doc instanceof DenormalizedCouchDoc )
+        {
+            ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+        }
+
         String docUrl = buildDocUrl( doc, false );
         return exists( docUrl );
     }
@@ -599,6 +655,11 @@ public class CouchManager
     protected String buildDocUrl( final CouchDocument doc, final boolean includeRevision )
         throws CouchDBException
     {
+        if ( doc instanceof DenormalizedCouchDoc )
+        {
+            ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
+        }
+
         try
         {
             String url;

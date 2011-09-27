@@ -89,5 +89,10 @@
       <artifactId>couch-test-harness</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+        <groupId>org.jboss.weld.se</groupId>
+        <artifactId>weld-se-core</artifactId>
+        <optional>true</optional>
+    </dependency>
   </dependencies>
 </project>

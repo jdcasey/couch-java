@@ -17,66 +17,24 @@
  ******************************************************************************/
 package org.commonjava.auth.couch.data;
 
-import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.Set;
 
-import org.apache.log4j.Level;
-import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
+import org.commonjava.auth.couch.fixture.CouchUserFixture;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
-import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
-import org.commonjava.couch.db.CouchManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class UserDataManagerTest
 {
 
-    private static UserDataManager manager;
-
-    private static DefaultUserManagerConfig config;
-
-    private static CouchManager couch;
-
-    @BeforeClass
-    public static void setupManager()
-    {
-        setupLogging( Level.DEBUG );
-
-        config = new DefaultUserManagerConfig();
-
-        couch =
-            new CouchManager(
-                              new DefaultCouchDBConfiguration(
-                                                               "http://developer.commonjava.org/db/test-user-manager" ) );
-
-        manager = new UserDataManager( config, new PasswordManager(), couch );
-    }
-
-    @Before
-    public void setupDB()
-        throws Exception
-    {
-        if ( couch.dbExists() )
-        {
-            couch.dropDatabase();
-        }
-        manager.install();
-    }
-
-    @After
-    public void teardownDB()
-        throws Exception
-    {
-        couch.dropDatabase();
-    }
+    @Rule
+    public CouchUserFixture fixture = new CouchUserFixture();
 
     @Test
     public void addSimpleUserRolePermission()
@@ -86,9 +44,14 @@ public class UserDataManagerTest
         Role role = new Role( "admin", perm );
         User user = new User( "admin", role );
 
-        manager.storePermission( perm );
-        manager.storeRole( role );
-        manager.storeUser( user );
+        getManager().storePermission( perm );
+        getManager().storeRole( role );
+        getManager().storeUser( user );
+    }
+
+    private UserDataManager getManager()
+    {
+        return fixture.getUserDataManager();
     }
 
     @Test
@@ -99,13 +62,13 @@ public class UserDataManagerTest
         Role role = new Role( "admin", perm );
         User user = new User( "admin", role );
 
-        manager.storePermission( perm );
-        manager.storeRole( role );
-        manager.storeUser( user );
+        getManager().storePermission( perm );
+        getManager().storeRole( role );
+        getManager().storeUser( user );
 
-        manager.deletePermission( perm.getName() );
-        manager.deleteRole( role.getName() );
-        manager.deleteUser( user.getUsername() );
+        getManager().deletePermission( perm.getName() );
+        getManager().deleteRole( role.getName() );
+        getManager().deleteUser( user.getUsername() );
     }
 
     @Test
@@ -116,21 +79,21 @@ public class UserDataManagerTest
         Role role = new Role( "admin", perm );
         User user = new User( "admin", role );
 
-        manager.storePermission( perm );
-        manager.storeRole( role );
-        manager.storeUser( user );
+        getManager().storePermission( perm );
+        getManager().storeRole( role );
+        getManager().storeUser( user );
 
-        User u = manager.getUser( user.getUsername() );
+        User u = getManager().getUser( user.getUsername() );
 
         assertThat( u, notNullValue() );
         assertThat( u.getUsername(), equalTo( user.getUsername() ) );
 
-        Role r = manager.getRole( role.getName() );
+        Role r = getManager().getRole( role.getName() );
 
         assertThat( r, notNullValue() );
         assertThat( r.getName(), equalTo( role.getName() ) );
 
-        Permission p = manager.getPermission( perm.getName() );
+        Permission p = getManager().getPermission( perm.getName() );
 
         assertThat( p, notNullValue() );
         assertThat( p.getName(), equalTo( perm.getName() ) );
@@ -144,17 +107,17 @@ public class UserDataManagerTest
         Role role = new Role( "admin", perm );
         User user = new User( "admin", role );
 
-        manager.storePermission( perm );
-        manager.storeRole( role );
-        manager.storeUser( user );
+        getManager().storePermission( perm );
+        getManager().storeRole( role );
+        getManager().storeUser( user );
 
-        Set<Role> roles = manager.getRoles( user );
+        Set<Role> roles = getManager().getRoles( user );
 
         assertThat( roles, notNullValue() );
         assertThat( roles.size(), equalTo( 1 ) );
         assertThat( roles.iterator().next().getName(), equalTo( role.getName() ) );
 
-        Set<Permission> perms = manager.getPermissions( role );
+        Set<Permission> perms = getManager().getPermissions( role );
 
         assertThat( perms, notNullValue() );
         assertThat( perms.size(), equalTo( 1 ) );

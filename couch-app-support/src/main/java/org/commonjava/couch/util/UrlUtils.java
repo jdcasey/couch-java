@@ -43,9 +43,14 @@ public final class UrlUtils
                                    final String... parts )
         throws MalformedURLException
     {
+        if ( parts == null || parts.length < 1 )
+        {
+            return baseUrl;
+        }
+
         StringBuilder urlBuilder = new StringBuilder();
 
-        if ( parts.length < 1 || !parts[0].startsWith( baseUrl ) )
+        if ( !parts[0].startsWith( baseUrl ) )
         {
             urlBuilder.append( baseUrl );
         }

@@ -24,16 +24,17 @@ import javax.inject.Named;
 
 import org.commonjava.web.test.fixture.TestPropertyDefinitions;
 
-public class RESTfulTestPropertiesProducer
+public class RUMTestPropertiesProvider
 {
 
     @Produces
-    @Named( "testProperties" )
-    public Properties createTestProperties()
+    @Named( TestPropertyDefinitions.NAMED )
+    public Properties getTestProperties()
     {
         Properties props = new Properties();
-        props.setProperty( TestPropertyDefinitions.DATABASE_URL,
-                           "http://developer.commonjava.org/db/test-user-manager" );
+
+        props.put( TestPropertyDefinitions.DATABASE_URL,
+                   "http://localhost:5984/test-restful-user-manager" );
 
         return props;
     }

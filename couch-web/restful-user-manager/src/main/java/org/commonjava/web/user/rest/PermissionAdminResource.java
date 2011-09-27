@@ -42,7 +42,6 @@ import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
-import org.commonjava.web.common.ser.DenormalizerPostProcessor;
 import org.commonjava.web.common.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
@@ -75,9 +74,7 @@ public class PermissionAdminResource
                                                                  Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
-        Permission permission =
-            jsonSerializer.fromRequestBody( request, Permission.class,
-                                            new DenormalizerPostProcessor<Permission>() );
+        Permission permission = jsonSerializer.fromRequestBody( request, Permission.class );
 
         logger.info( "\n\nGot permission: %s\n\n", permission );
 

@@ -39,22 +39,22 @@
       <dependency>
       	<groupId>org.commonjava.couch</groupId>
       	<artifactId>shiro-couch</artifactId>
-      	<version>${project.version}</version>
+      	<version>${couchJavaVersion}</version>
       </dependency>
       <dependency>
       	<groupId>org.commonjava.couch</groupId>
       	<artifactId>couch-user-manager</artifactId>
-      	<version>${project.version}</version>
+      	<version>${couchJavaVersion}</version>
       </dependency>
       <dependency>
       	<groupId>org.commonjava.couch</groupId>
       	<artifactId>couch-app-support</artifactId>
-      	<version>${project.version}</version>
+      	<version>${couchJavaVersion}</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch</groupId>
         <artifactId>couch-test-harness</artifactId>
-      	<version>${project.version}</version>
+      	<version>${couchJavaVersion}</version>
         <scope>test</scope>
       </dependency>
       
@@ -290,6 +290,7 @@
     <configurationVersion>0.1-SNAPSHOT</configurationVersion>
     <slf4jVersion>1.6.2</slf4jVersion>
     <shiroVersion>1.1.0</shiroVersion>
+    <couchJavaVersion>1.0-SNAPSHOT</couchJavaVersion>
   </properties>
   
   <profiles>

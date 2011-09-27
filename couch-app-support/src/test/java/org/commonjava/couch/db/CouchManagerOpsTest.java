@@ -17,7 +17,7 @@
  ******************************************************************************/
 package org.commonjava.couch.db;
 
-import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
+import static org.commonjava.couch.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -26,35 +26,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
-import org.commonjava.couch.conf.CouchDBConfiguration;
-import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.model.SimpleAppDescription;
 import org.commonjava.couch.db.model.ViewRequest;
+import org.commonjava.couch.fixture.DBFixture;
 import org.commonjava.couch.fixture.TestUser;
 import org.commonjava.couch.io.CouchAppReader;
-import org.commonjava.couch.io.CouchHttpClient;
-import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class CouchManagerOpsTest
 {
 
-    private static final String DB_URL = "http://developer.commonjava.org/db/test-ops";
-
-    private final CouchDBConfiguration config = new DefaultCouchDBConfiguration( DB_URL );
-
-    private final Serializer serializer = new Serializer();
-
-    private final CouchManager mgr = new CouchManager( config, new CouchHttpClient( config,
-                                                                                    serializer ),
-                                                       serializer, new CouchAppReader() );
+    @Rule
+    public DBFixture dbFix = new DBFixture();
 
     @BeforeClass
     public static void initLogging()
@@ -66,24 +57,24 @@ public class CouchManagerOpsTest
     public void setupDb()
         throws Exception
     {
-        mgr.dropDatabase();
-        mgr.createDatabase();
+        getCouch().dropDatabase();
+        getCouch().createDatabase();
     }
 
     @After
     public void teardownDb()
         throws Exception
     {
-        mgr.dropDatabase();
+        getCouch().dropDatabase();
     }
 
     @Test
     public void storeAndGetDocument()
         throws Exception
     {
-        mgr.store( new TestUser( "user", "User", "Name", "email@nowhere.com" ), false );
+        getCouch().store( new TestUser( "user", "User", "Name", "email@nowhere.com" ), false );
 
-        TestUser user = mgr.getDocument( new CouchDocRef( "user" ), TestUser.class );
+        TestUser user = getCouch().getDocument( new CouchDocRef( "user" ), TestUser.class );
         assertThat( user, notNullValue() );
         assertThat( user.getUsername(), equalTo( "user" ) );
         assertThat( user.getFirst(), equalTo( "User" ) );
@@ -100,13 +91,13 @@ public class CouchManagerOpsTest
                                                                               "test-app",
                                                                               "test-view" ) );
 
-        mgr.installApplication( app );
+        getCouch().installApplication( app );
 
-        mgr.store( new TestUser( "user1", "User", "Name", "user@nowhere.com" ), false );
-        mgr.store( new TestUser( "user2", "Another", "Name", "user2@nowhere.com" ), false );
+        getCouch().store( new TestUser( "user1", "User", "Name", "user@nowhere.com" ), false );
+        getCouch().store( new TestUser( "user2", "Another", "Name", "user2@nowhere.com" ), false );
 
         ViewRequest req = new ViewRequest( "test-app", "test-view" );
-        List<TestUser> users = mgr.getViewListing( req, TestUser.class );
+        List<TestUser> users = getCouch().getViewListing( req, TestUser.class );
 
         assertThat( users, notNullValue() );
         assertThat( users.size(), equalTo( 2 ) );
@@ -127,7 +118,12 @@ public class CouchManagerOpsTest
                                       new TestUser( "user2", "Another", "Name", "user2@nowhere.com" ),
                                       false ) );
 
-        mgr.modify( actions, false );
+        getCouch().modify( actions, false );
+    }
+
+    private CouchManager getCouch()
+    {
+        return dbFix.getCouchManager();
     }
 
 }

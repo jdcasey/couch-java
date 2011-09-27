@@ -35,17 +35,17 @@ public class RoleDeletionListenerTest
     public void removeAdminRoleAndReflectChangeInAdminUser()
         throws Exception
     {
-        User admin = dataManager.getUser( User.ADMIN );
+        User admin = getDataManager().getUser( User.ADMIN );
 
         assertThat( admin.getRoles(), notNullValue() );
         assertThat( admin.getRoles().size(), equalTo( 1 ) );
         assertThat( admin.getRoles().iterator().next(), equalTo( Role.ADMIN ) );
 
-        dataManager.deleteRole( Role.ADMIN );
+        getDataManager().deleteRole( Role.ADMIN );
 
         roleDeletionListener.waitForChange( 20000, 1000 );
 
-        admin = dataManager.getUser( User.ADMIN );
+        admin = getDataManager().getUser( User.ADMIN );
 
         boolean result = admin.getRoles() == null || admin.getRoles().isEmpty();
         assertThat( result, equalTo( true ) );

@@ -45,6 +45,17 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jboss.weld.se</groupId>
+        <artifactId>weld-se-core</artifactId>
+        <optional>true</optional>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.commonjava.couch</groupId>
+    	<artifactId>couch-app-support</artifactId>
     </dependency>
   </dependencies>
 </project>

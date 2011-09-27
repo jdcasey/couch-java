@@ -17,10 +17,12 @@
  ******************************************************************************/
 package org.commonjava.web.user.rest;
 
+import org.cjtest.fixture.TestUserManagerConfigProducer;
 import org.commonjava.auth.couch.data.UserAppDescription;
+import org.commonjava.couch.io.CouchHttpClient;
 import org.commonjava.web.test.AbstractRESTCouchTest;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
-import org.commonjava.web.user.rest.fixture.RESTfulTestPropertiesProducer;
+import org.commonjava.web.user.rest.fixture.RUMTestPropertiesProvider;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 
@@ -32,7 +34,10 @@ public abstract class AbstractRESTfulUserManagerTest
     public static WebArchive createTestWar()
     {
         TestWarArchiveBuilder builder =
-            new TestWarArchiveBuilder( RESTfulTestPropertiesProducer.class );
+            new TestWarArchiveBuilder( TestUserManagerConfigProducer.class );
+
+        builder.withExtraPackages( true, CouchHttpClient.class.getPackage(),
+                                   RUMTestPropertiesProvider.class.getPackage() );
 
         builder.withAllStandards();
         builder.withTestRESTApplication();

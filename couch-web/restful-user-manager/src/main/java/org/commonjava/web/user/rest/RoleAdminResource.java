@@ -43,7 +43,6 @@ import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
-import org.commonjava.web.common.ser.DenormalizerPostProcessor;
 import org.commonjava.web.common.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
@@ -75,9 +74,7 @@ public class RoleAdminResource
         SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
-        Role role =
-            jsonSerializer.fromRequestBody( request, Role.class,
-                                            new DenormalizerPostProcessor<Role>() );
+        Role role = jsonSerializer.fromRequestBody( request, Role.class );
 
         logger.info( "\n\nGot role: %s\n\n", role );
 
@@ -105,9 +102,7 @@ public class RoleAdminResource
         SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
-        Role role =
-            jsonSerializer.fromRequestBody( request, Role.class,
-                                            new DenormalizerPostProcessor<Role>() );
+        Role role = jsonSerializer.fromRequestBody( request, Role.class );
 
         logger.info( "\n\nGot role: %s\n\n", role );
 

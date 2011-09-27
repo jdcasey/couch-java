@@ -24,29 +24,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
 
-import org.commonjava.couch.change.CouchChangeListener;
 import org.commonjava.couch.change.CouchDocChange;
-import org.commonjava.couch.conf.CouchDBConfiguration;
-import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.db.CouchManager;
+import org.commonjava.couch.fixture.DBFixture;
 import org.commonjava.couch.model.AbstractCouchDocument;
 import org.commonjava.couch.util.ChangeSynchronizer;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class J2EECouchChangeDispatcherTest
 {
-    private static final String URL = "http://developer.commonjava.org/db/test-change-listener";
 
-    private CouchChangeListener listener;
+    private final WeldContainer weld = new Weld().initialize();
 
-    private CouchManager couch;
+    @Rule
+    public DBFixture dbFix = new DBFixture( weld );
 
     private TestListener dispatchListener;
 
@@ -54,41 +51,14 @@ public class J2EECouchChangeDispatcherTest
     public void setupTest()
         throws Exception
     {
-        WeldContainer weld = new Weld().initialize();
-
-        couch = weld.instance().select( CouchManager.class ).get();
-
-        couch.dropDatabase();
-        couch.createDatabase();
-
         dispatchListener = weld.instance().select( TestListener.class ).get();
-
-        listener = weld.instance().select( CouchChangeListener.class ).get();
-        listener.startup();
-    }
-
-    @After
-    public void teardownTest()
-        throws Exception
-    {
-        listener.shutdown();
-        while ( listener.isRunning() )
-        {
-            synchronized ( listener )
-            {
-                System.out.println( "Waiting 2s for change listener to shutdown..." );
-                listener.wait( 2000 );
-            }
-        }
-
-        couch.dropDatabase();
     }
 
     @Test
     public void addDocumentAndDetectCorrespondingChange()
         throws Exception
     {
-        boolean stored = couch.store( new TestDocument( "addedDocument" ), false );
+        boolean stored = getCouch().store( new TestDocument( "addedDocument" ), false );
 
         assertThat( stored, equalTo( true ) );
 
@@ -103,7 +73,7 @@ public class J2EECouchChangeDispatcherTest
         throws Exception
     {
         TestDocument doc = new TestDocument( "addedDocument" );
-        boolean stored = couch.store( doc, false );
+        boolean stored = getCouch().store( doc, false );
 
         assertThat( stored, equalTo( true ) );
 
@@ -115,12 +85,17 @@ public class J2EECouchChangeDispatcherTest
         System.out.println( "Clearing changes list." );
         dispatchListener.changes.clear();
 
-        couch.delete( doc );
+        getCouch().delete( doc );
 
         dispatchListener.waitForChanges( 20 );
 
         System.out.println( "Checking changes in:" + dispatchListener.changes.hashCode() );
         assertThat( dispatchListener.changes.size(), equalTo( 1 ) );
+    }
+
+    private CouchManager getCouch()
+    {
+        return dbFix.getCouchManager();
     }
 
     @Singleton
@@ -172,23 +147,6 @@ public class J2EECouchChangeDispatcherTest
             this.name = name;
         }
 
-    }
-
-    @Singleton
-    public static final class ConfigProvider
-    {
-        private CouchDBConfiguration config;
-
-        @Produces
-        public CouchDBConfiguration getConfig()
-        {
-            if ( config == null )
-            {
-                config = new DefaultCouchDBConfiguration( URL );
-            }
-
-            return config;
-        }
     }
 
 }

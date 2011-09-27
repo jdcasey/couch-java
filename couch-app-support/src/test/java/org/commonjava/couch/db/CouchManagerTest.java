@@ -17,35 +17,26 @@
  ******************************************************************************/
 package org.commonjava.couch.db;
 
-import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
+import static org.commonjava.couch.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
 import org.apache.log4j.Level;
-import org.commonjava.couch.conf.CouchDBConfiguration;
-import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.db.model.SimpleAppDescription;
+import org.commonjava.couch.fixture.DBFixture;
 import org.commonjava.couch.io.CouchAppReader;
-import org.commonjava.couch.io.CouchHttpClient;
-import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.model.CouchApp;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class CouchManagerTest
 {
 
-    private static final String DB_URL = "http://developer.commonjava.org/db/test-couch-manager";
-
-    private final CouchDBConfiguration config = new DefaultCouchDBConfiguration( DB_URL );
-
-    private final Serializer serializer = new Serializer();
-
-    private final CouchManager mgr = new CouchManager( config, new CouchHttpClient( config,
-                                                                                    serializer ),
-                                                       serializer, new CouchAppReader() );
+    @Rule
+    public DBFixture dbFix = new DBFixture();
 
     @BeforeClass
     public static void initLogging()
@@ -57,42 +48,47 @@ public class CouchManagerTest
     public void createAndDropDB()
         throws CouchDBException
     {
-        mgr.dropDatabase();
+        getCouch().dropDatabase();
 
-        assertThat( mgr.exists( "/" ), is( false ) );
+        assertThat( getCouch().exists( "/" ), is( false ) );
 
-        mgr.createDatabase();
+        getCouch().createDatabase();
 
-        assertThat( mgr.exists( "/" ), is( true ) );
+        assertThat( getCouch().exists( "/" ), is( true ) );
 
-        mgr.dropDatabase();
+        getCouch().dropDatabase();
 
-        assertThat( mgr.exists( "/" ), is( false ) );
+        assertThat( getCouch().exists( "/" ), is( false ) );
     }
 
     @Test
     public void createDBThenInstallAppThenDropDB()
         throws CouchDBException, IOException
     {
-        mgr.dropDatabase();
+        getCouch().dropDatabase();
 
-        assertThat( mgr.exists( "/" ), is( false ) );
+        assertThat( getCouch().exists( "/" ), is( false ) );
 
-        mgr.createDatabase();
+        getCouch().createDatabase();
 
-        assertThat( mgr.exists( "/" ), is( true ) );
+        assertThat( getCouch().exists( "/" ), is( true ) );
 
         CouchApp app =
             new CouchAppReader().readAppDefinition( new SimpleAppDescription( "test-app" ) );
 
-        mgr.installApplication( app );
+        getCouch().installApplication( app );
 
-        assertThat( mgr.exists( app ), is( true ) );
+        assertThat( getCouch().exists( app ), is( true ) );
 
-        mgr.dropDatabase();
+        getCouch().dropDatabase();
 
-        assertThat( mgr.exists( app ), is( false ) );
-        assertThat( mgr.exists( "/" ), is( false ) );
+        assertThat( getCouch().exists( app ), is( false ) );
+        assertThat( getCouch().exists( "/" ), is( false ) );
+    }
+
+    private CouchManager getCouch()
+    {
+        return dbFix.getCouchManager();
     }
 
 }

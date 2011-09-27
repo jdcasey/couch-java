@@ -24,6 +24,7 @@ import java.net.URL;
 import org.cjtest.fixture.TestAuthenticationFilter;
 import org.cjtest.fixture.TestRESTApplication;
 import org.cjtest.fixture.TestUserManagerConfigProducer;
+import org.commonjava.auth.couch.change.RoleDeletionListener;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.User;
@@ -62,6 +63,7 @@ public class TestWarArchiveBuilder
         IdUtils.class.getPackage(),
         User.class.getPackage(),
         UserDataManager.class.getPackage(),
+        RoleDeletionListener.class.getPackage(),
         UserManagerConfiguration.class.getPackage(),
         LoggingFixture.class.getPackage(),
         AbstractRESTCouchTest.class.getPackage(),
