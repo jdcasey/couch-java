@@ -34,6 +34,7 @@ import org.apache.shiro.authc.SimpleAccount;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.realm.Realm;
@@ -64,6 +65,7 @@ public class CouchRealm
 
     public CouchRealm( final UserDataManager dataManager, final CouchPermissionResolver resolver )
     {
+        super( new MemoryConstrainedCacheManager() );
         this.dataManager = dataManager;
         this.resolver = resolver;
 
