@@ -303,7 +303,12 @@ public class CouchManager
         req.setParameter( ViewRequest.INCLUDE_DOCS, true );
 
         String url = buildViewUrl( req );
-        LOGGER.info( "Retrieving view listing from: " + url );
+
+        if ( LOGGER.isDebugEnabled() )
+        {
+            LOGGER.debug( "Retrieving view listing from: " + url );
+        }
+
         HttpGet request = new HttpGet( url );
 
         CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( itemType );
@@ -700,7 +705,11 @@ public class CouchManager
         {
             while ( latch.getCount() > 0 )
             {
-                LOGGER.info( "Waiting for " + latch.getCount() + " actions to complete." );
+                if ( LOGGER.isDebugEnabled() )
+                {
+                    LOGGER.debug( "Waiting for " + latch.getCount() + " actions to complete." );
+                }
+
                 try
                 {
                     latch.await( 2, TimeUnit.SECONDS );

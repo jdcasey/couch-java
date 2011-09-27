@@ -61,7 +61,9 @@ public class CouchRealm
     private CouchPermissionResolver resolver;
 
     CouchRealm()
-    {}
+    {
+        super( new MemoryConstrainedCacheManager() );
+    }
 
     public CouchRealm( final UserDataManager dataManager, final CouchPermissionResolver resolver )
     {
