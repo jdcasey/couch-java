@@ -61,17 +61,14 @@ public class CouchRealm
     private CouchPermissionResolver resolver;
 
     CouchRealm()
-    {
-        super( new MemoryConstrainedCacheManager() );
-    }
+    {}
 
     public CouchRealm( final UserDataManager dataManager, final CouchPermissionResolver resolver )
     {
-        super( new MemoryConstrainedCacheManager() );
         this.dataManager = dataManager;
         this.resolver = resolver;
 
-        initResolver();
+        initRealm();
     }
 
     public void setupSecurityManager( final Realm... fallbackRealms )
@@ -90,10 +87,12 @@ public class CouchRealm
     }
 
     @PostConstruct
-    protected void initResolver()
+    protected void initRealm()
     {
         setRolePermissionResolver( resolver );
         setPermissionResolver( resolver );
+        setCacheManager( new MemoryConstrainedCacheManager() );
+        setCachingEnabled( true );
     }
 
     @Override
