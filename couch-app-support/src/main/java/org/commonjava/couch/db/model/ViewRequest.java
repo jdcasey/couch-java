@@ -29,6 +29,8 @@ import java.util.Set;
 public class ViewRequest
 {
 
+    public static final String WILDCARD = "%7B%7D"; // '{}'
+
     public static final String KEY = "key";
 
     public static final String START_KEY = "startkey";
@@ -51,9 +53,48 @@ public class ViewRequest
         this.view = view;
     }
 
-    public void setParameter( final String key, final Object value )
+    public void setFullRangeForBaseKey( final Object baseKey )
     {
-        requestParameters.put( key, stringQueryParameter( value ) );
+        setParameterArray( START_KEY, baseKey );
+        setParameterArray( END_KEY, baseKey, WILDCARD );
+    }
+
+    public void setParameter( final String key, final Object... values )
+    {
+        if ( values.length == 1 )
+        {
+            requestParameters.put( key, stringQueryParameter( values[0] ) );
+        }
+        else
+        {
+            setParameterArray( key, values );
+        }
+    }
+
+    public void setParameterArray( final String key, final Object... values )
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append( "[" );
+        for ( Object val : values )
+        {
+            if ( sb.length() > 1 )
+            {
+                sb.append( "," );
+            }
+
+            if ( WILDCARD.equals( val ) || ( val instanceof Number ) || ( val instanceof Boolean ) )
+            {
+                sb.append( val );
+            }
+            else
+            {
+                sb.append( stringQueryParameter( val ) );
+            }
+        }
+        sb.append( "]" );
+
+        requestParameters.put( key, sb.toString() );
     }
 
     public void setParameter( final String key, final boolean value )
