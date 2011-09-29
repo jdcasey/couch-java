@@ -21,8 +21,8 @@ import static org.commonjava.couch.util.UrlUtils.stringQueryParameter;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,7 +45,8 @@ public class ViewRequest
 
     private Set<String> views;
 
-    private final Map<String, String> requestParameters = new HashMap<String, String>();
+    // NOTE: LinkedHashMap is critical, since CouchDB has order-sensitive request parameters.
+    private final Map<String, String> requestParameters = new LinkedHashMap<String, String>();
 
     public ViewRequest( final String application, final String view )
     {
