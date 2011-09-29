@@ -23,6 +23,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Singleton;
 
 import org.apache.http.HttpEntity;
 import org.commonjava.couch.db.action.BulkActionHolder;
@@ -35,14 +40,23 @@ import org.commonjava.couch.model.CouchError;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+@Singleton
 public class Serializer
 {
 
-    private final SerializationAdapter[] baseAdapters;
+    private final Set<SerializationAdapter> baseAdapters = new HashSet<SerializationAdapter>();
+
+    Serializer()
+    {}
 
     public Serializer( final SerializationAdapter... baseAdapters )
     {
-        this.baseAdapters = baseAdapters;
+        this.baseAdapters.addAll( Arrays.asList( baseAdapters ) );
+    }
+
+    public void registerSerializationAdapters( final SerializationAdapter... adapters )
+    {
+        this.baseAdapters.addAll( Arrays.asList( adapters ) );
     }
 
     public String toString( final BulkActionHolder actions, final SerializationAdapter... adapters )

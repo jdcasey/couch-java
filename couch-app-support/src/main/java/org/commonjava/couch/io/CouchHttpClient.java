@@ -51,12 +51,11 @@ public class CouchHttpClient
     @Inject
     private CouchDBConfiguration config;
 
-    private final Serializer serializer;
+    @Inject
+    private Serializer serializer;
 
     public CouchHttpClient()
-    {
-        this.serializer = new Serializer();
-    }
+    {}
 
     public CouchHttpClient( final CouchDBConfiguration config, final Serializer serializer )
     {

@@ -22,14 +22,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 
@@ -37,17 +42,37 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+@Singleton
 public class JsonSerializer
 {
 
     private final Logger logger = new Logger( getClass() );
 
+    private final Set<SerializationAdapter> baseAdapters = new HashSet<SerializationAdapter>();
+
     JsonSerializer()
     {}
+
+    public JsonSerializer( final SerializationAdapter... baseAdapters )
+    {
+        this.baseAdapters.addAll( Arrays.asList( baseAdapters ) );
+    }
+
+    public void registerSerializationAdapters( final SerializationAdapter... adapters )
+    {
+        this.baseAdapters.addAll( Arrays.asList( adapters ) );
+    }
 
     private Gson getGson()
     {
         GsonBuilder builder = new GsonBuilder();
+        if ( baseAdapters != null )
+        {
+            for ( SerializationAdapter adapter : baseAdapters )
+            {
+                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+            }
+        }
         return builder.create();
     }
 

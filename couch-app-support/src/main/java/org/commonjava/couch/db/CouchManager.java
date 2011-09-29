@@ -90,8 +90,6 @@ public class CouchManager
 
     private static final String BULK_DOCS = "_bulk_docs";
 
-    private final Serializer serializer;
-
     private final ExecutorService exec = Executors.newCachedThreadPool();
 
     private final CouchAppReader appReader;
@@ -108,9 +106,11 @@ public class CouchManager
     @Inject
     private Event<ApplicationEvent> appEvent;
 
+    @Inject
+    private Serializer serializer;
+
     protected CouchManager()
     {
-        this.serializer = new Serializer();
         this.appReader = new CouchAppReader();
     }
 

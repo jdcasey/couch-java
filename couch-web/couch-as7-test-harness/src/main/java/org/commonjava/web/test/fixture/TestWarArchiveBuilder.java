@@ -117,7 +117,7 @@ public class TestWarArchiveBuilder
 
     public TestWarArchiveBuilder withAllStandards()
     {
-        return withStandardContents().withStandardAuthentication();
+        return withStandardPackages().withEmptyBeansXml().withLog4jProperties().withStandardAuthentication();
     }
 
     public TestWarArchiveBuilder withTestUserManagerConfigProducer()
@@ -171,13 +171,23 @@ public class TestWarArchiveBuilder
         return this;
     }
 
-    public TestWarArchiveBuilder withStandardContents()
+    public TestWarArchiveBuilder withStandardPackages()
     {
         war.addPackages( true, STD_PACKAGES );
         war.addPackages( true, STD_PACKAGE_ROOTS );
 
+        return this;
+    }
+
+    public TestWarArchiveBuilder withEmptyBeansXml()
+    {
         war.addAsWebInfResource( EmptyAsset.INSTANCE, "beans.xml" );
 
+        return this;
+    }
+
+    public TestWarArchiveBuilder withLog4jProperties()
+    {
         ClassLoader cloader = Thread.currentThread().getContextClassLoader();
 
         URL resource = cloader.getResource( "log4j.properties" );

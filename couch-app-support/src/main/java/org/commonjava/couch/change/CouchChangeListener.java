@@ -67,7 +67,8 @@ public class CouchChangeListener
     @Inject
     private CouchManager couch;
 
-    private final Serializer serializer;
+    @Inject
+    private Serializer serializer;
 
     private ChangeListenerMetadata metadata;
 
@@ -78,9 +79,7 @@ public class CouchChangeListener
     private final Object internalLock = new Object();
 
     public CouchChangeListener()
-    {
-        serializer = new Serializer();
-    }
+    {}
 
     public CouchChangeListener( final CouchChangeDispatcher dispatcher, final CouchHttpClient http,
                                 final CouchDBConfiguration config, final CouchManager couch,
