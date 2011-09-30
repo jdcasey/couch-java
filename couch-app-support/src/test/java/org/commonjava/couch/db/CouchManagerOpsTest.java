@@ -35,8 +35,6 @@ import org.commonjava.couch.fixture.TestUser;
 import org.commonjava.couch.io.CouchAppReader;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -51,21 +49,6 @@ public class CouchManagerOpsTest
     public static void initLogging()
     {
         setupLogging( Level.DEBUG );
-    }
-
-    @Before
-    public void setupDb()
-        throws Exception
-    {
-        getCouch().dropDatabase();
-        getCouch().createDatabase();
-    }
-
-    @After
-    public void teardownDb()
-        throws Exception
-    {
-        getCouch().dropDatabase();
     }
 
     @Test

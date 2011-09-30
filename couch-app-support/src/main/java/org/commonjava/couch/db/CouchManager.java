@@ -46,6 +46,7 @@ import javax.inject.Inject;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpDelete;
@@ -53,6 +54,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.commonjava.couch.change.j2ee.ApplicationEvent;
@@ -64,12 +66,14 @@ import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.handler.SerializedGetHandler;
 import org.commonjava.couch.db.model.AppDescription;
+import org.commonjava.couch.db.model.AttachmentDownload;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.io.CouchAppReader;
 import org.commonjava.couch.io.CouchHttpClient;
 import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.io.json.CouchObjectListDeserializer;
+import org.commonjava.couch.model.Attachment;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.CouchDocument;
@@ -414,6 +418,114 @@ public class CouchManager
         String url = buildDocUrl( doc, true );
         HttpDelete request = new HttpDelete( url );
         client.executeHttp( request, SC_OK, "Failed to delete document" );
+    }
+
+    public void attach( final CouchDocument doc, final Attachment attachment )
+        throws CouchDBException
+    {
+        if ( !documentRevisionExists( doc ) )
+        {
+            throw new CouchDBException( "Cannot attach to a non-existent document: %s",
+                                        doc.getCouchDocId() );
+        }
+
+        String url;
+        try
+        {
+            url =
+                buildUrl( config.getDatabaseUrl(),
+                          Collections.singletonMap( REV, doc.getCouchDocRev() ),
+                          doc.getCouchDocId(), attachment.getName() );
+        }
+        catch ( MalformedURLException e )
+        {
+            throw new CouchDBException(
+                                        "Failed to format attachment URL for: %s to document: %s. Error: %s",
+                                        e, attachment.getName(), doc.getCouchDocId(),
+                                        e.getMessage() );
+        }
+
+        LOGGER.info( "Attaching " + attachment.getName() + " to document: " + doc.getCouchDocId()
+            + "\nURL: " + url );
+
+        HttpPut request = new HttpPut( url );
+        request.setHeader( HttpHeaders.CONTENT_TYPE, attachment.getContentType() );
+
+        try
+        {
+            request.setEntity( new InputStreamEntity( attachment.getData(),
+                                                      attachment.getContentLength() ) );
+        }
+        catch ( IOException e )
+        {
+            throw new CouchDBException( "Failed to read attachment data: %s. Error: %s", e,
+                                        attachment.getName(), e.getMessage() );
+        }
+
+        client.executeHttp( request, SC_CREATED, "Failed to attach to document" );
+    }
+
+    public void deleteAttachment( final CouchDocument doc, final String attachmentName )
+        throws CouchDBException
+    {
+        doc.setCouchDocRev( null );
+        if ( !documentRevisionExists( doc ) )
+        {
+            throw new CouchDBException(
+                                        "Cannot delete attachment from a non-existent document: %s",
+                                        doc.getCouchDocId() );
+        }
+
+        String url;
+        try
+        {
+            url =
+                buildUrl( config.getDatabaseUrl(),
+                          Collections.singletonMap( REV, doc.getCouchDocRev() ),
+                          doc.getCouchDocId(), attachmentName );
+        }
+        catch ( MalformedURLException e )
+        {
+            throw new CouchDBException(
+                                        "Failed to format attachment URL for: %s to document: %s. Error: %s",
+                                        e, attachmentName, doc.getCouchDocId(), e.getMessage() );
+        }
+
+        HttpDelete request = new HttpDelete( url );
+        client.executeHttp( request, SC_OK, "Failed to delete attachment" );
+    }
+
+    public Attachment getAttachment( final CouchDocument doc, final String attachmentName )
+        throws CouchDBException
+    {
+        String url;
+        try
+        {
+            url = buildUrl( config.getDatabaseUrl(), doc.getCouchDocId(), attachmentName );
+        }
+        catch ( MalformedURLException e )
+        {
+            throw new CouchDBException(
+                                        "Failed to format attachment URL for: %s to document: %s. Error: %s",
+                                        e, attachmentName, doc.getCouchDocId(), e.getMessage() );
+        }
+
+        HttpGet request = new HttpGet( url );
+        HttpResponse response =
+            client.executeHttpWithResponse( request, "Failed to retrieve attachment." );
+
+        if ( response.getStatusLine().getStatusCode() == SC_NOT_FOUND )
+        {
+            return null;
+        }
+        else if ( response.getStatusLine().getStatusCode() != SC_OK )
+        {
+            throw new CouchDBException( "Failed to retrieve attachment: %s from: %s. Reason: %s",
+                                        attachmentName, doc.getCouchDocId(),
+                                        response.getStatusLine() );
+        }
+
+        return new AttachmentDownload( attachmentName, request, response, client );
     }
 
     public boolean viewExists( final String appName, final String viewName )
