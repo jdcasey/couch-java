@@ -41,7 +41,7 @@ import org.junit.Test;
 public class CouchChangeListenerTest
 {
 
-    private static final String URL = "http://developer.commonjava.org/db/test-change-listener";
+    private static final String URL = "http://localhost:5984/test-change-listener";
 
     private CouchChangeListener listener;
 

@@ -69,7 +69,7 @@ public class CouchRealmTest
         couch =
             new CouchManager(
                               new DefaultCouchDBConfiguration(
-                                                               "http://developer.commonjava.org/db/test-shiro" ) );
+                                                               "http://localhost:5984/test-shiro" ) );
 
         manager = new UserDataManager( config, passwordManager, couch );
 
