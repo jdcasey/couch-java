@@ -21,7 +21,7 @@
   
   <parent>
     <groupId>org.commonjava.couch</groupId>
-    <artifactId>couch-apps-parent</artifactId>
+    <artifactId>couch-java-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 

@@ -21,7 +21,7 @@
   
   <parent>
     <groupId>org.commonjava.couch</groupId>
-    <artifactId>couch-apps-parent</artifactId>
+    <artifactId>couch-java-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   
@@ -40,11 +40,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>artifact-dependency-database</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
       	<groupId>org.commonjava.couch.web</groupId>
       	<artifactId>couch-as7-test-harness</artifactId>
       	<version>${couchJavaVersion}</version>
@@ -58,11 +53,6 @@
       <dependency>
       	<groupId>org.commonjava.couch.web</groupId>
       	<artifactId>restful-user-manager</artifactId>
-      	<version>${couchJavaVersion}</version>
-      </dependency>
-      <dependency>
-      	<groupId>org.commonjava.couch.web</groupId>
-      	<artifactId>artifact-dependency-database</artifactId>
       	<version>${couchJavaVersion}</version>
       </dependency>
     </dependencies>
