@@ -309,7 +309,7 @@
     <configurationVersion>0.1</configurationVersion>
     <slf4jVersion>1.6.2</slf4jVersion>
     <shiroVersion>1.1.0</shiroVersion>
-    <couchJavaVersion>1.0-SNAPSHOT</couchJavaVersion>
+    <couchJavaVersion>1.0</couchJavaVersion>
   </properties>
   
   <profiles>
