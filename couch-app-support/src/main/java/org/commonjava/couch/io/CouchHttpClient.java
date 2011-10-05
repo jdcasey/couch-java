@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,7 +42,6 @@ import org.commonjava.couch.db.handler.SerializedGetHandler;
 import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchError;
 
-@Singleton
 public class CouchHttpClient
 {
     private HttpClient client;

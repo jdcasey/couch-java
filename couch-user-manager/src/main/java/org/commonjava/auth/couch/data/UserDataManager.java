@@ -30,17 +30,17 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.commonjava.auth.couch.change.event.UserManagerDeleteEvent;
 import org.commonjava.auth.couch.change.event.PermissionUpdateEvent;
 import org.commonjava.auth.couch.change.event.RoleUpdateEvent;
 import org.commonjava.auth.couch.change.event.UpdateType;
+import org.commonjava.auth.couch.change.event.UserManagerDeleteEvent;
 import org.commonjava.auth.couch.change.event.UserUpdateEvent;
+import org.commonjava.auth.couch.conf.UserManager;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserAppDescription.View;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
-import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.db.model.ViewRequest;
@@ -51,13 +51,11 @@ public class UserDataManager
 {
 
     @Inject
+    @UserManager
     private CouchManager couch;
 
     @Inject
     private UserManagerConfiguration config;
-
-    @Inject
-    private CouchDBConfiguration couchConfig;
 
     @Inject
     private PasswordManager passwordManager;
@@ -96,9 +94,8 @@ public class UserDataManager
         catch ( CouchDBException e )
         {
             throw new UserDataException(
-                                         "Failed to initialize user-management database: %s (application: %s). Reason: %s",
-                                         e, couchConfig.getDatabaseUrl(), description,
-                                         e.getMessage() );
+                                         "Failed to initialize user-management database (application: %s). Reason: %s",
+                                         e, description, e.getMessage() );
         }
     }
 
