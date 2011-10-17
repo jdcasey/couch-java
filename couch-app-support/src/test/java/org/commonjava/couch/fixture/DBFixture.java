@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executors;
 
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.commonjava.couch.change.CouchChangeListener;
@@ -165,6 +166,56 @@ public class DBFixture
     public static final class ConfigProvider
     {
         private CouchDBConfiguration config;
+
+        private CouchHttpClient httpClient;
+
+        private CouchManager couch;
+
+        private CouchChangeListener changeListener;
+
+        @Inject
+        private Serializer serializer;
+
+        @Inject
+        private CouchAppReader appReader;
+
+        @Inject
+        private CouchChangeDispatcher dispatcher;
+
+        @Produces
+        public CouchChangeListener getListener()
+        {
+            if ( changeListener == null )
+            {
+                changeListener =
+                    new CouchChangeListener( dispatcher, getHttpClient(), getConfig(), getCouch(),
+                                             serializer );
+            }
+
+            return changeListener;
+        }
+
+        @Produces
+        public CouchManager getCouch()
+        {
+            if ( couch == null )
+            {
+                couch = new CouchManager( getConfig(), getHttpClient(), serializer, appReader );
+            }
+
+            return couch;
+        }
+
+        @Produces
+        public CouchHttpClient getHttpClient()
+        {
+            if ( httpClient == null )
+            {
+                httpClient = new CouchHttpClient( getConfig(), serializer );
+            }
+
+            return httpClient;
+        }
 
         @Produces
         public CouchDBConfiguration getConfig()

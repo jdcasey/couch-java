@@ -1,10 +1,13 @@
 package org.cjtest.fixture;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
+import javax.inject.Qualifier;
 
 import org.commonjava.couch.change.CouchChangeListener;
 import org.commonjava.couch.change.dispatch.CouchChangeDispatcher;
@@ -38,12 +41,12 @@ public class CouchFixture
 
     public CouchFixture()
     {
-        this( (CouchChangeDispatcher) null );
+        this( (CouchChangeDispatcher) null, DB_URL );
     }
 
-    public CouchFixture( final CouchChangeDispatcher dispatcher )
+    public CouchFixture( final CouchChangeDispatcher dispatcher, final String dbUrl )
     {
-        couchConfig = new DefaultCouchDBConfiguration( DB_URL );
+        couchConfig = new DefaultCouchDBConfiguration( dbUrl );
 
         serializer = new Serializer();
 
@@ -57,9 +60,9 @@ public class CouchFixture
                                                                  serializer );
     }
 
-    public CouchFixture( final ThreadableListener... listeners )
+    public CouchFixture( final String dbUrl, final ThreadableListener... listeners )
     {
-        couchConfig = new DefaultCouchDBConfiguration( DB_URL );
+        couchConfig = new DefaultCouchDBConfiguration( dbUrl );
 
         serializer = new Serializer();
 
@@ -74,13 +77,13 @@ public class CouchFixture
                                      couchHttp, couchConfig, couchManager, serializer );
     }
 
-    public CouchFixture( final WeldContainer weld )
+    public CouchFixture( final WeldContainer weld, final Annotation... qualifiers )
     {
-        serializer = new Serializer();
-        couchConfig = weld.instance().select( CouchDBConfiguration.class ).get();
-        couchHttp = weld.instance().select( CouchHttpClient.class ).get();
-        couchManager = weld.instance().select( CouchManager.class ).get();
-        listener = weld.instance().select( CouchChangeListener.class ).get();
+        serializer = weld.instance().select( Serializer.class ).get();
+        couchConfig = weld.instance().select( CouchDBConfiguration.class, qualifiers ).get();
+        couchHttp = weld.instance().select( CouchHttpClient.class, qualifiers ).get();
+        couchManager = weld.instance().select( CouchManager.class, qualifiers ).get();
+        listener = weld.instance().select( CouchChangeListener.class, qualifiers ).get();
     }
 
     public CouchChangeListener getChangeListener()
@@ -165,8 +168,28 @@ public class CouchFixture
         super.after();
     }
 
-    @Singleton
-    public static final class ConfigProvider
+    protected static Annotation[] getFixtureQualifiers( final Class<? extends CouchFixture> type )
+    {
+        Annotation[] annotations = type.getAnnotations();
+        Set<Annotation> annos = new HashSet<Annotation>();
+        for ( Annotation annotation : annotations )
+        {
+            Class<?> annoCls = annotation.annotationType();
+            Annotation[] aannos = annoCls.getAnnotations();
+            for ( Annotation aanno : aannos )
+            {
+                if ( aanno instanceof Qualifier )
+                {
+                    annos.add( annotation );
+                    break;
+                }
+            }
+        }
+
+        return annos.toArray( new Annotation[] {} );
+    }
+
+    protected abstract static class FixtureConfigProvider
     {
         private CouchDBConfiguration config;
 

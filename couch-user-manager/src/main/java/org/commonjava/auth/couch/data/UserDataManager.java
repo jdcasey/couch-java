@@ -35,9 +35,9 @@ import org.commonjava.auth.couch.change.event.RoleUpdateEvent;
 import org.commonjava.auth.couch.change.event.UpdateType;
 import org.commonjava.auth.couch.change.event.UserManagerDeleteEvent;
 import org.commonjava.auth.couch.change.event.UserUpdateEvent;
-import org.commonjava.auth.couch.conf.UserManager;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserAppDescription.View;
+import org.commonjava.auth.couch.inject.UserDatabase;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
@@ -51,7 +51,7 @@ public class UserDataManager
 {
 
     @Inject
-    @UserManager
+    @UserDatabase
     private CouchManager couch;
 
     @Inject

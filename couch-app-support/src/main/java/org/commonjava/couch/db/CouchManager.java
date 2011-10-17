@@ -42,7 +42,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.event.Event;
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -81,6 +83,8 @@ import org.commonjava.couch.model.CouchError;
 import org.commonjava.couch.model.DenormalizedCouchDoc;
 import org.commonjava.couch.util.ToString;
 
+@Named( "dont-use-directly" )
+@Alternative
 public class CouchManager
 {
 
@@ -94,9 +98,10 @@ public class CouchManager
 
     private static final String BULK_DOCS = "_bulk_docs";
 
-    private final ExecutorService exec = Executors.newCachedThreadPool();
+    private ExecutorService exec;
 
-    private final CouchAppReader appReader;
+    @Inject
+    private CouchAppReader appReader;
 
     @Inject
     private CouchDBConfiguration config;
@@ -114,9 +119,7 @@ public class CouchManager
     private Serializer serializer;
 
     protected CouchManager()
-    {
-        this.appReader = new CouchAppReader();
-    }
+    {}
 
     public CouchManager( final CouchDBConfiguration config, final CouchHttpClient client,
                          final Serializer serializer, final CouchAppReader appReader )
@@ -803,9 +806,14 @@ public class CouchManager
         }
     }
 
-    protected void threadedExecute( final Set<? extends CouchDocumentAction> actions )
+    protected synchronized void threadedExecute( final Set<? extends CouchDocumentAction> actions )
         throws CouchDBException
     {
+        if ( exec == null )
+        {
+            exec = Executors.newCachedThreadPool();
+        }
+
         CountDownLatch latch = new CountDownLatch( actions.size() );
         for ( CouchDocumentAction action : actions )
         {

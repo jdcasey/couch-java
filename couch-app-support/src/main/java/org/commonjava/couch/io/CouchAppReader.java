@@ -27,11 +27,14 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Singleton;
+
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.model.AppDescription;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchAppView;
 
+@Singleton
 public class CouchAppReader
 {
     private static final String APP_BASEPATH = "couchapps/";

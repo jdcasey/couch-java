@@ -18,6 +18,7 @@
 package org.commonjava.couch.conf;
 
 import javax.enterprise.inject.Alternative;
+import javax.inject.Named;
 
 import org.commonjava.couch.util.UrlUtils;
 import org.commonjava.couch.util.UrlUtils.UrlInfo;
@@ -26,6 +27,7 @@ import org.commonjava.web.config.annotation.SectionName;
 
 @SectionName( "database" )
 @Alternative
+@Named( "do-not-use-directly" )
 public class DefaultCouchDBConfiguration
     implements CouchDBConfiguration
 {

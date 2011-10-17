@@ -1,5 +1,6 @@
 package org.commonjava.auth.couch.fixture;
 
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
 
@@ -8,11 +9,16 @@ import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataManager;
+import org.commonjava.auth.couch.inject.UserDatabase;
+import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.jboss.weld.environment.se.WeldContainer;
 
+@UserDatabase
 public class CouchUserFixture
     extends CouchFixture
 {
+
+    public static final String DB_URL = "http://localhost:5984/test-user-db";
 
     private final UserDataManager userDataManager;
 
@@ -24,7 +30,7 @@ public class CouchUserFixture
 
     public CouchUserFixture( final WeldContainer weld )
     {
-        super( weld );
+        super( weld, getFixtureQualifiers( CouchUserFixture.class ) );
         userConfig = weld.instance().select( UserManagerConfiguration.class ).get();
         passwordManager = weld.instance().select( PasswordManager.class ).get();
         userDataManager = weld.instance().select( UserDataManager.class ).get();
@@ -33,6 +39,7 @@ public class CouchUserFixture
 
     public CouchUserFixture()
     {
+        super( DB_URL );
         this.userConfig = new DefaultUserManagerConfig();
         this.passwordManager = new PasswordManager();
         this.userDataManager = new UserDataManager( userConfig, passwordManager, getCouchManager() );
@@ -60,7 +67,7 @@ public class CouchUserFixture
     }
 
     @Singleton
-    public static final class ConfigProvider
+    public static final class UserFixtureConfigProvider
     {
         private UserManagerConfiguration umConfig;
 
@@ -71,10 +78,19 @@ public class CouchUserFixture
             {
                 DefaultUserManagerConfig c = new DefaultUserManagerConfig();
                 c.setAdminPassword( "password" );
+                c.setDatabaseUrl( DB_URL );
                 umConfig = c;
             }
 
             return umConfig;
+        }
+
+        @Produces
+        @UserDatabase
+        @Default
+        public CouchDBConfiguration getConfig()
+        {
+            return getUserManagerConfig().getUserDatabaseConfig();
         }
     }
 

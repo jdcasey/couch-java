@@ -1,22 +1,21 @@
-package org.commonjava.auth.couch.conf;
+package org.commonjava.auth.couch.inject;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Stereotype;
 import javax.inject.Named;
+import javax.inject.Qualifier;
 
-@Alternative
+@Qualifier
 @Named
-@Stereotype
 @Retention( RetentionPolicy.RUNTIME )
 @Target( {
     ElementType.FIELD,
+    ElementType.METHOD,
     ElementType.TYPE } )
-public @interface UserManager
+public @interface UserDatabase
 {
 
 }

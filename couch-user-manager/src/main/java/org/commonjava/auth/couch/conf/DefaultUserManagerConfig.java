@@ -22,13 +22,16 @@ import javax.inject.Named;
 
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.model.User;
+import org.commonjava.couch.conf.CouchDBConfiguration;
+import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 
 @SectionName( "user-manager" )
-@Named( "unused" )
+@Named( "do-not-use-directly" )
 @Alternative
 public class DefaultUserManagerConfig
+    extends DefaultCouchDBConfiguration
     implements UserManagerConfiguration
 {
 
@@ -107,6 +110,12 @@ public class DefaultUserManagerConfig
     public void setAdminLastName( final String adminLastName )
     {
         this.adminLastName = adminLastName;
+    }
+
+    @Override
+    public CouchDBConfiguration getUserDatabaseConfig()
+    {
+        return new DefaultCouchDBConfiguration( getDatabaseUrl(), getMaxConnections() );
     }
 
 }

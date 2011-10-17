@@ -26,8 +26,9 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.Named;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -44,7 +45,8 @@ import org.commonjava.util.logging.Logger;
 
 import com.google.gson.annotations.SerializedName;
 
-@Singleton
+@Named( "dont-use-directly" )
+@Alternative
 public class CouchChangeListener
     implements Runnable
 {

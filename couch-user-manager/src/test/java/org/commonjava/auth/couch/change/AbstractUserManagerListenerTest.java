@@ -19,16 +19,13 @@ package org.commonjava.auth.couch.change;
 
 import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Level;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.fixture.CouchUserFixture;
-import org.commonjava.couch.util.ChangeSynchronizer;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 
 public abstract class AbstractUserManagerListenerTest
@@ -39,15 +36,17 @@ public abstract class AbstractUserManagerListenerTest
     @Rule
     public CouchUserFixture fixture = new CouchUserFixture( weld );
 
+    @BeforeClass
+    public static void logging()
+    {
+        setupLogging( Level.INFO );
+
+    }
+
     @Before
     public final void setupTest()
         throws Exception
     {
-        Map<String, Level> customEntries = new HashMap<String, Level>();
-        customEntries.put( ChangeSynchronizer.class.getName(), Level.DEBUG );
-
-        setupLogging( Level.INFO, customEntries );
-
         setupFixtures();
     }
 

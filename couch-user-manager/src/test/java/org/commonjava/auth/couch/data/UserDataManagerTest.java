@@ -17,16 +17,19 @@
  ******************************************************************************/
 package org.commonjava.auth.couch.data;
 
+import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.commonjava.auth.couch.fixture.CouchUserFixture;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -35,6 +38,12 @@ public class UserDataManagerTest
 
     @Rule
     public CouchUserFixture fixture = new CouchUserFixture();
+
+    @BeforeClass
+    public static void logging()
+    {
+        setupLogging( Level.INFO );
+    }
 
     @Test
     public void addSimpleUserRolePermission()
