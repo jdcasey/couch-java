@@ -15,7 +15,7 @@ import javax.inject.Qualifier;
     ElementType.FIELD,
     ElementType.METHOD,
     ElementType.TYPE } )
-public @interface UserDatabase
+public @interface UserData
 {
 
 }

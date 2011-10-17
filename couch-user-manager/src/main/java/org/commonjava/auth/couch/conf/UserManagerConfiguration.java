@@ -26,6 +26,6 @@ public interface UserManagerConfiguration
 
     User createInitialAdminUser( final PasswordManager passwordManager );
 
-    CouchDBConfiguration getUserDatabaseConfig();
+    CouchDBConfiguration getDatabaseConfig();
 
 }

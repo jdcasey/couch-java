@@ -17,8 +17,12 @@
  ******************************************************************************/
 package org.commonjava.web.user.rest;
 
+import javax.inject.Inject;
+
 import org.cjtest.fixture.TestUserManagerConfigProducer;
 import org.commonjava.auth.couch.data.UserAppDescription;
+import org.commonjava.auth.couch.inject.UserData;
+import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.io.CouchHttpClient;
 import org.commonjava.web.test.AbstractRESTCouchTest;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
@@ -29,6 +33,10 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 public abstract class AbstractRESTfulUserManagerTest
     extends AbstractRESTCouchTest
 {
+
+    @Inject
+    @UserData
+    private CouchManager couch;
 
     @Deployment
     public static WebArchive createTestWar()
@@ -50,5 +58,11 @@ public abstract class AbstractRESTfulUserManagerTest
 
     protected AbstractRESTfulUserManagerTest()
     {}
+
+    @Override
+    protected CouchManager getCouchManager()
+    {
+        return couch;
+    }
 
 }

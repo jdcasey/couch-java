@@ -9,11 +9,11 @@ import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.inject.UserDatabase;
+import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.jboss.weld.environment.se.WeldContainer;
 
-@UserDatabase
+@UserData
 public class CouchUserFixture
     extends CouchFixture
 {
@@ -86,11 +86,11 @@ public class CouchUserFixture
         }
 
         @Produces
-        @UserDatabase
+        @UserData
         @Default
         public CouchDBConfiguration getConfig()
         {
-            return getUserManagerConfig().getUserDatabaseConfig();
+            return getUserManagerConfig().getDatabaseConfig();
         }
     }
 

@@ -23,9 +23,7 @@ import javax.inject.Named;
 import org.commonjava.couch.util.UrlUtils;
 import org.commonjava.couch.util.UrlUtils.UrlInfo;
 import org.commonjava.web.config.annotation.ConfigName;
-import org.commonjava.web.config.annotation.SectionName;
 
-@SectionName( "database" )
 @Alternative
 @Named( "do-not-use-directly" )
 public class DefaultCouchDBConfiguration

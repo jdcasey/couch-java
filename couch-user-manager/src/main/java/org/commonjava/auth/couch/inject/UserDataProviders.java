@@ -14,7 +14,7 @@ import org.commonjava.couch.io.CouchHttpClient;
 import org.commonjava.couch.io.Serializer;
 
 @Singleton
-public class UserDatabaseProviders
+public class UserDataProviders
 {
 
     @Inject
@@ -36,16 +36,16 @@ public class UserDatabaseProviders
     private CouchChangeListener changeListener;
 
     @Produces
-    @UserDatabase
+    @UserData
     @Default
-    public synchronized CouchChangeListener getUserChangeListener()
+    public synchronized CouchChangeListener getChangeListener()
     {
         System.out.println( "Returning change listener for user DB" );
         if ( changeListener == null )
         {
             changeListener =
-                new CouchChangeListener( dispatcher, getUserHttpClient(),
-                                         userConfig.getUserDatabaseConfig(), getUserCouchManager(),
+                new CouchChangeListener( dispatcher, getHttpClient(),
+                                         userConfig.getDatabaseConfig(), getCouchManager(),
                                          serializer );
         }
 
@@ -53,28 +53,28 @@ public class UserDatabaseProviders
     }
 
     @Produces
-    @UserDatabase
+    @UserData
     @Default
-    public synchronized CouchManager getUserCouchManager()
+    public synchronized CouchManager getCouchManager()
     {
         if ( couchManager == null )
         {
             couchManager =
-                new CouchManager( userConfig.getUserDatabaseConfig(), getUserHttpClient(),
-                                  serializer, appReader );
+                new CouchManager( userConfig.getDatabaseConfig(), getHttpClient(), serializer,
+                                  appReader );
         }
 
         return couchManager;
     }
 
     @Produces
-    @UserDatabase
+    @UserData
     @Default
-    public synchronized CouchHttpClient getUserHttpClient()
+    public synchronized CouchHttpClient getHttpClient()
     {
         if ( httpClient == null )
         {
-            httpClient = new CouchHttpClient( userConfig.getUserDatabaseConfig(), serializer );
+            httpClient = new CouchHttpClient( userConfig.getDatabaseConfig(), serializer );
         }
 
         return httpClient;

@@ -19,6 +19,7 @@ package org.cjtest.fixture;
 
 import java.util.Properties;
 
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,6 +27,7 @@ import javax.inject.Singleton;
 
 import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
+import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.web.test.fixture.TestPropertyDefinitions;
@@ -43,6 +45,8 @@ public class TestUserManagerConfigProducer
     private Properties testProperties;
 
     @Produces
+    @UserData
+    @Default
     public synchronized CouchDBConfiguration getCouchDBConfiguration()
     {
         if ( couchConfig == null )
@@ -61,7 +65,12 @@ public class TestUserManagerConfigProducer
         if ( umConfig == null )
         {
             umConfig =
-                new DefaultUserManagerConfig( "admin@nowhere.com", "password", "Admin", "User" );
+                new DefaultUserManagerConfig(
+                                              "admin@nowhere.com",
+                                              "password",
+                                              "Admin",
+                                              "User",
+                                              testProperties.getProperty( TestPropertyDefinitions.DATABASE_URL ) );
         }
 
         return umConfig;

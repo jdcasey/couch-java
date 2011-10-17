@@ -66,9 +66,6 @@ public abstract class AbstractRESTCouchTest
     protected UserManagerConfiguration config;
 
     @Inject
-    protected CouchManager couch;
-
-    @Inject
     protected PasswordManager passwordManager;
 
     @Inject
@@ -79,11 +76,13 @@ public abstract class AbstractRESTCouchTest
     protected AbstractRESTCouchTest()
     {}
 
+    protected abstract CouchManager getCouchManager();
+
     @Before
     public final void setupRESTCouchTest()
         throws Exception
     {
-        couch.dropDatabase();
+        getCouchManager().dropDatabase();
 
         userManager.install();
         userManager.setupAdminInformation();
@@ -101,7 +100,7 @@ public abstract class AbstractRESTCouchTest
     public final void teardownRESTCouchTest()
         throws Exception
     {
-        couch.dropDatabase();
+        getCouchManager().dropDatabase();
     }
 
     protected void assertLocationHeader( final HttpResponse response, final String value )

@@ -43,16 +43,20 @@ public class DefaultUserManagerConfig
 
     private String adminLastName;
 
+    private CouchDBConfiguration dbConfig;
+
     public DefaultUserManagerConfig()
     {}
 
     public DefaultUserManagerConfig( final String adminEmail, final String adminPassword,
-                                     final String adminFirstName, final String adminLastName )
+                                     final String adminFirstName, final String adminLastName,
+                                     final String dbUrl )
     {
         this.adminEmail = adminEmail;
         this.adminPassword = adminPassword;
         this.adminFirstName = adminFirstName;
         this.adminLastName = adminLastName;
+        setDatabaseUrl( dbUrl );
     }
 
     @Override
@@ -113,9 +117,14 @@ public class DefaultUserManagerConfig
     }
 
     @Override
-    public CouchDBConfiguration getUserDatabaseConfig()
+    public CouchDBConfiguration getDatabaseConfig()
     {
-        return new DefaultCouchDBConfiguration( getDatabaseUrl(), getMaxConnections() );
+        if ( dbConfig == null )
+        {
+            dbConfig = new DefaultCouchDBConfiguration( getDatabaseUrl(), getMaxConnections() );
+        }
+
+        return dbConfig;
     }
 
 }
