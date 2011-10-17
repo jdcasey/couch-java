@@ -51,13 +51,13 @@ public class DefaultCouchDBConfiguration
     public DefaultCouchDBConfiguration()
     {}
 
-    @ConfigName( "url" )
+    @ConfigName( "db.url" )
     public void setDatabaseUrl( final String databaseUrl )
     {
         this.urlInfo = UrlUtils.parseUrlInfo( databaseUrl );
     }
 
-    @ConfigName( "connections.max" )
+    @ConfigName( "db.connections.max" )
     public void setMaxConnections( final int maxConnections )
     {
         this.maxConnections = maxConnections;
