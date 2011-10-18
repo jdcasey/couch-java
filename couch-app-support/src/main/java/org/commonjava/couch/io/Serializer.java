@@ -32,6 +32,7 @@ import javax.inject.Singleton;
 import org.apache.http.HttpEntity;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
+import org.commonjava.couch.db.model.CouchDocRefSet;
 import org.commonjava.couch.io.json.CouchDocumentActionAdapter;
 import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchDocument;
@@ -62,6 +63,11 @@ public class Serializer
     public String toString( final BulkActionHolder actions, final SerializationAdapter... adapters )
     {
         return getGson( adapters ).toJson( actions );
+    }
+
+    public String toString( final CouchDocRefSet refSet, final SerializationAdapter... adapters )
+    {
+        return getGson( adapters ).toJson( refSet );
     }
 
     public String toString( final CouchDocument doc, final SerializationAdapter... adapters )

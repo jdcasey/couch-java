@@ -33,9 +33,16 @@ public final class IdUtils
         return namespaceId.substring( namespace.length() + 1 );
     }
 
-    public static String namespaceId( final String namespace, final String id )
+    public static String namespaceId( final String namespace, final String... parts )
     {
-        return namespace + ":" + id;
+        StringBuilder sb = new StringBuilder();
+        sb.append( namespace );
+        for ( String part : parts )
+        {
+            sb.append( ":" ).append( part );
+        }
+
+        return sb.toString();
     }
 
 }

@@ -66,6 +66,28 @@ public class CouchManagerOpsTest
     }
 
     @Test
+    public void storeThreeAndBulkGetTwoDocuments()
+        throws Exception
+    {
+        TestUser u1 = new TestUser( "user", "User", "Name", "email@nowhere.com" );
+        TestUser u2 = new TestUser( "user2", "User", "Name2", "email2@nowhere.com" );
+        TestUser u3 = new TestUser( "user3", "User", "Name3", "email3@nowhere.com" );
+
+        getCouch().store( u1, false );
+        getCouch().store( u2, false );
+        getCouch().store( u3, false );
+
+        List<TestUser> users =
+            getCouch().getDocuments( TestUser.class, new CouchDocRef( "user" ),
+                                     new CouchDocRef( "user3" ) );
+
+        assertThat( users.size(), equalTo( 2 ) );
+        assertThat( users.contains( u1 ), equalTo( true ) );
+        assertThat( users.contains( u2 ), equalTo( false ) );
+        assertThat( users.contains( u3 ), equalTo( true ) );
+    }
+
+    @Test
     public void storeAndReadUserListingFromView()
         throws Exception
     {

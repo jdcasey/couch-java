@@ -30,6 +30,7 @@ import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.action.DeleteAction;
 import org.commonjava.couch.db.action.StoreAction;
+import org.commonjava.couch.db.model.CouchDocRefSet;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.db.model.SimpleAppDescription;
 import org.commonjava.couch.fixture.TestUser;
@@ -37,6 +38,7 @@ import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.io.json.CouchObjectListDeserializer;
 import org.commonjava.couch.model.CouchApp;
 import org.commonjava.couch.model.CouchAppView;
+import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.model.CouchDocument;
 import org.junit.Test;
 
@@ -44,6 +46,18 @@ import com.google.gson.annotations.SerializedName;
 
 public class SerializerTest
 {
+
+    @Test
+    public void serializeCouchDocRefSet()
+    {
+        CouchDocRefSet set =
+            new CouchDocRefSet( new CouchDocRef( "key1" ), new CouchDocRef( "key2" ),
+                                new CouchDocRef( "key3" ) );
+
+        String ser = new Serializer().toString( set );
+
+        System.out.println( ser );
+    }
 
     @Test
     public void deserializeObjectList()

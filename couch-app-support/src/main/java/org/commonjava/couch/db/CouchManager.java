@@ -69,6 +69,7 @@ import org.commonjava.couch.db.action.StoreAction;
 import org.commonjava.couch.db.handler.SerializedGetHandler;
 import org.commonjava.couch.db.model.AppDescription;
 import org.commonjava.couch.db.model.AttachmentDownload;
+import org.commonjava.couch.db.model.CouchDocRefSet;
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.io.CouchAppReader;
@@ -97,6 +98,8 @@ public class CouchManager
     private static final String APP_BASE = "_design";
 
     private static final String BULK_DOCS = "_bulk_docs";
+
+    private static final String ALL_DOCS = "_all_docs";
 
     private ExecutorService exec;
 
@@ -349,6 +352,80 @@ public class CouchManager
                                             new ToString(
                                                           "Failed to retrieve contents for view request: %s",
                                                           req ) );
+    }
+
+    public <T extends CouchDocument> List<T> getDocuments( final Class<T> docType,
+                                                           final Set<CouchDocRef> refs )
+        throws CouchDBException
+    {
+        CouchDocRefSet refSet = new CouchDocRefSet( refs );
+        return getDocuments( docType, refSet );
+    }
+
+    public <T extends CouchDocument> List<T> getDocuments( final Class<T> docType,
+                                                           final CouchDocRef... refs )
+        throws CouchDBException
+    {
+        if ( refs == null || refs.length < 1 )
+        {
+            return null;
+        }
+
+        CouchDocRefSet refSet = new CouchDocRefSet( refs );
+        return getDocuments( docType, refSet );
+    }
+
+    public <T extends CouchDocument> List<T> getDocuments( final Class<T> docType,
+                                                           final CouchDocRefSet refSet )
+        throws CouchDBException
+    {
+        String url;
+        try
+        {
+            url =
+                buildUrl( config.getDatabaseUrl(),
+                          Collections.singletonMap( ViewRequest.INCLUDE_DOCS, "true" ), ALL_DOCS );
+        }
+        catch ( MalformedURLException e )
+        {
+            throw new CouchDBException( "Failed to format multi-doc URL: %s", e, e.getMessage() );
+        }
+
+        if ( LOGGER.isDebugEnabled() )
+        {
+            LOGGER.debug( "Selecting multiple documents from: " + url );
+        }
+
+        HttpPost request = new HttpPost( url );
+        try
+        {
+            String body = serializer.toString( refSet );
+            request.setEntity( new StringEntity( body, "application/json", "UTF-8" ) );
+        }
+        catch ( UnsupportedEncodingException e )
+        {
+            throw new CouchDBException(
+                                        "Failed to encode POST entity for multi-document selection: %s",
+                                        e, e.getMessage() );
+        }
+
+        CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( docType );
+
+        CouchObjectList<T> listing =
+            client.executeHttpAndReturn( request, deser.typeLiteral(),
+                                         new ToString( "Failed to retrieve documents for: %s",
+                                                       refSet ), deser );
+
+        for ( T t : listing )
+        {
+            if ( t instanceof DenormalizedCouchDoc )
+            {
+                ( (DenormalizedCouchDoc) t ).calculateDenormalizedFields();
+            }
+
+        }
+
+        return listing.getItems();
     }
 
     public <T> T getDocument( final CouchDocRef ref, final Class<T> docType )
