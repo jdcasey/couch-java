@@ -34,8 +34,8 @@
   <modules>
     <module>couch-app-support</module>
     <module>couch-user-manager</module>
-    <module>couch-test-harness</module>
     <module>shiro-couch</module>
+    <module>couch-test</module>
     <module>couch-web</module>
   </modules>
   
@@ -63,10 +63,32 @@
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>web-common</artifactId>
+        <version>1.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>restful-user-manager</artifactId>
+        <version>1.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
         <groupId>org.commonjava.couch</groupId>
         <artifactId>couch-test-harness</artifactId>
         <version>1.1-SNAPSHOT</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.couch.web</groupId>
+        <artifactId>couch-user-test-harness</artifactId>
+        <version>1.1-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+      	<groupId>org.commonjava.couch.web</groupId>
+      	<artifactId>couch-as7-test-harness</artifactId>
+        <version>1.1-SNAPSHOT</version>
+      	<scope>test</scope>
       </dependency>
       
       <dependency>
@@ -317,13 +339,4 @@
     <shiroVersion>1.1.0</shiroVersion>
   </properties>
   
-  <profiles>
-    <profile>
-      <id>experimental</id>
-      
-      <modules>
-        <module>couch-web-experimental/maven-dependency-database</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>

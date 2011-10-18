@@ -24,23 +24,19 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
   
-  <groupId>org.commonjava.couch.web</groupId>
-  <artifactId>couch-web</artifactId>
+  <groupId>org.commonjava.couch.test</groupId>
+  <artifactId>couch-test</artifactId>
   <packaging>pom</packaging>
   
-  <name>CouchDB Web Applications :: Parent</name>
+  <name>CouchDB Test Harnesses :: Parent</name>
   
   <modules>
-    <module>web-common</module>
-    <module>restful-user-manager</module>
+    <module>couch-test-harness</module>
+    <module>couch-as7-test-harness</module>
+    <module>couch-user-test-harness</module>
   </modules>
   
   <dependencies>
-    <dependency>
-      <groupId>org.commonjava.util</groupId>
-      <artifactId>logging</artifactId>
-    </dependency>
-    
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>

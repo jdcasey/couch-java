@@ -19,14 +19,14 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.commonjava.couch</groupId>
-    <artifactId>couch-java-parent</artifactId>
+    <groupId>org.commonjava.couch.test</groupId>
+    <artifactId>couch-test</artifactId>
     <version>1.1-SNAPSHOT</version>
   </parent>
+  
+  <artifactId>couch-as7-test-harness</artifactId>
 
-  <artifactId>couch-test-harness</artifactId>
-
-  <name>CouchDB Basic Test Harness + Fixtures</name>
+  <name>CouchDB AS-7-Driven Test Harness</name>
 
   <dependencies>
     <dependency>
@@ -35,11 +35,29 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
+      <artifactId>slf4j-ext</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.commonjava.util</groupId>
+      <artifactId>configuration-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.util</groupId>
+      <artifactId>configuration-dotconf</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.commonjava.couch.web</groupId>
+      <artifactId>web-common</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -47,14 +65,24 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.jboss.weld.se</groupId>
-      <artifactId>weld-se-core</artifactId>
-      <optional>true</optional>
+      <groupId>org.jboss.arquillian.junit</groupId>
+      <artifactId>arquillian-junit-container</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
-    	<groupId>org.commonjava.couch</groupId>
-    	<artifactId>couch-app-support</artifactId>
+      <groupId>org.jboss.as</groupId>
+      <artifactId>jboss-as-arquillian-container-managed</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.couch</groupId>
+      <artifactId>couch-test-harness</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jboss.weld.se</groupId>
+        <artifactId>weld-se-core</artifactId>
+        <optional>true</optional>
     </dependency>
   </dependencies>
 </project>
