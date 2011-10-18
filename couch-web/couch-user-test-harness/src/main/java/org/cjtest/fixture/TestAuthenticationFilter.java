@@ -36,7 +36,7 @@ import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
-import org.commonjava.web.test.fixture.TestPropertyDefinitions;
+import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
 
 @WebFilter( "/*" )
 public class TestAuthenticationFilter

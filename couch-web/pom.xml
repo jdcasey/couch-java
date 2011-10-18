@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Copyright (C) 2011  John Casey
   
@@ -14,8 +15,7 @@
   You should have received a copy of the GNU Affero General Public
   License along with this program.  If not, see 
   <http://www.gnu.org/licenses />.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
@@ -34,10 +34,17 @@
     <module>couch-as7-test-harness</module>
     <module>web-common</module>
     <module>restful-user-manager</module>
+    <module>couch-user-test-harness</module>
   </modules>
   
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.commonjava.couch.web</groupId>
+        <artifactId>couch-user-test-harness</artifactId>
+        <version>1.1-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
       <dependency>
       	<groupId>org.commonjava.couch.web</groupId>
       	<artifactId>couch-as7-test-harness</artifactId>

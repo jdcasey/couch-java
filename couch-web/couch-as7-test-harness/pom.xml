@@ -59,7 +59,7 @@
       <groupId>org.commonjava.couch.web</groupId>
       <artifactId>web-common</artifactId>
     </dependency>
-    <dependency>
+<!--     <dependency>
       <groupId>org.commonjava.couch</groupId>
       <artifactId>shiro-couch</artifactId>
     </dependency>
@@ -67,7 +67,7 @@
       <groupId>org.commonjava.couch</groupId>
       <artifactId>couch-user-manager</artifactId>
     </dependency>
-    
+ -->    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

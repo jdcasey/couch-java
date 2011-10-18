@@ -21,14 +21,7 @@ import static org.junit.Assert.fail;
 
 import java.net.URL;
 
-import org.cjtest.fixture.TestAuthenticationFilter;
 import org.cjtest.fixture.TestRESTApplication;
-import org.cjtest.fixture.TestUserManagerConfigProducer;
-import org.commonjava.auth.couch.change.RoleDeletionListener;
-import org.commonjava.auth.couch.conf.UserManagerConfiguration;
-import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.model.User;
-import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.couch.change.CouchChangeListener;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchManager;
@@ -46,6 +39,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.UrlAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.osgi.service.useradmin.User;
 
 public class TestWarArchiveBuilder
 {
@@ -62,12 +56,8 @@ public class TestWarArchiveBuilder
         CouchDocument.class.getPackage(),
         IdUtils.class.getPackage(),
         User.class.getPackage(),
-        UserDataManager.class.getPackage(),
-        RoleDeletionListener.class.getPackage(),
-        UserManagerConfiguration.class.getPackage(),
         LoggingFixture.class.getPackage(),
-        AbstractRESTCouchTest.class.getPackage(),
-        CouchRealm.class.getPackage() };
+        AbstractRESTCouchTest.class.getPackage() };
 
     private static final String[] STD_PACKAGE_ROOTS = {
         "org.apache.http",
@@ -80,7 +70,7 @@ public class TestWarArchiveBuilder
         "org.slf4j",
         "org.apache.commons.logging" };
 
-    private final WebArchive war;
+    protected final WebArchive war;
 
     public TestWarArchiveBuilder( final Class<?> testPropertiesProducer )
     {
@@ -117,21 +107,7 @@ public class TestWarArchiveBuilder
 
     public TestWarArchiveBuilder withAllStandards()
     {
-        return withStandardPackages().withEmptyBeansXml().withLog4jProperties().withStandardAuthentication();
-    }
-
-    public TestWarArchiveBuilder withTestUserManagerConfigProducer()
-    {
-        war.addClass( TestUserManagerConfigProducer.class );
-
-        return this;
-    }
-
-    public TestWarArchiveBuilder withStandardAuthentication()
-    {
-        war.addClass( TestAuthenticationFilter.class );
-
-        return this;
+        return withStandardPackages().withEmptyBeansXml().withLog4jProperties();
     }
 
     public TestWarArchiveBuilder withApplication( final AppDescription description )

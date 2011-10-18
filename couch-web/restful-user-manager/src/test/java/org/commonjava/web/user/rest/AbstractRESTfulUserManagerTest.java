@@ -24,14 +24,14 @@ import org.commonjava.auth.couch.data.UserAppDescription;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.io.CouchHttpClient;
-import org.commonjava.web.test.AbstractRESTCouchTest;
-import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
+import org.commonjava.couch.user.fixture.TestUserWarArchiveBuilder;
+import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
 import org.commonjava.web.user.rest.fixture.RUMTestPropertiesProvider;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 
 public abstract class AbstractRESTfulUserManagerTest
-    extends AbstractRESTCouchTest
+    extends AbstractUserRESTCouchTest
 {
 
     @Inject
@@ -41,8 +41,8 @@ public abstract class AbstractRESTfulUserManagerTest
     @Deployment
     public static WebArchive createTestWar()
     {
-        TestWarArchiveBuilder builder =
-            new TestWarArchiveBuilder( TestUserManagerConfigProducer.class );
+        TestUserWarArchiveBuilder builder =
+            new TestUserWarArchiveBuilder( TestUserManagerConfigProducer.class );
 
         builder.withExtraPackages( true, CouchHttpClient.class.getPackage(),
                                    RUMTestPropertiesProvider.class.getPackage() );

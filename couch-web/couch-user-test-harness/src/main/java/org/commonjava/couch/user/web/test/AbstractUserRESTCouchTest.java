@@ -15,7 +15,7 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.web.test;
+package org.commonjava.couch.user.web.test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -38,6 +38,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.commonjava.auth.couch.conf.UserManagerConfiguration;
+import org.commonjava.auth.couch.data.PasswordManager;
+import org.commonjava.auth.couch.data.UserDataManager;
+import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.JsonSerializer;
@@ -46,7 +50,7 @@ import org.junit.Before;
 
 import com.google.gson.reflect.TypeToken;
 
-public abstract class AbstractRESTCouchTest
+public abstract class AbstractUserRESTCouchTest
 {
     protected static final String HOST = "localhost";
 
@@ -55,9 +59,21 @@ public abstract class AbstractRESTCouchTest
     @Inject
     protected JsonSerializer serializer;
 
+    @Inject
+    protected UserDataManager userManager;
+
+    @Inject
+    protected UserManagerConfiguration config;
+
+    @Inject
+    protected PasswordManager passwordManager;
+
+    @Inject
+    protected CouchRealm realm;
+
     protected DefaultHttpClient http;
 
-    protected AbstractRESTCouchTest()
+    protected AbstractUserRESTCouchTest()
     {}
 
     protected abstract CouchManager getCouchManager();
@@ -67,6 +83,12 @@ public abstract class AbstractRESTCouchTest
         throws Exception
     {
         getCouchManager().dropDatabase();
+
+        userManager.install();
+        userManager.setupAdminInformation();
+
+        // setup the security manager.
+        realm.setupSecurityManager();
 
         ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
         ccm.setMaxTotal( 20 );

@@ -30,7 +30,7 @@ import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
-import org.commonjava.web.test.fixture.TestPropertyDefinitions;
+import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
 
 @Singleton
 public class TestUserManagerConfigProducer
