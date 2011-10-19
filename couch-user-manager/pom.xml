@@ -92,7 +92,7 @@
     	<artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
-    	<groupId>org.commonjava.couch</groupId>
+    	<groupId>org.commonjava.couch.test</groupId>
     	<artifactId>couch-test-harness</artifactId>
     </dependency>
     <dependency>

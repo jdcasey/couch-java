@@ -59,7 +59,7 @@
           <scope>compile</scope>
         </dependency>
         <dependency>
-          <groupId>org.commonjava.couch</groupId>
+          <groupId>org.commonjava.couch.test</groupId>
           <artifactId>couch-test-harness</artifactId>
           <scope>compile</scope>
         </dependency>
@@ -69,7 +69,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-        	<groupId>org.commonjava.couch.web</groupId>
+        	<groupId>org.commonjava.couch.test</groupId>
         	<artifactId>couch-as7-test-harness</artifactId>
         	<scope>compile</scope>
         </dependency>

@@ -73,19 +73,19 @@
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.couch</groupId>
+        <groupId>org.commonjava.couch.test</groupId>
         <artifactId>couch-test-harness</artifactId>
         <version>1.1-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.couch.web</groupId>
+        <groupId>org.commonjava.couch.test</groupId>
         <artifactId>couch-user-test-harness</artifactId>
         <version>1.1-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.couch.web</groupId>
+      	<groupId>org.commonjava.couch.test</groupId>
       	<artifactId>couch-as7-test-harness</artifactId>
         <version>1.1-SNAPSHOT</version>
       	<scope>test</scope>
