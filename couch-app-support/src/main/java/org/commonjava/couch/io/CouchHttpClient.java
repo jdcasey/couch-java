@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.http.HttpEntity;
@@ -50,14 +49,9 @@ public class CouchHttpClient
 {
     private HttpClient client;
 
-    @Inject
-    private CouchDBConfiguration config;
+    private final CouchDBConfiguration config;
 
-    @Inject
-    private Serializer serializer;
-
-    public CouchHttpClient()
-    {}
+    private final Serializer serializer;
 
     public CouchHttpClient( final CouchDBConfiguration config, final Serializer serializer )
     {

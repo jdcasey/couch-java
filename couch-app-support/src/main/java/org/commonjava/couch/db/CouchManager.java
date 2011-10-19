@@ -43,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.http.Header;
@@ -103,26 +102,17 @@ public class CouchManager
 
     private ExecutorService exec;
 
-    @Inject
-    private CouchAppReader appReader;
+    private final CouchAppReader appReader;
 
-    @Inject
-    private CouchDBConfiguration config;
+    private final CouchDBConfiguration config;
 
-    @Inject
-    private CouchHttpClient client;
+    private final CouchHttpClient client;
 
-    @Inject
     private Event<DatabaseEvent> dbEvent;
 
-    @Inject
     private Event<ApplicationEvent> appEvent;
 
-    @Inject
-    private Serializer serializer;
-
-    protected CouchManager()
-    {}
+    private final Serializer serializer;
 
     public CouchManager( final CouchDBConfiguration config, final CouchHttpClient client,
                          final Serializer serializer, final CouchAppReader appReader )
@@ -139,6 +129,18 @@ public class CouchManager
         this.serializer = new Serializer();
         this.appReader = new CouchAppReader();
         this.client = new CouchHttpClient( config, serializer );
+    }
+
+    public CouchManager( final CouchDBConfiguration config, final CouchHttpClient client,
+                         final Serializer serializer, final CouchAppReader appReader,
+                         final Event<DatabaseEvent> dbEvent, final Event<ApplicationEvent> appEvent )
+    {
+        this.config = config;
+        this.client = client;
+        this.serializer = serializer;
+        this.appReader = appReader;
+        this.dbEvent = dbEvent;
+        this.appEvent = appEvent;
     }
 
     public void initialize( final AppDescription description )

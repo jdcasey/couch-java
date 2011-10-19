@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.http.Header;
@@ -57,20 +56,15 @@ public class CouchChangeListener
 
     private final Logger logger = new Logger( getClass() );
 
-    @Inject
-    private CouchChangeDispatcher dispatcher;
+    private final CouchChangeDispatcher dispatcher;
 
-    @Inject
-    private CouchDBConfiguration config;
+    private final CouchDBConfiguration config;
 
-    @Inject
-    private CouchHttpClient http;
+    private final CouchHttpClient http;
 
-    @Inject
-    private CouchManager couch;
+    private final CouchManager couch;
 
-    @Inject
-    private Serializer serializer;
+    private final Serializer serializer;
 
     private ChangeListenerMetadata metadata;
 
@@ -79,9 +73,6 @@ public class CouchChangeListener
     private boolean running = false;
 
     private final Object internalLock = new Object();
-
-    public CouchChangeListener()
-    {}
 
     public CouchChangeListener( final CouchChangeDispatcher dispatcher, final CouchHttpClient http,
                                 final CouchDBConfiguration config, final CouchManager couch,
