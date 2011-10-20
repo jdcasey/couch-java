@@ -24,6 +24,8 @@ import org.commonjava.couch.conf.CouchDBConfiguration;
 public interface UserManagerConfiguration
 {
 
+    String DEFAULT_DB_NAME = "user";
+
     User createInitialAdminUser( final PasswordManager passwordManager );
 
     CouchDBConfiguration getDatabaseConfig();

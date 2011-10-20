@@ -5,7 +5,10 @@ import org.cjtest.fixture.TestUserManagerConfigProducer;
 import org.commonjava.auth.couch.change.RoleDeletionListener;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserDataManager;
+import org.commonjava.auth.couch.inject.UserDataProvider;
+import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.CouchRealm;
+import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 
 public class TestUserWarArchiveBuilder
@@ -14,6 +17,8 @@ public class TestUserWarArchiveBuilder
 
     private static final Package[] EXTRA_STD_PACKAGES = {
         UserDataManager.class.getPackage(),
+        User.class.getPackage(),
+        UserDataProvider.class.getPackage(),
         RoleDeletionListener.class.getPackage(),
         UserManagerConfiguration.class.getPackage(),
         CouchRealm.class.getPackage() };
@@ -21,11 +26,13 @@ public class TestUserWarArchiveBuilder
     public TestUserWarArchiveBuilder( final Class<?> testPropertiesProducer )
     {
         super( testPropertiesProducer );
+        withExtraClasses( AbstractUserRESTCouchTest.class );
     }
 
     public TestUserWarArchiveBuilder( final String warName, final Class<?> testPropertiesProducer )
     {
         super( warName, testPropertiesProducer );
+        withExtraClasses( AbstractUserRESTCouchTest.class );
     }
 
     public TestWarArchiveBuilder withTestUserManagerConfigProducer()

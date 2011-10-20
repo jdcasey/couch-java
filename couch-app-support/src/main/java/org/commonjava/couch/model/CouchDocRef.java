@@ -31,4 +31,11 @@ public class CouchDocRef
         setCouchDocId( id );
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format( "CouchDocRef [getCouchDocId()=%s, getCouchDocRev()=%s]",
+                              getCouchDocId(), getCouchDocRev() );
+    }
+
 }

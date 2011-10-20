@@ -29,16 +29,15 @@ import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.conf.CouchDBConfiguration;
-import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
 import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
+import org.commonjava.couch.user.fixture.UserTestPropertyDefinitions;
+import org.commonjava.web.test.fixture.TestData;
 
 @Singleton
 public class TestUserManagerConfigProducer
 {
 
     private UserManagerConfiguration umConfig;
-
-    private CouchDBConfiguration couchConfig;
 
     @Inject
     @Named( TestPropertyDefinitions.NAMED )
@@ -49,17 +48,12 @@ public class TestUserManagerConfigProducer
     @Default
     public synchronized CouchDBConfiguration getCouchDBConfiguration()
     {
-        if ( couchConfig == null )
-        {
-            couchConfig =
-                new DefaultCouchDBConfiguration(
-                                                 testProperties.getProperty( TestPropertyDefinitions.DATABASE_URL ) );
-        }
-
-        return couchConfig;
+        return getUserManagerConfiguration().getDatabaseConfig();
     }
 
     @Produces
+    @TestData
+    @Default
     public synchronized UserManagerConfiguration getUserManagerConfiguration()
     {
         if ( umConfig == null )
@@ -70,7 +64,7 @@ public class TestUserManagerConfigProducer
                                               "password",
                                               "Admin",
                                               "User",
-                                              testProperties.getProperty( TestPropertyDefinitions.DATABASE_URL ) );
+                                              testProperties.getProperty( UserTestPropertyDefinitions.USER_DATABASE_URL ) );
         }
 
         return umConfig;

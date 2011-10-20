@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Named;
 import javax.inject.Qualifier;
@@ -12,6 +13,7 @@ import javax.inject.Qualifier;
 @Stereotype
 @Named
 @Qualifier
+@Alternative
 @Retention( RetentionPolicy.RUNTIME )
 @Target( {
     ElementType.FIELD,

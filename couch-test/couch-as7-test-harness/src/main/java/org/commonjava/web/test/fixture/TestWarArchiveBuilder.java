@@ -34,6 +34,7 @@ import org.commonjava.couch.util.UrlUtils;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.JsonSerializer;
+import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.test.AbstractRESTCouchTest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -54,10 +55,13 @@ public class TestWarArchiveBuilder
         CouchManager.class.getPackage(),
         CouchDBConfiguration.class.getPackage(),
         CouchDocument.class.getPackage(),
+        // ConfigurationListener.class.getPackage(),
         IdUtils.class.getPackage(),
         User.class.getPackage(),
         LoggingFixture.class.getPackage(),
-        AbstractRESTCouchTest.class.getPackage() };
+        AbstractRESTCouchTest.class.getPackage(),
+        ConfigName.class.getPackage(),
+        TestData.class.getPackage() };
 
     private static final String[] STD_PACKAGE_ROOTS = {
         "org.apache.http",

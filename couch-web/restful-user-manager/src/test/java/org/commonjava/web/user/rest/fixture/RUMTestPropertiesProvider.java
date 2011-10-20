@@ -22,7 +22,8 @@ import java.util.Properties;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
-import org.commonjava.web.test.fixture.TestPropertyDefinitions;
+import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
+import org.commonjava.couch.user.fixture.UserTestPropertyDefinitions;
 
 public class RUMTestPropertiesProvider
 {
@@ -33,7 +34,7 @@ public class RUMTestPropertiesProvider
     {
         Properties props = new Properties();
 
-        props.put( TestPropertyDefinitions.DATABASE_URL,
+        props.put( UserTestPropertyDefinitions.USER_DATABASE_URL,
                    "http://localhost:5984/test-restful-user-manager" );
 
         return props;

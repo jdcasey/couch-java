@@ -50,6 +50,7 @@ public class CouchDocRefSet
         for ( CouchDocRef ref : refs )
         {
             this.keys[i] = ref.getCouchDocId();
+            i++;
         }
     }
 
