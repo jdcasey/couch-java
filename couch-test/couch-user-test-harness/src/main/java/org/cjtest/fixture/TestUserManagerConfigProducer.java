@@ -45,6 +45,7 @@ public class TestUserManagerConfigProducer
 
     @Produces
     @UserData
+    @TestData
     @Default
     public synchronized CouchDBConfiguration getCouchDBConfiguration()
     {
