@@ -25,6 +25,9 @@ import javax.inject.Named;
 import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
 import org.commonjava.couch.user.fixture.UserTestPropertyDefinitions;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class RUMTestPropertiesProvider
 {
 

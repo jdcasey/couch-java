@@ -17,146 +17,88 @@
  ******************************************************************************/
 package org.commonjava.web.test.fixture;
 
-import static org.junit.Assert.fail;
-
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 
-import org.cjtest.fixture.TestRESTApplication;
-import org.commonjava.couch.change.CouchChangeListener;
-import org.commonjava.couch.conf.CouchDBConfiguration;
-import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.db.model.AppDescription;
-import org.commonjava.couch.io.CouchHttpClient;
-import org.commonjava.couch.model.CouchDocument;
-import org.commonjava.couch.test.fixture.LoggingFixture;
-import org.commonjava.couch.util.IdUtils;
-import org.commonjava.couch.util.UrlUtils;
-import org.commonjava.util.logging.Logger;
-import org.commonjava.web.common.model.Listing;
-import org.commonjava.web.common.ser.JsonSerializer;
-import org.commonjava.web.config.annotation.ConfigName;
-import org.commonjava.web.test.AbstractRESTCouchTest;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.DefaultModelReader;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.UrlAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.osgi.service.useradmin.User;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenImporter;
+import org.junit.rules.ExternalResource;
 
 public class TestWarArchiveBuilder
+    extends ExternalResource
 {
 
-    private static final Package[] STD_PACKAGES = {
-        Logger.class.getPackage(),
-        CouchHttpClient.class.getPackage(),
-        CouchChangeListener.class.getPackage(),
-        JsonSerializer.class.getPackage(),
-        Listing.class.getPackage(),
-        UrlUtils.class.getPackage(),
-        CouchManager.class.getPackage(),
-        CouchDBConfiguration.class.getPackage(),
-        CouchDocument.class.getPackage(),
-        // ConfigurationListener.class.getPackage(),
-        IdUtils.class.getPackage(),
-        User.class.getPackage(),
-        LoggingFixture.class.getPackage(),
-        AbstractRESTCouchTest.class.getPackage(),
-        ConfigName.class.getPackage(),
-        TestData.class.getPackage() };
+    protected WebArchive war;
 
-    private static final String[] STD_PACKAGE_ROOTS = {
-        "org.apache.http",
-        "org.apache.shiro",
-        "org.apache.commons.lang",
-        "org.apache.commons.codec",
-        "org.apache.commons.io",
-        "org.apache.log4j",
-        "com.google.gson",
-        "org.slf4j",
-        "org.apache.commons.logging" };
+    protected File testPom;
 
-    protected final WebArchive war;
-
-    public TestWarArchiveBuilder( final Class<?> testPropertiesProducer )
+    public TestWarArchiveBuilder loadFromMaven( final File pomFile )
+        throws IOException
     {
-        this( "test", testPropertiesProducer );
-    }
+        war = ShrinkWrap.create( WebArchive.class, "test.war" );
 
-    public TestWarArchiveBuilder( final String warName, final Class<?> testPropertiesProducer )
-    {
-        war = ShrinkWrap.create( WebArchive.class, warName + ".war" );
-        war.addClass( testPropertiesProducer );
-    }
+        Model model =
+            new DefaultModelReader().read( pomFile, Collections.<String, Object> emptyMap() );
 
-    public TestWarArchiveBuilder withExtraPackages( final boolean recursive, final String... extras )
-    {
-        war.addPackages( recursive, extras );
+        if ( !"war".equals( model.getPackaging() ) )
+        {
+            testPom = new File( pomFile.getAbsoluteFile().getParentFile(), "pom.test-war.xml" );
+            model.setPackaging( "war" );
+            FileWriter writer = null;
+            try
+            {
+                writer = new FileWriter( testPom );
+                new MavenXpp3Writer().write( writer, model );
+            }
+            finally
+            {
+                IOUtils.closeQuietly( writer );
+            }
+
+            war.addAsWebInfResource( EmptyAsset.INSTANCE, "web.xml" );
+        }
+        else
+        {
+            testPom = pomFile;
+        }
+
+        war.as( MavenImporter.class ).loadEffectivePom( testPom.getAbsolutePath() ).importTestBuildOutput().importBuildOutput().importTestDependencies();
 
         return this;
     }
 
-    public TestWarArchiveBuilder withExtraPackages( final boolean recursive,
-                                                    final Package... extras )
+    @Override
+    protected void after()
     {
-        war.addPackages( recursive, extras );
-
-        return this;
-    }
-
-    public TestWarArchiveBuilder withExtraClasses( final Class<?>... extras )
-    {
-        war.addClasses( extras );
-
-        return this;
+        if ( testPom != null )
+        {
+            String path = testPom.getAbsolutePath();
+            try
+            {
+                FileUtils.forceDelete( testPom );
+            }
+            catch ( IOException e )
+            {
+                System.err.println( "Failed to delete test WAR POM: " + path );
+            }
+        }
     }
 
     public TestWarArchiveBuilder withAllStandards()
     {
-        return withStandardPackages().withEmptyBeansXml().withLog4jProperties();
-    }
-
-    public TestWarArchiveBuilder withApplication( final AppDescription description )
-    {
-        ClassLoader cloader = Thread.currentThread().getContextClassLoader();
-
-        String base = "couchapps/" + description.getClasspathAppResource() + "/views/";
-        for ( String viewName : description.getViewNames() )
-        {
-            String path = base + viewName + "/map.js";
-            URL resource = cloader.getResource( path );
-            if ( resource == null )
-            {
-                fail( "Cannot find view: " + viewName + " for CouchDB application: "
-                    + description.getAppName() + " (classpath: " + path + ")" );
-            }
-
-            System.out.println( "Adding app resource: " + path );
-            war.addAsWebInfResource( new UrlAsset( resource ), "classes/" + path );
-
-            path = base + viewName + "/reduce.js";
-            resource = cloader.getResource( path );
-            if ( resource != null )
-            {
-                System.out.println( "Adding app resource: " + path );
-                war.addAsWebInfResource( new UrlAsset( resource ), "classes/" + path );
-            }
-        }
-
-        return this;
-    }
-
-    public TestWarArchiveBuilder withTestRESTApplication()
-    {
-        war.addClass( TestRESTApplication.class );
-
-        return this;
-    }
-
-    public TestWarArchiveBuilder withStandardPackages()
-    {
-        war.addPackages( true, STD_PACKAGES );
-        war.addPackages( true, STD_PACKAGE_ROOTS );
-
-        return this;
+        // return withStandardPackages().withEmptyBeansXml().withLog4jProperties();
+        return withEmptyBeansXml().withLog4jProperties();
     }
 
     public TestWarArchiveBuilder withEmptyBeansXml()

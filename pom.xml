@@ -48,28 +48,28 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-      	<groupId>org.commonjava.couch</groupId>
-      	<artifactId>shiro-couch</artifactId>
+        <groupId>org.commonjava.couch</groupId>
+        <artifactId>shiro-couch</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.couch</groupId>
-      	<artifactId>couch-user-manager</artifactId>
+        <groupId>org.commonjava.couch</groupId>
+        <artifactId>couch-user-manager</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.couch</groupId>
-      	<artifactId>couch-app-support</artifactId>
+        <groupId>org.commonjava.couch</groupId>
+        <artifactId>couch-app-support</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.couch.web</groupId>
-      	<artifactId>web-common</artifactId>
+        <groupId>org.commonjava.couch.web</groupId>
+        <artifactId>web-common</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.couch.web</groupId>
-      	<artifactId>restful-user-manager</artifactId>
+        <groupId>org.commonjava.couch.web</groupId>
+        <artifactId>restful-user-manager</artifactId>
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
@@ -85,10 +85,10 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.couch.test</groupId>
-      	<artifactId>couch-as7-test-harness</artifactId>
+        <groupId>org.commonjava.couch.test</groupId>
+        <artifactId>couch-as7-test-harness</artifactId>
         <version>1.1-SNAPSHOT</version>
-      	<scope>test</scope>
+        <scope>test</scope>
       </dependency>
       
       <dependency>
@@ -97,8 +97,8 @@
         <version>${configurationVersion}</version>
       </dependency>
       <dependency>
-      	<groupId>org.commonjava.util</groupId>
-      	<artifactId>configuration-dotconf</artifactId>
+        <groupId>org.commonjava.util</groupId>
+        <artifactId>configuration-dotconf</artifactId>
         <version>${configurationVersion}</version>
       </dependency>
       <dependency>
@@ -228,7 +228,7 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
-      	<version>4.1.1</version>
+        <version>4.1.1</version>
         <exclusions>
           <exclusion>
             <groupId>commons-logging</groupId>
@@ -244,10 +244,10 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-      	<groupId>org.hamcrest</groupId>
-      	<artifactId>hamcrest-core</artifactId>
-      	<version>1.1</version>
-      	<scope>test</scope>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>1.1</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.arquillian.junit</groupId>
@@ -262,27 +262,75 @@
          <scope>test</scope>
       </dependency>
       <dependency>
-      	<groupId>org.jboss.weld.se</groupId>
-      	<artifactId>weld-se-core</artifactId>
-      	<version>1.1.2.Final</version>
-      	<scope>test</scope>
+        <groupId>org.jboss.weld.se</groupId>
+        <artifactId>weld-se-core</artifactId>
+        <version>1.1.2.Final</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.shrinkwrap.resolver</groupId>
+        <artifactId>shrinkwrap-resolver-api-maven</artifactId>
+        <version>1.1.0-alpha-1-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.shrinkwrap.resolver</groupId>
+        <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+        <version>1.1.0-alpha-1-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.sonatype.aether</groupId>
+        <artifactId>aether-api</artifactId>
+        <version>1.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.sonatype.aether</groupId>
+        <artifactId>aether-impl</artifactId>
+        <version>1.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.sonatype.aether</groupId>
+        <artifactId>aether-spi</artifactId>
+        <version>1.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.sonatype.aether</groupId>
+        <artifactId>aether-util</artifactId>
+        <version>1.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.sonatype.aether</groupId>
+        <artifactId>aether-connector-wagon</artifactId>
+        <version>1.12</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-aether-provider</artifactId>
+        <version>3.0.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
   
   <dependencies>
     <dependency>
-    	<groupId>org.commonjava.util</groupId>
-    	<artifactId>logging</artifactId>
+      <groupId>org.commonjava.util</groupId>
+      <artifactId>logging</artifactId>
     </dependency>
     
     <dependency>
-    	<groupId>javax.inject</groupId>
-    	<artifactId>javax.inject</artifactId>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
     </dependency>
     <dependency>
-    	<groupId>javax.enterprise</groupId>
-    	<artifactId>cdi-api</artifactId>
+      <groupId>javax.enterprise</groupId>
+      <artifactId>cdi-api</artifactId>
     </dependency>
   </dependencies>
   
@@ -303,12 +351,34 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.9</version>
+          <version>2.10</version>
+          <configuration>
+            <excludes>
+              <exclude>**/fixture/*.java</exclude>
+              <exclude>**/live/*.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.10</version>
           <configuration>
             <excludes>
               <exclude>**/fixture/*.java</exclude>
             </excludes>
+            <includes>
+              <include>**/live/*.java</include>
+            </includes>
           </configuration>
+          <executions>
+            <execution>
+              <id>integration-tests</id>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-war-plugin</artifactId>
@@ -330,6 +400,11 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
   
   <properties>

@@ -25,6 +25,7 @@
   </parent>
   
   <artifactId>restful-user-manager</artifactId>
+  <packaging>war</packaging>
   
   <name>RESTful wrapper for Couch-User-Manager</name>
   

@@ -15,20 +15,17 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.commonjava.web.user.rest;
+package org.commonjava.web.user.rest.live;
 
 import javax.inject.Inject;
 
-import org.cjtest.fixture.TestUserManagerConfigProducer;
-import org.commonjava.auth.couch.data.UserAppDescription;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.db.CouchManager;
-import org.commonjava.couch.io.CouchHttpClient;
-import org.commonjava.couch.user.fixture.TestUserWarArchiveBuilder;
 import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
-import org.commonjava.web.user.rest.fixture.RUMTestPropertiesProvider;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenImporter;
 
 public abstract class AbstractRESTfulUserManagerTest
     extends AbstractUserRESTCouchTest
@@ -41,20 +38,39 @@ public abstract class AbstractRESTfulUserManagerTest
     @Deployment
     public static WebArchive createTestWar()
     {
-        TestUserWarArchiveBuilder builder =
-            new TestUserWarArchiveBuilder( TestUserManagerConfigProducer.class );
+        WebArchive war = ShrinkWrap.create( WebArchive.class, "test.war" );
+        war.as( MavenImporter.class ).loadEffectivePom( "pom.xml" ).importTestDependencies().importBuildOutput().importTestBuildOutput();
 
-        builder.withExtraPackages( true, CouchHttpClient.class.getPackage(),
-                                   RUMTestPropertiesProvider.class.getPackage() );
-
-        builder.withAllStandards();
-        builder.withTestRESTApplication();
-        builder.withTestUserManagerConfigProducer();
-        builder.withApplication( new UserAppDescription() );
-        builder.withExtraPackages( true, "org.commonjava" );
-
-        return builder.build();
+        // // TODO: This doesn't work, apparently cannot add a directory as a WEB-INF resource...may need to iterate
+        // // through files.
+        // addClasses( war, "target/classes" );
+        // addClasses( war, "target/test-classes" );
+        //
+        return war;
     }
+
+    // private static void addClasses( final WebArchive war, final String basepath )
+    // {
+    // File base = new File( basepath );
+    // DirectoryScanner scanner = new DirectoryScanner();
+    // scanner.setBasedir( base );
+    // scanner.setIncludes( new String[] { "**/*" } );
+    //
+    // scanner.scan();
+    // String[] included = scanner.getIncludedFiles();
+    //
+    // for ( String includedFile : included )
+    // {
+    // File f = new File( includedFile );
+    // String path = f.getParent();
+    //
+    // f = new File( base, includedFile );
+    // if ( !f.isDirectory() )
+    // {
+    // war.addAsWebInfResource( f, "classes/" + path );
+    // }
+    // }
+    // }
 
     protected AbstractRESTfulUserManagerTest()
     {}
