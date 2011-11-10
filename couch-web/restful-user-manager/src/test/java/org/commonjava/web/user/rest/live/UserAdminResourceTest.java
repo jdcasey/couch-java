@@ -29,6 +29,7 @@ import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.UserAdminResource;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -48,7 +49,8 @@ public class UserAdminResourceTest
     @Deployment
     public static WebArchive createWar()
     {
-        return createTestWar( UserAdminResource.class );
+        return new TestWarArchiveBuilder( UserAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class )
+                                                                   .build();
     }
 
     @Inject

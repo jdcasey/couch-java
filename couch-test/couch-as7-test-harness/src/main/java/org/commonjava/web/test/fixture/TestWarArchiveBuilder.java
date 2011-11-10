@@ -18,101 +18,51 @@
 package org.commonjava.web.test.fixture;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.DefaultModelReader;
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.UrlAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.impl.base.asset.ClassLoaderAsset;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenImporter;
-import org.junit.rules.ExternalResource;
 
 public class TestWarArchiveBuilder
-    extends ExternalResource
 {
 
     protected WebArchive war;
 
     protected File testPom;
 
-    public TestWarArchiveBuilder loadFromMaven( final File pomFile )
-        throws IOException
+    public TestWarArchiveBuilder( final Class<?> testClass )
     {
-        war = ShrinkWrap.create( WebArchive.class, "test.war" );
+        war = ShrinkWrap.create( WebArchive.class, "test.war" )
+                        .addAsWebInfResource( new ClassLoaderAsset( "test-beans.xml" ), "beans.xml" );
 
-        Model model =
-            new DefaultModelReader().read( pomFile, Collections.<String, Object> emptyMap() );
+        war.as( MavenImporter.class )
+           .configureFrom( new File( System.getProperty( "user.home" ), ".m2/settings.xml" ).getAbsolutePath() )
+           .loadEffectivePom( "pom.xml" )
+           .importTestDependencies()
+           .importBuildOutput();
 
-        if ( !"war".equals( model.getPackaging() ) )
-        {
-            testPom = new File( pomFile.getAbsoluteFile().getParentFile(), "pom.test-war.xml" );
-            model.setPackaging( "war" );
-            FileWriter writer = null;
-            try
-            {
-                writer = new FileWriter( testPom );
-                new MavenXpp3Writer().write( writer, model );
-            }
-            finally
-            {
-                IOUtils.closeQuietly( writer );
-            }
-
-            war.addAsWebInfResource( EmptyAsset.INSTANCE, "web.xml" );
-        }
-        else
-        {
-            testPom = pomFile;
-        }
-
-        war.as( MavenImporter.class ).loadEffectivePom( testPom.getAbsolutePath() ).importTestBuildOutput().importBuildOutput().importTestDependencies();
-
-        return this;
+        war.addClass( testClass );
     }
 
-    @Override
-    protected void after()
+    public TestWarArchiveBuilder withExtraClasses( final Class<?>... classes )
     {
-        if ( testPom != null )
+        for ( final Class<?> cls : classes )
         {
-            String path = testPom.getAbsolutePath();
-            try
-            {
-                FileUtils.forceDelete( testPom );
-            }
-            catch ( IOException e )
-            {
-                System.err.println( "Failed to delete test WAR POM: " + path );
-            }
+            war.addClass( cls );
         }
-    }
-
-    public TestWarArchiveBuilder withAllStandards()
-    {
-        // return withStandardPackages().withEmptyBeansXml().withLog4jProperties();
-        return withEmptyBeansXml().withLog4jProperties();
-    }
-
-    public TestWarArchiveBuilder withEmptyBeansXml()
-    {
-        war.addAsWebInfResource( EmptyAsset.INSTANCE, "beans.xml" );
 
         return this;
     }
 
     public TestWarArchiveBuilder withLog4jProperties()
     {
-        ClassLoader cloader = Thread.currentThread().getContextClassLoader();
+        final ClassLoader cloader = Thread.currentThread()
+                                          .getContextClassLoader();
 
-        URL resource = cloader.getResource( "log4j.properties" );
+        final URL resource = cloader.getResource( "log4j.properties" );
         if ( resource != null )
         {
             war.addAsWebInfResource( new UrlAsset( resource ), "classes/log4j.properties" );

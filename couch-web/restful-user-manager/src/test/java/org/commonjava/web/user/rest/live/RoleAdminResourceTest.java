@@ -26,6 +26,7 @@ import org.apache.http.HttpStatus;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.RoleAdminResource;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -45,7 +46,8 @@ public class RoleAdminResourceTest
     @Deployment
     public static WebArchive createWar()
     {
-        return createTestWar( RoleAdminResource.class );
+        return new TestWarArchiveBuilder( RoleAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class )
+                                                                   .build();
     }
 
     @Test
