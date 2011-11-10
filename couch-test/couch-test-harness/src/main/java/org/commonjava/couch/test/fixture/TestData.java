@@ -1,6 +1,10 @@
-package org.commonjava.web.test.fixture;
+package org.commonjava.couch.test.fixture;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -15,10 +19,7 @@ import javax.inject.Qualifier;
 @Qualifier
 @Alternative
 @Retention( RetentionPolicy.RUNTIME )
-@Target( {
-    ElementType.FIELD,
-    ElementType.METHOD,
-    ElementType.TYPE } )
+@Target( { METHOD, FIELD, PARAMETER, TYPE } )
 public @interface TestData
 {
 

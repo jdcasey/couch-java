@@ -17,14 +17,18 @@
  ******************************************************************************/
 package org.commonjava.web.user.rest.live;
 
+import static org.junit.Assert.fail;
+
+import java.io.File;
+
 import javax.inject.Inject;
 
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
-import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.impl.base.asset.ClassLoaderAsset;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenImporter;
 
 public abstract class AbstractRESTfulUserManagerTest
@@ -35,45 +39,32 @@ public abstract class AbstractRESTfulUserManagerTest
     @UserData
     private CouchManager couch;
 
-    @Deployment
-    public static WebArchive createTestWar()
+    public static WebArchive createTestWar( final Class<?> testClass )
     {
-        WebArchive war = ShrinkWrap.create( WebArchive.class, "test.war" );
-        war.as( MavenImporter.class ).loadEffectivePom( "pom.xml" ).importTestDependencies().importBuildOutput().importTestBuildOutput();
+        final WebArchive war = ShrinkWrap.create( WebArchive.class, "test.war" )
+                                         .addAsWebInfResource( new ClassLoaderAsset( "test-beans.xml" ), "beans.xml" );
 
-        // // TODO: This doesn't work, apparently cannot add a directory as a WEB-INF resource...may need to iterate
-        // // through files.
-        // addClasses( war, "target/classes" );
-        // addClasses( war, "target/test-classes" );
-        //
+        war.as( MavenImporter.class )
+           .configureFrom( new File( System.getProperty( "user.home" ), ".m2/settings.xml" ).getAbsolutePath() )
+           .loadEffectivePom( "pom.xml" )
+           .importTestDependencies()
+           .importBuildOutput();
+
+        if ( testClass == null )
+        {
+            fail( "testClass field not specified in: " + AbstractRESTfulUserManagerTest.class.getName()
+                + ". Cannot create WAR." );
+        }
+
+        war.addClass( AbstractRESTfulUserManagerTest.class );
+        war.addClass( testClass );
+
         return war;
     }
 
-    // private static void addClasses( final WebArchive war, final String basepath )
-    // {
-    // File base = new File( basepath );
-    // DirectoryScanner scanner = new DirectoryScanner();
-    // scanner.setBasedir( base );
-    // scanner.setIncludes( new String[] { "**/*" } );
-    //
-    // scanner.scan();
-    // String[] included = scanner.getIncludedFiles();
-    //
-    // for ( String includedFile : included )
-    // {
-    // File f = new File( includedFile );
-    // String path = f.getParent();
-    //
-    // f = new File( base, includedFile );
-    // if ( !f.isDirectory() )
-    // {
-    // war.addAsWebInfResource( f, "classes/" + path );
-    // }
-    // }
-    // }
-
     protected AbstractRESTfulUserManagerTest()
-    {}
+    {
+    }
 
     @Override
     protected CouchManager getCouchManager()

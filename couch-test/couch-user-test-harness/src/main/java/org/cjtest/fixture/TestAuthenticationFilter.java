@@ -18,10 +18,8 @@
 package org.cjtest.fixture;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -36,7 +34,6 @@ import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
-import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
 
 @WebFilter( "/*" )
 public class TestAuthenticationFilter
@@ -45,35 +42,30 @@ public class TestAuthenticationFilter
     @Inject
     private UserDataManager dataManager;
 
-    @Inject
-    @Named( TestPropertyDefinitions.NAMED )
-    private Properties testProperties;
-
     @Override
     public void init( final FilterConfig filterConfig )
         throws ServletException
-    {}
+    {
+    }
 
     @Override
-    public void doFilter( final ServletRequest request, final ServletResponse response,
-                          final FilterChain chain )
+    public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
         throws IOException, ServletException
     {
         // Login the user before we test!
-        Subject subject = SecurityUtils.getSubject();
+        final Subject subject = SecurityUtils.getSubject();
 
-        String username =
-            testProperties.getProperty( TestPropertyDefinitions.AUTHENTICATE_USER, User.ADMIN );
+        final String username = User.ADMIN;
 
         User user;
         try
         {
             user = dataManager.getUser( username );
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
-            throw new ServletException( "Cannot find user: " + username
-                + " to authenticate! Error: " + e.getMessage(), e );
+            throw new ServletException( "Cannot find user: " + username + " to authenticate! Error: " + e.getMessage(),
+                                        e );
         }
 
         subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
@@ -83,6 +75,7 @@ public class TestAuthenticationFilter
 
     @Override
     public void destroy()
-    {}
+    {
+    }
 
 }

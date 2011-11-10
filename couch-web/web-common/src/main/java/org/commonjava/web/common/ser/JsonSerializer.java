@@ -51,7 +51,8 @@ public class JsonSerializer
     private final Set<SerializationAdapter> baseAdapters = new HashSet<SerializationAdapter>();
 
     JsonSerializer()
-    {}
+    {
+    }
 
     public JsonSerializer( final SerializationAdapter... baseAdapters )
     {
@@ -65,10 +66,10 @@ public class JsonSerializer
 
     private Gson getGson()
     {
-        GsonBuilder builder = new GsonBuilder();
+        final GsonBuilder builder = new GsonBuilder();
         if ( baseAdapters != null )
         {
-            for ( SerializationAdapter adapter : baseAdapters )
+            for ( final SerializationAdapter adapter : baseAdapters )
             {
                 builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
             }
@@ -99,13 +100,29 @@ public class JsonSerializer
         {
             return fromStream( req.getInputStream(), encoding, type, postProcessors );
         }
-        catch ( IOException e )
+        catch ( final IOException e )
         {
-            logger.error( "Failed to deserialize type: %s from HttpServletRequest body. Error: %s",
-                          e, type.getName(), e.getMessage() );
-            throw new WebApplicationException(
-                                               Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
+            logger.error( "Failed to deserialize type: %s from HttpServletRequest body. Error: %s", e, type.getName(),
+                          e.getMessage() );
+            throw new WebApplicationException( Response.status( Status.INTERNAL_SERVER_ERROR )
+                                                       .build() );
         }
+    }
+
+    public <T> T fromString( final String src, final Class<T> type,
+                             final DeserializerPostProcessor<T>... postProcessors )
+    {
+        final T result = getGson().fromJson( src, type );
+
+        if ( result != null )
+        {
+            for ( final DeserializerPostProcessor<T> proc : postProcessors )
+            {
+                proc.process( result );
+            }
+        }
+
+        return result;
     }
 
     public <T> T fromStream( final InputStream stream, String encoding, final Class<T> type,
@@ -118,11 +135,11 @@ public class JsonSerializer
 
         try
         {
-            T result = getGson().fromJson( new InputStreamReader( stream, encoding ), type );
+            final T result = getGson().fromJson( new InputStreamReader( stream, encoding ), type );
 
             if ( result != null )
             {
-                for ( DeserializerPostProcessor<T> proc : postProcessors )
+                for ( final DeserializerPostProcessor<T> proc : postProcessors )
                 {
                     proc.process( result );
                 }
@@ -130,12 +147,11 @@ public class JsonSerializer
 
             return result;
         }
-        catch ( UnsupportedEncodingException e )
+        catch ( final UnsupportedEncodingException e )
         {
-            logger.error( "Failed to deserialize type: %s. Error: %s", e, type.getName(),
-                          e.getMessage() );
-            throw new WebApplicationException(
-                                               Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
+            logger.error( "Failed to deserialize type: %s. Error: %s", e, type.getName(), e.getMessage() );
+            throw new WebApplicationException( Response.status( Status.INTERNAL_SERVER_ERROR )
+                                                       .build() );
         }
     }
 
@@ -150,18 +166,17 @@ public class JsonSerializer
 
         try
         {
-            Listing<T> result =
-                getGson().fromJson( new InputStreamReader( stream, encoding ), token.getType() );
+            Listing<T> result = getGson().fromJson( new InputStreamReader( stream, encoding ), token.getType() );
 
             if ( result != null && result.getItems() != null )
             {
-                List<T> items = result.getItems();
+                final List<T> items = result.getItems();
                 Collections.reverse( items );
 
                 result = new Listing<T>( items );
-                for ( T item : result )
+                for ( final T item : result )
                 {
-                    for ( DeserializerPostProcessor<T> proc : postProcessors )
+                    for ( final DeserializerPostProcessor<T> proc : postProcessors )
                     {
                         proc.process( item );
                     }
@@ -170,14 +185,36 @@ public class JsonSerializer
 
             return result;
         }
-        catch ( UnsupportedEncodingException e )
+        catch ( final UnsupportedEncodingException e )
         {
-            logger.error( "Failed to deserialize type: %s. Error: %s", e, token.getType(),
-                          e.getMessage() );
+            logger.error( "Failed to deserialize type: %s. Error: %s", e, token.getType(), e.getMessage() );
 
-            throw new WebApplicationException(
-                                               Response.status( Status.INTERNAL_SERVER_ERROR ).build() );
+            throw new WebApplicationException( Response.status( Status.INTERNAL_SERVER_ERROR )
+                                                       .build() );
         }
+    }
+
+    public <T> Listing<T> listingFromString( final String src, final TypeToken<Listing<T>> token,
+                                             final DeserializerPostProcessor<T>... postProcessors )
+    {
+        Listing<T> result = getGson().fromJson( src, token.getType() );
+
+        if ( result != null && result.getItems() != null )
+        {
+            final List<T> items = result.getItems();
+            Collections.reverse( items );
+
+            result = new Listing<T>( items );
+            for ( final T item : result )
+            {
+                for ( final DeserializerPostProcessor<T> proc : postProcessors )
+                {
+                    proc.process( item );
+                }
+            }
+        }
+
+        return result;
     }
 
 }

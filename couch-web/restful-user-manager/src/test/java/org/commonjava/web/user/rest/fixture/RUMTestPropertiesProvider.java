@@ -20,9 +20,8 @@ package org.commonjava.web.user.rest.fixture;
 import java.util.Properties;
 
 import javax.enterprise.inject.Produces;
-import javax.inject.Named;
 
-import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
+import org.commonjava.couch.test.fixture.TestData;
 import org.commonjava.couch.user.fixture.UserTestPropertyDefinitions;
 
 import com.google.inject.Singleton;
@@ -32,13 +31,12 @@ public class RUMTestPropertiesProvider
 {
 
     @Produces
-    @Named( TestPropertyDefinitions.NAMED )
+    @TestData
     public Properties getTestProperties()
     {
-        Properties props = new Properties();
+        final Properties props = new Properties();
 
-        props.put( UserTestPropertyDefinitions.USER_DATABASE_URL,
-                   "http://localhost:5984/test-restful-user-manager" );
+        props.put( UserTestPropertyDefinitions.USER_DATABASE_URL, "http://localhost:5984/test-restful-user-manager" );
 
         return props;
     }

@@ -17,21 +17,14 @@
  ******************************************************************************/
 package org.cjtest.fixture;
 
-import java.util.Properties;
-
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.conf.CouchDBConfiguration;
-import org.commonjava.couch.test.fixture.TestPropertyDefinitions;
-import org.commonjava.couch.user.fixture.UserTestPropertyDefinitions;
-import org.commonjava.web.test.fixture.TestData;
 
 @Singleton
 public class TestUserManagerConfigProducer
@@ -39,13 +32,13 @@ public class TestUserManagerConfigProducer
 
     private UserManagerConfiguration umConfig;
 
-    @Inject
-    @Named( TestPropertyDefinitions.NAMED )
-    private Properties testProperties;
+    public TestUserManagerConfigProducer()
+    {
+        System.out.println( "Starting " + getClass().getName() + " for user manager config..." );
+    }
 
     @Produces
     @UserData
-    @TestData
     @Default
     public synchronized CouchDBConfiguration getCouchDBConfiguration()
     {
@@ -53,19 +46,14 @@ public class TestUserManagerConfigProducer
     }
 
     @Produces
-    @TestData
     @Default
     public synchronized UserManagerConfiguration getUserManagerConfiguration()
     {
         if ( umConfig == null )
         {
             umConfig =
-                new DefaultUserManagerConfig(
-                                              "admin@nowhere.com",
-                                              "password",
-                                              "Admin",
-                                              "User",
-                                              testProperties.getProperty( UserTestPropertyDefinitions.USER_DATABASE_URL ) );
+                new DefaultUserManagerConfig( "admin@nowhere.com", "password", "Admin", "User",
+                                              "http://localhost:5984/test-restful-user-manager" );
         }
 
         return umConfig;

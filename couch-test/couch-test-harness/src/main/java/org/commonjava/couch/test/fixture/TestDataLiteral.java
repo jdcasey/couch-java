@@ -1,4 +1,4 @@
-package org.commonjava.web.test.fixture;
+package org.commonjava.couch.test.fixture;
 
 import javax.enterprise.util.AnnotationLiteral;
 

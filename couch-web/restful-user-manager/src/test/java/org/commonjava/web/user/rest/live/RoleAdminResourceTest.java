@@ -26,7 +26,10 @@ import org.apache.http.HttpStatus;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.user.rest.RoleAdminResource;
+import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,17 +42,26 @@ public class RoleAdminResourceTest
 
     private static final String BASE_URL = "http://localhost:8080/test/admin/role";
 
+    @Deployment
+    public static WebArchive createWar()
+    {
+        return createTestWar( RoleAdminResource.class );
+    }
+
     @Test
     public void getAdminRole()
         throws Exception
     {
-        Role role = get( BASE_URL + "/admin", Role.class );
+        final Role role = get( BASE_URL + "/admin", Role.class );
 
         assertThat( role, notNullValue() );
         assertThat( role.getName(), equalTo( "admin" ) );
         assertThat( role.getPermissions(), notNullValue() );
-        assertThat( role.getPermissions().size(), equalTo( 1 ) );
-        assertThat( role.getPermissions().iterator().next(), equalTo( "*" ) );
+        assertThat( role.getPermissions()
+                        .size(), equalTo( 1 ) );
+        assertThat( role.getPermissions()
+                        .iterator()
+                        .next(), equalTo( "*" ) );
     }
 
     @Test
@@ -63,9 +75,9 @@ public class RoleAdminResourceTest
     public void createRole()
         throws Exception
     {
-        Role r = new Role( "test", new Permission( Permission.WILDCARD ) );
+        final Role r = new Role( "test", new Permission( Permission.WILDCARD ) );
 
-        HttpResponse response = post( BASE_URL, r, HttpStatus.SC_CREATED );
+        final HttpResponse response = post( BASE_URL, r, HttpStatus.SC_CREATED );
         assertLocationHeader( response, BASE_URL + "/test" );
     }
 
@@ -73,7 +85,7 @@ public class RoleAdminResourceTest
     public void modifyAdminRole()
         throws Exception
     {
-        Role role = get( BASE_URL + "/admin", Role.class );
+        final Role role = get( BASE_URL + "/admin", Role.class );
 
         assertThat( role, notNullValue() );
 
@@ -85,22 +97,24 @@ public class RoleAdminResourceTest
     public void createRoleThenGetNewAndAdminRoles()
         throws Exception
     {
-        HttpResponse response =
-            post( BASE_URL, new Role( "test", new Permission( Permission.WILDCARD ) ),
-                  HttpStatus.SC_CREATED );
+        final HttpResponse response =
+            post( BASE_URL, new Role( "test", new Permission( Permission.WILDCARD ) ), HttpStatus.SC_CREATED );
 
         assertLocationHeader( response, BASE_URL + "/test" );
 
-        Listing<Role> roles = getListing( BASE_URL + "/list", new TypeToken<Listing<Role>>()
-        {} );
+        final Listing<Role> roles = getListing( BASE_URL + "/list", new TypeToken<Listing<Role>>()
+        {
+        } );
 
         assertThat( roles, notNullValue() );
         assertThat( roles.getItems(), notNullValue() );
 
-        Role r = roles.getItems().get( 0 );
+        Role r = roles.getItems()
+                      .get( 0 );
         assertThat( r.getName(), equalTo( "admin" ) );
 
-        r = roles.getItems().get( 1 );
+        r = roles.getItems()
+                 .get( 1 );
         assertThat( r.getName(), equalTo( "test" ) );
 
     }

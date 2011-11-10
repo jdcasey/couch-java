@@ -29,7 +29,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.commonjava.auth.couch.model.Permission;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.user.rest.PermissionAdminResource;
+import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,11 +45,17 @@ public class PermissionAdminResourceTest
 
     private static final String BASE_URL = "http://" + HOST + ":" + PORT + "/test/admin/permission";
 
+    @Deployment
+    public static WebArchive createWar()
+    {
+        return createTestWar( PermissionAdminResource.class );
+    }
+
     @Test
     public void getGodPermission()
         throws Exception
     {
-        Permission perm = get( BASE_URL + "/*", Permission.class );
+        final Permission perm = get( BASE_URL + "/*", Permission.class );
 
         assertThat( perm, notNullValue() );
         assertThat( perm.getName(), equalTo( "*" ) );
@@ -63,8 +72,7 @@ public class PermissionAdminResourceTest
     public void createPermission()
         throws Exception
     {
-        HttpResponse response =
-            post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
+        final HttpResponse response = post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
 
         assertLocationHeader( response, BASE_URL + "/test:read" );
     }
@@ -75,19 +83,20 @@ public class PermissionAdminResourceTest
     {
         post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
 
-        Listing<Permission> listing =
-            getListing( BASE_URL + "/list", new TypeToken<Listing<Permission>>()
-            {} );
+        final Listing<Permission> listing = getListing( BASE_URL + "/list", new TypeToken<Listing<Permission>>()
+        {
+        } );
 
         assertThat( listing, notNullValue() );
 
-        List<Permission> items = listing.getItems();
+        final List<Permission> items = listing.getItems();
         Collections.sort( items, new Comparator<Permission>()
         {
             @Override
             public int compare( final Permission p1, final Permission p2 )
             {
-                return p1.getName().compareTo( p2.getName() );
+                return p1.getName()
+                         .compareTo( p2.getName() );
             }
         } );
 

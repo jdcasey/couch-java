@@ -29,7 +29,10 @@ import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.couch.model.User;
 import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.user.rest.UserAdminResource;
+import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,6 +45,12 @@ public class UserAdminResourceTest
 
     private static final String BASE_URL = "http://localhost:8080/test/admin/user";
 
+    @Deployment
+    public static WebArchive createWar()
+    {
+        return createTestWar( UserAdminResource.class );
+    }
+
     @Inject
     private PasswordManager passwordManager;
 
@@ -49,7 +58,7 @@ public class UserAdminResourceTest
     public void getAdminUser()
         throws Exception
     {
-        User user = get( BASE_URL + "/" + User.ADMIN, User.class );
+        final User user = get( BASE_URL + "/" + User.ADMIN, User.class );
 
         assertThat( user, notNullValue() );
         assertThat( user.getUsername(), equalTo( User.ADMIN ) );
@@ -57,12 +66,14 @@ public class UserAdminResourceTest
         assertThat( user.getLastName(), equalTo( "User" ) );
         assertThat( user.getEmail(), equalTo( "admin@nowhere.com" ) );
 
-        assertThat( user.getPasswordDigest(),
-                    equalTo( passwordManager.digestPassword( "password" ) ) );
+        assertThat( user.getPasswordDigest(), equalTo( passwordManager.digestPassword( "password" ) ) );
 
         assertThat( user.getRoles(), notNullValue() );
-        assertThat( user.getRoles().size(), equalTo( 1 ) );
-        assertThat( user.getRoles().iterator().next(), equalTo( Role.ADMIN ) );
+        assertThat( user.getRoles()
+                        .size(), equalTo( 1 ) );
+        assertThat( user.getRoles()
+                        .iterator()
+                        .next(), equalTo( Role.ADMIN ) );
     }
 
     @Test
@@ -76,9 +87,9 @@ public class UserAdminResourceTest
     public void createUser()
         throws Exception
     {
-        User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
+        final User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
 
-        HttpResponse response = post( BASE_URL, user, HttpStatus.SC_CREATED );
+        final HttpResponse response = post( BASE_URL, user, HttpStatus.SC_CREATED );
         assertLocationHeader( response, BASE_URL + "/test" );
     }
 
@@ -86,7 +97,7 @@ public class UserAdminResourceTest
     public void modifyAdminUser()
         throws Exception
     {
-        User user = get( BASE_URL + "/" + User.ADMIN, User.class );
+        final User user = get( BASE_URL + "/" + User.ADMIN, User.class );
 
         assertThat( user, notNullValue() );
 
@@ -99,19 +110,22 @@ public class UserAdminResourceTest
     public void createUserThenRetrieveNewAndAdminUsers()
         throws Exception
     {
-        User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
+        final User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
         post( BASE_URL, user, HttpStatus.SC_CREATED );
 
-        Listing<User> users = getListing( BASE_URL + "/list", new TypeToken<Listing<User>>()
-        {} );
+        final Listing<User> users = getListing( BASE_URL + "/list", new TypeToken<Listing<User>>()
+        {
+        } );
 
         assertThat( users, notNullValue() );
         assertThat( users.getItems(), notNullValue() );
 
-        User u = users.getItems().get( 0 );
+        User u = users.getItems()
+                      .get( 0 );
         assertThat( u.getUsername(), equalTo( "admin" ) );
 
-        u = users.getItems().get( 1 );
+        u = users.getItems()
+                 .get( 1 );
         assertThat( u.getUsername(), equalTo( "test" ) );
     }
 
