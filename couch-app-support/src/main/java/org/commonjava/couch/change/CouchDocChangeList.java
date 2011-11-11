@@ -17,6 +17,7 @@
  ******************************************************************************/
 package org.commonjava.couch.change;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,7 +33,8 @@ public class CouchDocChangeList
     private int lastSequence;
 
     CouchDocChangeList()
-    {}
+    {
+    }
 
     public List<CouchDocChange> getResults()
     {
@@ -57,7 +59,8 @@ public class CouchDocChangeList
     @Override
     public Iterator<CouchDocChange> iterator()
     {
-        return results.iterator();
+        return results == null ? Collections.<CouchDocChange> emptySet()
+                                            .iterator() : results.iterator();
     }
 
 }

@@ -15,7 +15,7 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.cjtest.fixture;
+package org.commonjava.web.user.rest.fixture;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;

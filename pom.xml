@@ -71,6 +71,7 @@
         <groupId>org.commonjava.couch.web</groupId>
         <artifactId>restful-user-manager</artifactId>
         <version>1.1-SNAPSHOT</version>
+        <type>war</type>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch.test</groupId>

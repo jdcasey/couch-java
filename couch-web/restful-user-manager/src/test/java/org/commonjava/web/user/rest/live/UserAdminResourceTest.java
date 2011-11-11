@@ -31,6 +31,7 @@ import org.commonjava.auth.couch.model.User;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.UserAdminResource;
+import org.commonjava.web.user.rest.fixture.TestRESTApplication;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
@@ -49,7 +50,8 @@ public class UserAdminResourceTest
     @Deployment
     public static WebArchive createWar()
     {
-        return new TestWarArchiveBuilder( UserAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class )
+        return new TestWarArchiveBuilder( UserAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class,
+                                                                                      TestRESTApplication.class )
                                                                    .build();
     }
 
