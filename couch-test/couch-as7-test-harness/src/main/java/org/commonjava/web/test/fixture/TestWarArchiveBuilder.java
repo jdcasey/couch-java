@@ -36,7 +36,7 @@ public class TestWarArchiveBuilder
     public TestWarArchiveBuilder( final Class<?> testClass )
     {
         war = ShrinkWrap.create( WebArchive.class, "test.war" )
-                        .addAsWebInfResource( new ClassLoaderAsset( "test-beans.xml" ), "beans.xml" );
+                        .addAsWebInfResource( new ClassLoaderAsset( "beans.xml.test" ), "beans.xml" );
 
         war.as( MavenImporter.class )
            .configureFrom( new File( System.getProperty( "user.home" ), ".m2/settings.xml" ).getAbsolutePath() )

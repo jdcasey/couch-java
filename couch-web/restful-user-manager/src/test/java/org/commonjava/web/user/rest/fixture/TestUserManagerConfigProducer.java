@@ -15,7 +15,7 @@
  * License along with this program.  If not, see 
  * <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package org.cjtest.fixture;
+package org.commonjava.web.user.rest.fixture;
 
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
@@ -38,6 +38,7 @@ public class TestUserManagerConfigProducer
     }
 
     @Produces
+    // @TestData
     @UserData
     @Default
     public synchronized CouchDBConfiguration getCouchDBConfiguration()
@@ -46,6 +47,7 @@ public class TestUserManagerConfigProducer
     }
 
     @Produces
+    // @TestData
     @Default
     public synchronized UserManagerConfiguration getUserManagerConfiguration()
     {
@@ -53,7 +55,7 @@ public class TestUserManagerConfigProducer
         {
             umConfig =
                 new DefaultUserManagerConfig( "admin@nowhere.com", "password", "Admin", "User",
-                                              "http://localhost:5984/test-restful-user-manager" );
+                                              "http://localhost:5984/test-user-manager" );
         }
 
         return umConfig;
