@@ -41,7 +41,6 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.JsonSerializer;
-import org.junit.After;
 import org.junit.Before;
 
 import com.google.gson.reflect.TypeToken;
@@ -58,7 +57,8 @@ public abstract class AbstractRESTCouchTest
     protected DefaultHttpClient http;
 
     protected AbstractRESTCouchTest()
-    {}
+    {
+    }
 
     protected abstract CouchManager getCouchManager();
 
@@ -68,13 +68,13 @@ public abstract class AbstractRESTCouchTest
     {
         getCouchManager().dropDatabase();
 
-        ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
+        final ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
         ccm.setMaxTotal( 20 );
 
         http = new DefaultHttpClient( ccm );
     }
 
-    @After
+    // @After
     public final void teardownRESTCouchTest()
         throws Exception
     {
@@ -83,18 +83,18 @@ public abstract class AbstractRESTCouchTest
 
     protected void assertLocationHeader( final HttpResponse response, final String value )
     {
-        Header[] headers = response.getHeaders( "Location" );
+        final Header[] headers = response.getHeaders( "Location" );
         assertThat( headers, notNullValue() );
         assertThat( headers.length, equalTo( 1 ) );
 
-        String header = headers[0].getValue();
+        final String header = headers[0].getValue();
         assertThat( header, equalTo( value ) );
     }
 
     protected <T> T get( final String url, final Class<T> type )
         throws Exception
     {
-        HttpGet get = new HttpGet( url );
+        final HttpGet get = new HttpGet( url );
         try
         {
             return http.execute( get, new ResponseHandler<T>()
@@ -104,10 +104,11 @@ public abstract class AbstractRESTCouchTest
                 public T handleResponse( final HttpResponse response )
                     throws ClientProtocolException, IOException
                 {
-                    StatusLine sl = response.getStatusLine();
+                    final StatusLine sl = response.getStatusLine();
                     assertThat( sl.getStatusCode(), equalTo( HttpStatus.SC_OK ) );
 
-                    return serializer.fromStream( response.getEntity().getContent(), "UTF-8", type );
+                    return serializer.fromStream( response.getEntity()
+                                                          .getContent(), "UTF-8", type );
                 }
             } );
         }
@@ -120,7 +121,7 @@ public abstract class AbstractRESTCouchTest
     protected void get( final String url, final int expectedStatus )
         throws Exception
     {
-        HttpGet get = new HttpGet( url );
+        final HttpGet get = new HttpGet( url );
         try
         {
             http.execute( get, new ResponseHandler<Void>()
@@ -129,7 +130,7 @@ public abstract class AbstractRESTCouchTest
                 public Void handleResponse( final HttpResponse response )
                     throws ClientProtocolException, IOException
                 {
-                    StatusLine sl = response.getStatusLine();
+                    final StatusLine sl = response.getStatusLine();
                     assertThat( sl.getStatusCode(), equalTo( expectedStatus ) );
 
                     return null;
@@ -145,7 +146,7 @@ public abstract class AbstractRESTCouchTest
     protected <T> Listing<T> getListing( final String url, final TypeToken<Listing<T>> token )
         throws Exception
     {
-        HttpGet get = new HttpGet( url );
+        final HttpGet get = new HttpGet( url );
         try
         {
             return http.execute( get, new ResponseHandler<Listing<T>>()
@@ -155,11 +156,11 @@ public abstract class AbstractRESTCouchTest
                 public Listing<T> handleResponse( final HttpResponse response )
                     throws ClientProtocolException, IOException
                 {
-                    StatusLine sl = response.getStatusLine();
+                    final StatusLine sl = response.getStatusLine();
                     assertThat( sl.getStatusCode(), equalTo( HttpStatus.SC_OK ) );
 
-                    return serializer.listingFromStream( response.getEntity().getContent(),
-                                                         "UTF-8", token );
+                    return serializer.listingFromStream( response.getEntity()
+                                                                 .getContent(), "UTF-8", token );
                 }
             } );
         }
@@ -172,12 +173,13 @@ public abstract class AbstractRESTCouchTest
     protected HttpResponse delete( final String url )
         throws Exception
     {
-        HttpDelete request = new HttpDelete( url );
+        final HttpDelete request = new HttpDelete( url );
         try
         {
-            HttpResponse response = http.execute( request );
+            final HttpResponse response = http.execute( request );
 
-            assertThat( response.getStatusLine().getStatusCode(), equalTo( HttpStatus.SC_OK ) );
+            assertThat( response.getStatusLine()
+                                .getStatusCode(), equalTo( HttpStatus.SC_OK ) );
 
             return response;
         }
@@ -190,15 +192,15 @@ public abstract class AbstractRESTCouchTest
     protected HttpResponse post( final String url, final Object value, final int status )
         throws Exception
     {
-        HttpPost request = new HttpPost( url );
-        request.setEntity( new StringEntity( serializer.toString( value ), "application/json",
-                                             "UTF-8" ) );
+        final HttpPost request = new HttpPost( url );
+        request.setEntity( new StringEntity( serializer.toString( value ), "application/json", "UTF-8" ) );
 
         try
         {
-            HttpResponse response = http.execute( request );
+            final HttpResponse response = http.execute( request );
 
-            assertThat( response.getStatusLine().getStatusCode(), equalTo( status ) );
+            assertThat( response.getStatusLine()
+                                .getStatusCode(), equalTo( status ) );
 
             return response;
         }
@@ -208,19 +210,18 @@ public abstract class AbstractRESTCouchTest
         }
     }
 
-    protected HttpResponse post( final String url, final Object value, final Type type,
-                                 final int status )
+    protected HttpResponse post( final String url, final Object value, final Type type, final int status )
         throws Exception
     {
-        HttpPost request = new HttpPost( url );
-        request.setEntity( new StringEntity( serializer.toString( value, type ),
-                                             "application/json", "UTF-8" ) );
+        final HttpPost request = new HttpPost( url );
+        request.setEntity( new StringEntity( serializer.toString( value, type ), "application/json", "UTF-8" ) );
 
         try
         {
-            HttpResponse response = http.execute( request );
+            final HttpResponse response = http.execute( request );
 
-            assertThat( response.getStatusLine().getStatusCode(), equalTo( status ) );
+            assertThat( response.getStatusLine()
+                                .getStatusCode(), equalTo( status ) );
 
             return response;
         }

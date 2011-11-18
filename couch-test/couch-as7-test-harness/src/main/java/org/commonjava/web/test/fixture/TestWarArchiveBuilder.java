@@ -19,32 +19,72 @@ package org.commonjava.web.test.fixture;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.commonjava.util.logging.Logger;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.UrlAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.impl.base.asset.ClassLoaderAsset;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenImporter;
+import org.jboss.shrinkwrap.resolver.api.maven.filter.ScopeFilter;
 
 public class TestWarArchiveBuilder
 {
+
+    private final Logger logger = new Logger( TestWarArchiveBuilder.class );
 
     protected WebArchive war;
 
     protected File testPom;
 
+    private final File buildOutput;
+
+    private final Set<String> excludedBuildOutput = new HashSet<String>();
+
     public TestWarArchiveBuilder( final Class<?> testClass )
     {
+        this( testClass, new File( "target/classes" ) );
+    }
+
+    public TestWarArchiveBuilder( final Class<?> testClass, final File buildOutput )
+    {
+        this.buildOutput = buildOutput.getAbsoluteFile();
         war = ShrinkWrap.create( WebArchive.class, "test.war" )
                         .addAsWebInfResource( new ClassLoaderAsset( "beans.xml.test" ), "beans.xml" );
 
         war.as( MavenImporter.class )
            .configureFrom( new File( System.getProperty( "user.home" ), ".m2/settings.xml" ).getAbsolutePath() )
            .loadEffectivePom( "pom.xml" )
-           .importTestDependencies()
-           .importBuildOutput();
+           .importAnyDependencies( new ScopeFilter( "compile", "runtime", "test" ) );
+        // .importTestDependencies();
+        // .importBuildOutput();
 
         war.addClass( testClass );
+    }
+
+    public TestWarArchiveBuilder withoutBuildClasses( final Class<?>... classes )
+    {
+        for ( final Class<?> cls : classes )
+        {
+            excludedBuildOutput.add( cls.getName()
+                                        .replace( '.', '/' ) + ".class" );
+        }
+
+        return this;
+    }
+
+    public TestWarArchiveBuilder withoutBuildOutputPath( final String... paths )
+    {
+        for ( final String path : paths )
+        {
+            excludedBuildOutput.add( path );
+        }
+
+        return this;
     }
 
     public TestWarArchiveBuilder withExtraClasses( final Class<?>... classes )
@@ -72,7 +112,91 @@ public class TestWarArchiveBuilder
 
     public WebArchive build()
     {
+        logger.info( "Scanning build output directory: '%s' (directory? %b)...", buildOutput, buildOutput.isDirectory() );
+
+        final String prefix = buildOutput.getAbsolutePath();
+        final IOFileFilter filter = new ExcludesFileFilter( prefix, excludedBuildOutput );
+
+        for ( final File f : FileUtils.listFiles( buildOutput, filter, filter ) )
+        {
+            if ( f.isFile() )
+            {
+                if ( f.getName()
+                      .endsWith( ".class" ) )
+                {
+                    war.addClass( classname( prefix, f ) );
+                }
+                else
+                {
+                    war.addAsWebInfResource( f, "classes/" + subpath( prefix, f ) );
+                }
+            }
+        }
+
         return war;
+    }
+
+    private static String classname( final String prefix, final File f )
+    {
+        String path = subpath( prefix, f );
+        path = path.replace( '/', '.' );
+        path = path.substring( 0, path.length() - ".class".length() );
+
+        return path;
+    }
+
+    private static String subpath( final String trimPrefix, final File file )
+    {
+        String result = file.getAbsolutePath()
+                            .replace( '\\', '/' );
+
+        if ( result.length() > trimPrefix.length() && result.startsWith( trimPrefix ) )
+        {
+            result = result.substring( trimPrefix.length() );
+            if ( result.startsWith( "/" ) && result.length() > 1 )
+            {
+                result = result.substring( 1 );
+            }
+        }
+
+        return result;
+    }
+
+    public class ExcludesFileFilter
+        implements IOFileFilter
+    {
+
+        private final String trimPrefix;
+
+        private final Set<String> excludes;
+
+        public ExcludesFileFilter( final String trimPrefix, final Set<String> excludedBuildOutput )
+        {
+            this.trimPrefix = trimPrefix;
+            this.excludes = excludedBuildOutput;
+        }
+
+        @Override
+        public boolean accept( final File file )
+        {
+            final String subpath = subpath( trimPrefix, file );
+            for ( final String exclude : excludes )
+            {
+                if ( subpath.startsWith( exclude ) )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public boolean accept( final File dir, final String name )
+        {
+            return accept( new File( dir, name ) );
+        }
+
     }
 
 }

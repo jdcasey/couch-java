@@ -21,7 +21,7 @@ import static org.commonjava.couch.test.fixture.LoggingFixture.setupLogging;
 
 import org.apache.log4j.Level;
 import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.fixture.CouchUserFixture;
+import org.commonjava.auth.couch.fixture.CouchWeldUserFixture;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public abstract class AbstractUserManagerListenerTest
     protected final WeldContainer weld = new Weld().initialize();
 
     @Rule
-    public CouchUserFixture fixture = new CouchUserFixture( weld );
+    public CouchWeldUserFixture fixture = new CouchWeldUserFixture( weld );
 
     @BeforeClass
     public static void logging()

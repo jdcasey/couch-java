@@ -19,7 +19,7 @@ import javax.inject.Qualifier;
 @Qualifier
 @Alternative
 @Retention( RetentionPolicy.RUNTIME )
-@Target( { METHOD, FIELD, PARAMETER, TYPE } )
+@Target( { METHOD, FIELD, TYPE, PARAMETER } )
 public @interface TestData
 {
 

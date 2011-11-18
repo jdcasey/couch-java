@@ -17,10 +17,15 @@
  ******************************************************************************/
 package org.commonjava.couch.model;
 
+import java.io.Serializable;
+
 import com.google.gson.annotations.SerializedName;
 
 public class CouchError
+    implements Serializable
 {
+
+    private static final long serialVersionUID = 1L;
 
     @SerializedName( "reason" )
     private String error;

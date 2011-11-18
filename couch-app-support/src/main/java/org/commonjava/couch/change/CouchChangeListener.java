@@ -75,8 +75,7 @@ public class CouchChangeListener
     private final Object internalLock = new Object();
 
     public CouchChangeListener( final CouchChangeDispatcher dispatcher, final CouchHttpClient http,
-                                final CouchDBConfiguration config, final CouchManager couch,
-                                final Serializer serializer )
+                                final CouchDBConfiguration config, final CouchManager couch, final Serializer serializer )
     {
         this.dispatcher = dispatcher;
         this.http = http;
@@ -94,9 +93,12 @@ public class CouchChangeListener
     public void startup( final boolean wait )
         throws CouchDBException
     {
-        metadata =
-            couch.getDocument( new CouchDocRef( CHANGE_LISTENER_DOCID ),
-                               ChangeListenerMetadata.class );
+        if ( running )
+        {
+            return;
+        }
+
+        metadata = couch.getDocument( new CouchDocRef( CHANGE_LISTENER_DOCID ), ChangeListenerMetadata.class );
         if ( metadata == null )
         {
             metadata = new ChangeListenerMetadata();
@@ -117,7 +119,7 @@ public class CouchChangeListener
                     {
                         internalLock.wait( 100 );
                     }
-                    catch ( InterruptedException e )
+                    catch ( final InterruptedException e )
                     {
                         logger.info( "Interrupted..." );
                         break;
@@ -143,7 +145,7 @@ public class CouchChangeListener
                     {
                         internalLock.wait( 2000 );
                     }
-                    catch ( InterruptedException e )
+                    catch ( final InterruptedException e )
                     {
                         break;
                     }
@@ -175,30 +177,28 @@ public class CouchChangeListener
     @Override
     public void run()
     {
-        CouchDocChangeDeserializer docDeserializer = new CouchDocChangeDeserializer();
+        final CouchDocChangeDeserializer docDeserializer = new CouchDocChangeDeserializer();
 
         all: while ( !Thread.interrupted() )
         {
             HttpGet get;
             try
             {
-                String url =
-                    buildUrl( config.getDatabaseUrl(), metadata.getUrlParameters(), CHANGES_SERVICE );
+                final String url = buildUrl( config.getDatabaseUrl(), metadata.getUrlParameters(), CHANGES_SERVICE );
 
                 get = new HttpGet( url );
             }
-            catch ( MalformedURLException e )
+            catch ( final MalformedURLException e )
             {
-                logger.error( "Failed to construct changes URL for db: %s. Reason: %s", e,
-                              config.getDatabaseUrl(), e.getMessage() );
+                logger.error( "Failed to construct changes URL for db: %s. Reason: %s", e, config.getDatabaseUrl(),
+                              e.getMessage() );
                 break;
             }
 
             String encoding = null;
             try
             {
-                HttpResponse response =
-                    http.executeHttpWithResponse( get, "Failed to open changes stream." );
+                final HttpResponse response = http.executeHttpWithResponse( get, "Failed to open changes stream." );
 
                 if ( response.getEntity() == null )
                 {
@@ -206,7 +206,8 @@ public class CouchChangeListener
                     break;
                 }
 
-                Header encodingHeader = response.getEntity().getContentEncoding();
+                final Header encodingHeader = response.getEntity()
+                                                      .getContentEncoding();
                 if ( encodingHeader == null )
                 {
                     encoding = "UTF-8";
@@ -216,7 +217,8 @@ public class CouchChangeListener
                     encoding = encodingHeader.getValue();
                 }
 
-                InputStream stream = response.getEntity().getContent();
+                final InputStream stream = response.getEntity()
+                                                   .getContent();
 
                 running = true;
                 synchronized ( internalLock )
@@ -224,13 +226,13 @@ public class CouchChangeListener
                     internalLock.notifyAll();
                 }
 
-                CouchDocChangeList changes =
-                    serializer.fromJson( stream, encoding, CouchDocChangeList.class,
-                                         docDeserializer );
+                final CouchDocChangeList changes =
+                    serializer.fromJson( stream, encoding, CouchDocChangeList.class, docDeserializer );
 
-                for ( CouchDocChange change : changes )
+                for ( final CouchDocChange change : changes )
                 {
-                    if ( !change.getId().equals( CHANGE_LISTENER_DOCID ) )
+                    if ( !change.getId()
+                                .equals( CHANGE_LISTENER_DOCID ) )
                     {
                         metadata.setLastProcessedSequenceId( change.getSequence() );
                         dispatcher.documentChanged( change );
@@ -238,22 +240,21 @@ public class CouchChangeListener
                 }
 
             }
-            catch ( CouchDBException e )
+            catch ( final CouchDBException e )
             {
-                logger.error( "Failed to read changes stream for db: %s. Reason: %s", e,
-                              config.getDatabaseUrl(), e.getMessage() );
-                break;
-            }
-            catch ( UnsupportedEncodingException e )
-            {
-                logger.error( "Invalid content encoding for changes response: %s. Reason: %s", e,
-                              encoding, e.getMessage() );
-                break;
-            }
-            catch ( IOException e )
-            {
-                logger.error( "Error reading changes response content. Reason: %s", e,
+                logger.error( "Failed to read changes stream for db: %s. Reason: %s", e, config.getDatabaseUrl(),
                               e.getMessage() );
+                break;
+            }
+            catch ( final UnsupportedEncodingException e )
+            {
+                logger.error( "Invalid content encoding for changes response: %s. Reason: %s", e, encoding,
+                              e.getMessage() );
+                break;
+            }
+            catch ( final IOException e )
+            {
+                logger.error( "Error reading changes response content. Reason: %s", e, e.getMessage() );
                 break;
             }
             finally
@@ -265,7 +266,7 @@ public class CouchChangeListener
             {
                 Thread.sleep( 2000 );
             }
-            catch ( InterruptedException e )
+            catch ( final InterruptedException e )
             {
                 break all;
             }
@@ -291,7 +292,7 @@ public class CouchChangeListener
 
         public Map<String, String> getUrlParameters()
         {
-            Map<String, String> params = new HashMap<String, String>();
+            final Map<String, String> params = new HashMap<String, String>();
             // params.put( "feed", "continuous" );
             if ( lastProcessedSequenceId > 0 )
             {
