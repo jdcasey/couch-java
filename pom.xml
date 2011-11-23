@@ -372,7 +372,7 @@
           <version>2.3</version>
           <executions>
             <execution>
-              <id>resolve-for-test-validation</id>
+              <id>resolve-for-testing</id>
               <goals>
                 <goal>copy-dependencies</goal>
               </goals>

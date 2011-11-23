@@ -18,8 +18,11 @@
 package org.commonjava.web.test.fixture;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -85,6 +88,10 @@ public class TestWarArchiveBuilder
 
     private File librariesDir;
 
+    private File knockoutRewritesDir = new File( "target/knockout-rewritten" );
+
+    private final Map<String, JarKnockouts> knockouts = new HashMap<String, JarKnockouts>();
+
     public TestWarArchiveBuilder( final Class<?> testClass )
     {
         this( testClass, new File( "target/classes" ) );
@@ -98,6 +105,38 @@ public class TestWarArchiveBuilder
                         .addAsWebInfResource( new ClassLoaderAsset( "test.web.xml" ), "web.xml" );
 
         war.addClass( testClass );
+    }
+
+    public TestWarArchiveBuilder withKnockoutRewritesDir( final File directory )
+    {
+        this.knockoutRewritesDir = directory;
+        return this;
+    }
+
+    public TestWarArchiveBuilder withJarKnockoutPaths( final String jarNamePattern, final String... paths )
+    {
+        JarKnockouts jk = knockouts.get( jarNamePattern );
+        if ( jk == null )
+        {
+            jk = new JarKnockouts();
+        }
+
+        jk.knockoutPaths( paths );
+
+        return this;
+    }
+
+    public TestWarArchiveBuilder withJarKnockoutClasses( final String jarNamePattern, final Class<?>... classes )
+    {
+        JarKnockouts jk = knockouts.get( jarNamePattern );
+        if ( jk == null )
+        {
+            jk = new JarKnockouts();
+        }
+
+        jk.knockoutClasses( classes );
+
+        return this;
     }
 
     public TestWarArchiveBuilder withLibrariesIn( final File directory )
@@ -161,8 +200,10 @@ public class TestWarArchiveBuilder
     {
         if ( librariesDir != null )
         {
-            libs: for ( final File f : librariesDir.listFiles() )
+            libs: for ( final File file : librariesDir.listFiles() )
             {
+                File f = file;
+
                 if ( f.isDirectory() )
                 {
                     logger.info( "Adding classes from exploded library directory: %s", f );
@@ -177,6 +218,28 @@ public class TestWarArchiveBuilder
                         if ( fname.matches( pattern ) )
                         {
                             continue libs;
+                        }
+                    }
+
+                    final Set<JarKnockouts> jks = new HashSet<JarKnockouts>();
+                    for ( final Map.Entry<String, JarKnockouts> entry : this.knockouts.entrySet() )
+                    {
+                        if ( fname.matches( entry.getKey() ) )
+                        {
+                            jks.add( entry.getValue() );
+                        }
+                    }
+
+                    if ( !jks.isEmpty() )
+                    {
+                        try
+                        {
+                            f = JarKnockouts.rewriteJar( f, knockoutRewritesDir, jks );
+                        }
+                        catch ( final IOException e )
+                        {
+                            throw new RuntimeException( "Failed to rewrite jar: " + fname + " with knock-outs. Error: "
+                                + e.getMessage(), e );
                         }
                     }
 
