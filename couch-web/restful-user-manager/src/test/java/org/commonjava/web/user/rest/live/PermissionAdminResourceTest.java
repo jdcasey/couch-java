@@ -21,13 +21,16 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.log4j.Level;
 import org.commonjava.auth.couch.model.Permission;
+import org.commonjava.couch.test.fixture.LoggingFixture;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.PermissionAdminResource;
@@ -36,6 +39,7 @@ import org.commonjava.web.user.rest.fixture.TestUserManagerConfigProducer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,12 +52,22 @@ public class PermissionAdminResourceTest
 
     private static final String BASE_URL = "http://" + HOST + ":" + PORT + "/test/admin/permission";
 
+    @BeforeClass
+    public static void setup()
+    {
+        createWar();
+    }
+
     @Deployment
     public static WebArchive createWar()
     {
+        LoggingFixture.setupLogging( Level.DEBUG );
         return new TestWarArchiveBuilder( PermissionAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class,
                                                                                             TestRESTApplication.class,
                                                                                             TestUserManagerConfigProducer.class )
+                                                                         .withLibrariesIn( new File(
+                                                                                                     "target/dependency" ) )
+                                                                         .withLog4jProperties()
                                                                          .build();
     }
 

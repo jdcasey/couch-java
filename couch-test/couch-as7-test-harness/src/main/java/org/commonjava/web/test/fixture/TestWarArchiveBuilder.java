@@ -29,8 +29,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.UrlAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.impl.base.asset.ClassLoaderAsset;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenImporter;
-import org.jboss.shrinkwrap.resolver.api.maven.filter.ScopeFilter;
 
 public class TestWarArchiveBuilder
 {
@@ -45,6 +43,48 @@ public class TestWarArchiveBuilder
 
     private final Set<String> excludedBuildOutput = new HashSet<String>();
 
+    private static final Set<String> DEFAULT_LIB_FILTERS = new HashSet<String>()
+    {
+        private static final long serialVersionUID = 1L;
+
+        {
+            add( "jboss.+" );
+            add( "arquillian.+" );
+            add( "jbosgi.+" );
+            add( "jsoup.+" );
+            add( "cal10n.+" );
+            add( "cdi-api.+" );
+            add( "commons-httpclient.+" );
+            add( "el-api.+" );
+            add( "guava.+" );
+            add( "httpserver.+" );
+            add( "jandex.+" );
+            add( "javassist.+" );
+            add( "javax.inject.+" );
+            add( "jaxrs-api.+" );
+            add( "jcip-annotations.+" );
+            add( "jsr250-api.+" );
+            add( "shrinkwrap.+" );
+            add( "staxmapper.+" );
+            add( "tjws.+" );
+            add( "weld.+" );
+            add( "xnio.+" );
+            add( "resteasy.+" );
+            add( "scannotation.+" );
+        }
+    };
+
+    private final Set<String> libraryFilters = new HashSet<String>()
+    {
+        private static final long serialVersionUID = 1L;
+
+        {
+            addAll( DEFAULT_LIB_FILTERS );
+        }
+    };
+
+    private File librariesDir;
+
     public TestWarArchiveBuilder( final Class<?> testClass )
     {
         this( testClass, new File( "target/classes" ) );
@@ -54,16 +94,23 @@ public class TestWarArchiveBuilder
     {
         this.buildOutput = buildOutput.getAbsoluteFile();
         war = ShrinkWrap.create( WebArchive.class, "test.war" )
-                        .addAsWebInfResource( new ClassLoaderAsset( "beans.xml.test" ), "beans.xml" );
-
-        war.as( MavenImporter.class )
-           .configureFrom( new File( System.getProperty( "user.home" ), ".m2/settings.xml" ).getAbsolutePath() )
-           .loadEffectivePom( "pom.xml" )
-           .importAnyDependencies( new ScopeFilter( "compile", "runtime", "test" ) );
-        // .importTestDependencies();
-        // .importBuildOutput();
+                        .addAsWebInfResource( new ClassLoaderAsset( "beans.xml.test" ), "beans.xml" )
+                        .addAsWebInfResource( new ClassLoaderAsset( "test.web.xml" ), "web.xml" );
 
         war.addClass( testClass );
+    }
+
+    public TestWarArchiveBuilder withLibrariesIn( final File directory )
+    {
+        librariesDir = directory;
+
+        return this;
+    }
+
+    public TestWarArchiveBuilder withoutLibrary( final String filePattern )
+    {
+        libraryFilters.add( filePattern );
+        return this;
     }
 
     public TestWarArchiveBuilder withoutBuildClasses( final Class<?>... classes )
@@ -112,12 +159,46 @@ public class TestWarArchiveBuilder
 
     public WebArchive build()
     {
-        logger.info( "Scanning build output directory: '%s' (directory? %b)...", buildOutput, buildOutput.isDirectory() );
+        if ( librariesDir != null )
+        {
+            libs: for ( final File f : librariesDir.listFiles() )
+            {
+                if ( f.isDirectory() )
+                {
+                    logger.info( "Adding classes from exploded library directory: %s", f );
+                    addDirectoryClasses( f );
+                }
+                else
+                {
+                    final String fname = f.getName();
 
-        final String prefix = buildOutput.getAbsolutePath();
+                    for ( final String pattern : libraryFilters )
+                    {
+                        if ( fname.matches( pattern ) )
+                        {
+                            continue libs;
+                        }
+                    }
+
+                    logger.info( "Adding library: %s", f );
+                    war.addAsLibrary( f );
+                }
+            }
+        }
+
+        addDirectoryClasses( buildOutput );
+
+        return war;
+    }
+
+    private void addDirectoryClasses( final File dir )
+    {
+        logger.info( "Scanning classes directory: '%s' (directory? %b)...", dir, dir.isDirectory() );
+
+        final String prefix = dir.getAbsolutePath();
         final IOFileFilter filter = new ExcludesFileFilter( prefix, excludedBuildOutput );
 
-        for ( final File f : FileUtils.listFiles( buildOutput, filter, filter ) )
+        for ( final File f : FileUtils.listFiles( dir, filter, filter ) )
         {
             if ( f.isFile() )
             {
@@ -132,8 +213,6 @@ public class TestWarArchiveBuilder
                 }
             }
         }
-
-        return war;
     }
 
     private static String classname( final String prefix, final File f )

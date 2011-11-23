@@ -21,6 +21,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.commonjava.auth.couch.model.Permission;
@@ -51,6 +53,8 @@ public class RoleAdminResourceTest
         return new TestWarArchiveBuilder( RoleAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class,
                                                                                       TestRESTApplication.class,
                                                                                       TestUserManagerConfigProducer.class )
+                                                                   .withLibrariesIn( new File( "target/dependency" ) )
+                                                                   .withLog4jProperties()
                                                                    .build();
     }
 

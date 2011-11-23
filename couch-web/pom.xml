@@ -44,6 +44,7 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
+      <!-- <scope>compile</scope> -->
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -52,6 +53,7 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-cdi</artifactId>
+      <!-- <scope>compile</scope> -->
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>

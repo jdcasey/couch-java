@@ -21,6 +21,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
 import org.apache.http.HttpResponse;
@@ -54,6 +56,8 @@ public class UserAdminResourceTest
         return new TestWarArchiveBuilder( UserAdminResource.class ).withExtraClasses( AbstractRESTfulUserManagerTest.class,
                                                                                       TestRESTApplication.class,
                                                                                       TestUserManagerConfigProducer.class )
+                                                                   .withLibrariesIn( new File( "target/dependency" ) )
+                                                                   .withLog4jProperties()
                                                                    .build();
     }
 

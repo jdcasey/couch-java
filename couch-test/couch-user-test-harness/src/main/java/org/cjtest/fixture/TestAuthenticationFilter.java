@@ -33,12 +33,20 @@ import org.apache.shiro.subject.Subject;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.auth.couch.model.User;
+import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
+import org.commonjava.util.logging.Logger;
 
 @WebFilter( "/*" )
 public class TestAuthenticationFilter
     implements Filter
 {
+
+    private final Logger logger = new Logger( getClass() );
+
+    @Inject
+    private CouchRealm realm;
+
     @Inject
     private UserDataManager dataManager;
 
@@ -46,12 +54,22 @@ public class TestAuthenticationFilter
     public void init( final FilterConfig filterConfig )
         throws ServletException
     {
+        logger.info( "Initializing CouchDB Shiro authentication/authorization realm..." );
+        if ( realm == null )
+        {
+            throw new RuntimeException( "Failed to initialize security. Realm has not been injected!" );
+        }
+
+        realm.setupSecurityManager();
+        logger.info( "...done." );
     }
 
     @Override
     public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
         throws IOException, ServletException
     {
+        logger.info( "LOGIN: CouchDB Shiro" );
+
         // Login the user before we test!
         final Subject subject = SecurityUtils.getSubject();
 
@@ -69,6 +87,8 @@ public class TestAuthenticationFilter
         }
 
         subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
+
+        logger.info( "/LOGIN: CouchDB Shiro" );
 
         chain.doFilter( request, response );
     }

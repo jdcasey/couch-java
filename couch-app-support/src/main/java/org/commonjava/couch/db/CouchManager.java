@@ -763,9 +763,6 @@ public class CouchManager
             return;
         }
 
-        LOGGER.info( "\n\n\n\n\n\nDROPPING: " + config.getDatabaseUrl() + "\n\n\n\n\n",
-                     new Throwable( "marker exception" ) );
-
         final HttpDelete request = new HttpDelete( config.getDatabaseUrl() );
         client.executeHttp( request, SC_OK, "Failed to drop database" );
         fireDBEvent( DatabaseEvent.Type.DROP, config.getDatabaseUrl() );
