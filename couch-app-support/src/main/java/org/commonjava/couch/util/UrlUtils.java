@@ -1,21 +1,21 @@
 /*******************************************************************************
- * Copyright (C) 2011  John Casey
+ * Copyright 2011 John Casey
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  * 
- * You should have received a copy of the GNU Affero General Public
- * License along with this program.  If not, see 
- * <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 package org.commonjava.couch.util;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,12 +25,46 @@ public final class UrlUtils
 {
 
     private UrlUtils()
-    {}
+    {
+    }
 
     public static String stringQueryParameter( final Object value )
     {
-        String base = String.valueOf( value );
+        final String base = String.valueOf( value );
         return "%22" + base + "%22";
+    }
+
+    public static String siblingDatabaseUrl( final String dbUrl, final String siblingName )
+    {
+        if ( isEmpty( dbUrl ) )
+        {
+            throw new IllegalArgumentException(
+                                                "Cannot calculate sibling database URL based on empty or null database URL." );
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        final int protoIdx = dbUrl.indexOf( "://" ) + 3;
+
+        final int lastIdx;
+        if ( dbUrl.charAt( dbUrl.length() - 1 ) == '/' )
+        {
+            lastIdx = dbUrl.lastIndexOf( '/', dbUrl.length() - 2 );
+        }
+        else
+        {
+            lastIdx = dbUrl.lastIndexOf( '/' );
+        }
+
+        if ( lastIdx > protoIdx )
+        {
+            sb.append( dbUrl.substring( 0, lastIdx + 1 ) )
+              .append( siblingName );
+
+            return sb.toString();
+        }
+
+        throw new IllegalArgumentException( "Cannot calculate sibling database URL for: '" + dbUrl
+            + "' (cannot find last path separator '/')" );
     }
 
     public static String buildUrl( final String baseUrl, final String... parts )
@@ -39,8 +73,7 @@ public final class UrlUtils
         return buildUrl( baseUrl, null, parts );
     }
 
-    public static String buildUrl( final String baseUrl, final Map<String, String> params,
-                                   final String... parts )
+    public static String buildUrl( final String baseUrl, final Map<String, String> params, final String... parts )
         throws MalformedURLException
     {
         if ( parts == null || parts.length < 1 )
@@ -48,7 +81,7 @@ public final class UrlUtils
             return baseUrl;
         }
 
-        StringBuilder urlBuilder = new StringBuilder();
+        final StringBuilder urlBuilder = new StringBuilder();
 
         if ( !parts[0].startsWith( baseUrl ) )
         {
@@ -74,7 +107,7 @@ public final class UrlUtils
         {
             urlBuilder.append( "?" );
             boolean first = true;
-            for ( Map.Entry<String, String> param : params.entrySet() )
+            for ( final Map.Entry<String, String> param : params.entrySet() )
             {
                 if ( first )
                 {
@@ -85,7 +118,9 @@ public final class UrlUtils
                     urlBuilder.append( "&" );
                 }
 
-                urlBuilder.append( param.getKey() ).append( "=" ).append( param.getValue() );
+                urlBuilder.append( param.getKey() )
+                          .append( "=" )
+                          .append( param.getValue() );
             }
         }
 
@@ -95,98 +130,5 @@ public final class UrlUtils
     public static UrlInfo parseUrlInfo( final String url )
     {
         return new UrlInfo( url );
-    }
-
-    public static final class UrlInfo
-    {
-        private final String url;
-
-        private String user;
-
-        private String password;
-
-        private final String host;
-
-        private int port;
-
-        private UrlInfo( final String u )
-        {
-            String resultUrl = u;
-
-            URL url;
-            try
-            {
-                url = new URL( u );
-            }
-            catch ( MalformedURLException e )
-            {
-                throw new IllegalArgumentException( "Failed to parse repository URL: '" + u
-                    + "'. Reason: " + e.getMessage(), e );
-            }
-
-            String userInfo = url.getUserInfo();
-            if ( userInfo != null && user == null && password == null )
-            {
-                user = userInfo;
-                password = null;
-
-                int idx = userInfo.indexOf( ':' );
-                if ( idx > 0 )
-                {
-                    user = userInfo.substring( 0, idx );
-                    password = userInfo.substring( idx + 1 );
-
-                    StringBuilder sb = new StringBuilder();
-                    idx = this.url.indexOf( "://" );
-                    sb.append( this.url.substring( 0, idx + 3 ) );
-
-                    idx = this.url.indexOf( "@" );
-                    if ( idx > 0 )
-                    {
-                        sb.append( this.url.substring( idx + 1 ) );
-                    }
-
-                    resultUrl = sb.toString();
-                }
-            }
-
-            this.url = resultUrl;
-
-            host = url.getHost();
-            if ( url.getPort() < 0 )
-            {
-                port = url.getProtocol().equals( "https" ) ? 443 : 80;
-            }
-            else
-            {
-                port = url.getPort();
-            }
-        }
-
-        public String getUrl()
-        {
-            return url;
-        }
-
-        public String getUser()
-        {
-            return user;
-        }
-
-        public String getPassword()
-        {
-            return password;
-        }
-
-        public String getHost()
-        {
-            return host;
-        }
-
-        public int getPort()
-        {
-            return port;
-        }
-
     }
 }

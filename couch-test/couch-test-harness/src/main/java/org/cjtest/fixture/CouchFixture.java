@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2011 John Casey
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.cjtest.fixture;
 
 import java.lang.annotation.Annotation;
@@ -38,9 +53,16 @@ public class CouchFixture
 
     private final CouchChangeListener listener;
 
+    private boolean debug = false;
+
     public CouchFixture()
     {
         this( (CouchChangeDispatcher) null, DB_URL );
+    }
+
+    public CouchFixture( final String url )
+    {
+        this( (CouchChangeDispatcher) null, url );
     }
 
     public CouchFixture( final CouchChangeDispatcher dispatcher, final String dbUrl )
@@ -82,6 +104,16 @@ public class CouchFixture
     // couchManager = weld.instance().select( CouchManager.class, qualifiers ).get();
     // listener = weld.instance().select( CouchChangeListener.class, qualifiers ).get();
     // }
+
+    public void setDebug( final boolean debug )
+    {
+        this.debug = debug;
+    }
+
+    public boolean isDebug()
+    {
+        return debug;
+    }
 
     public CouchChangeListener getChangeListener()
     {
@@ -153,13 +185,16 @@ public class CouchFixture
             }
         }
 
-        try
+        if ( !debug )
         {
-            couchManager.dropDatabase();
-        }
-        catch ( final CouchDBException e )
-        {
-            e.printStackTrace();
+            try
+            {
+                couchManager.dropDatabase();
+            }
+            catch ( final CouchDBException e )
+            {
+                e.printStackTrace();
+            }
         }
 
         super.after();

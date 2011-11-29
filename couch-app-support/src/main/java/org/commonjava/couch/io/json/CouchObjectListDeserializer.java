@@ -1,19 +1,17 @@
 /*******************************************************************************
- * Copyright (C) 2011  John Casey
+ * Copyright 2011 John Casey
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  * 
- * You should have received a copy of the GNU Affero General Public
- * License along with this program.  If not, see 
- * <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 package org.commonjava.couch.io.json;
 
@@ -42,16 +40,26 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
 
     private final Class<T> type;
 
+    private final boolean allowMissing;
+
     public CouchObjectListDeserializer( final Class<T> type )
     {
         this.type = type;
+        this.allowMissing = false;
+    }
+
+    public CouchObjectListDeserializer( final Class<T> type, final boolean allowMissing )
+    {
+        this.type = type;
+        this.allowMissing = allowMissing;
     }
 
     @Override
     public Type typeLiteral()
     {
         return new TypeToken<CouchObjectList<T>>()
-        {}.getType();
+        {
+        }.getType();
     }
 
     @Override
@@ -59,23 +67,28 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
                                            final JsonDeserializationContext context )
         throws JsonParseException
     {
-        List<T> items = new ArrayList<T>();
+        final List<T> items = new ArrayList<T>();
 
-        JsonElement rowsRaw = json.getAsJsonObject().get( ROWS );
+        final JsonElement rowsRaw = json.getAsJsonObject()
+                                        .get( ROWS );
         if ( rowsRaw == null )
         {
             throw new JsonParseException( "Cannot find " + ROWS + " field within root object." );
         }
 
-        JsonArray rows = rowsRaw.getAsJsonArray();
-        for ( JsonElement row : rows )
+        final JsonArray rows = rowsRaw.getAsJsonArray();
+        for ( final JsonElement row : rows )
         {
-            JsonObject rowObj = row.getAsJsonObject();
-            JsonElement doc = rowObj.get( DOC_ELEMENT );
+            final JsonObject rowObj = row.getAsJsonObject();
+            final JsonElement doc = rowObj.get( DOC_ELEMENT );
             if ( doc == null )
             {
-                throw new JsonParseException( "Cannot find " + DOC_ELEMENT + " field within row: "
-                    + row
+                if ( allowMissing )
+                {
+                    continue;
+                }
+
+                throw new JsonParseException( "Cannot find " + DOC_ELEMENT + " field within row: " + row
                     + "\nDid you access the view with the '?include_docs=true' query parameter?" );
             }
 

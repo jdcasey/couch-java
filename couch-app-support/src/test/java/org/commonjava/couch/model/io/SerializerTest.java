@@ -1,19 +1,17 @@
 /*******************************************************************************
- * Copyright (C) 2011  John Casey
+ * Copyright 2011 John Casey
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  * 
- * You should have received a copy of the GNU Affero General Public
- * License along with this program.  If not, see 
- * <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 package org.commonjava.couch.model.io;
 
@@ -50,11 +48,10 @@ public class SerializerTest
     @Test
     public void serializeCouchDocRefSet()
     {
-        CouchDocRefSet set =
-            new CouchDocRefSet( new CouchDocRef( "key1" ), new CouchDocRef( "key2" ),
-                                new CouchDocRef( "key3" ) );
+        final CouchDocRefSet set =
+            new CouchDocRefSet( new CouchDocRef( "key1" ), new CouchDocRef( "key2" ), new CouchDocRef( "key3" ) );
 
-        String ser = new Serializer().toString( set );
+        final String ser = new Serializer().toString( set );
 
         System.out.println( ser );
     }
@@ -62,21 +59,20 @@ public class SerializerTest
     @Test
     public void deserializeObjectList()
     {
-        String src =
+        final String src =
             "{\"total_rows\":1,\"offset\":0,\"rows\":[\n"
                 + "{\"key\":\"username\",\"value\":\"2-abcdef012345678\",\"doc\":{\"username\":\"username\",\"first\":\"first\",\"last\":\"last\",\"email\":\"email@nowhere.com\",\"_id\":\"username\"}},\n"
                 + "{\"key\":\"username2\",\"value\":\"3-bdefca34567216\",\"doc\":{\"username\":\"username2\",\"first\":\"first2\",\"last\":\"last2\",\"email\":\"email2@nowhere.com\",\"_id\":\"username2\"}}"
                 + "]}";
 
-        CouchObjectListDeserializer<TestUser> deser =
-            new CouchObjectListDeserializer<TestUser>( TestUser.class );
+        final CouchObjectListDeserializer<TestUser> deser =
+            new CouchObjectListDeserializer<TestUser>( TestUser.class, false );
 
-        CouchObjectList<TestUser> listing =
-            new Serializer().fromJson( src, deser.typeLiteral(), deser );
+        final CouchObjectList<TestUser> listing = new Serializer().fromJson( src, deser.typeLiteral(), deser );
 
         assertThat( listing, notNullValue() );
 
-        List<TestUser> users = listing.getItems();
+        final List<TestUser> users = listing.getItems();
 
         assertThat( users, notNullValue() );
         assertThat( users.size(), equalTo( 2 ) );
@@ -93,14 +89,13 @@ public class SerializerTest
     @Test
     public void serializeSimpleUser()
     {
-        System.out.println( new Serializer().toString( new TestUser( "username", "first", "last",
-                                                                     "email@nowhere.com" ) ) );
+        System.out.println( new Serializer().toString( new TestUser( "username", "first", "last", "email@nowhere.com" ) ) );
     }
 
     @Test
     public void serializeBulkStore()
     {
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
+        final List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
         actions.add( new StoreAction( new TestDoc( "foo", "bar", "bat" ), false ) );
         actions.add( new StoreAction( new TestDoc( "bar", "1-aabbeeff24422cc", "fieldname" ), false ) );
 
@@ -110,7 +105,7 @@ public class SerializerTest
     @Test
     public void serializeTransactionalBulkStore()
     {
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
+        final List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
         actions.add( new StoreAction( new TestDoc( "foo", "bar", "bat" ), false ) );
         actions.add( new StoreAction( new TestDoc( "bar", "1-aabbeeff24422cc", "fieldname" ), false ) );
 
@@ -120,7 +115,7 @@ public class SerializerTest
     @Test
     public void serializeBulkDelete()
     {
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
+        final List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
         actions.add( new DeleteAction( "foo" ) );
         actions.add( new DeleteAction( "bar", "1-aabbeeff24422cc" ) );
 
@@ -130,7 +125,7 @@ public class SerializerTest
     @Test
     public void serializeTransactionalBulkDelete()
     {
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
+        final List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
         actions.add( new DeleteAction( "foo" ) );
         actions.add( new DeleteAction( "bar", "1-aabbeeff24422cc" ) );
 
@@ -140,7 +135,7 @@ public class SerializerTest
     @Test
     public void serializeBulkModify()
     {
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
+        final List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
         actions.add( new StoreAction( new TestDoc( "foo", "bar", "bat" ), false ) );
         actions.add( new StoreAction( new TestDoc( "bar", "1-aabbeeff24422cc", "fieldname" ), false ) );
         actions.add( new DeleteAction( "foo" ) );
@@ -152,7 +147,7 @@ public class SerializerTest
     @Test
     public void serializeTransactionalBulkModify()
     {
-        List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
+        final List<CouchDocumentAction> actions = new ArrayList<CouchDocumentAction>();
         actions.add( new StoreAction( new TestDoc( "foo", "bar", "bat" ), false ) );
         actions.add( new StoreAction( new TestDoc( "bar", "1-aabbeeff24422cc", "fieldname" ), false ) );
         actions.add( new DeleteAction( "foo" ) );
@@ -164,15 +159,11 @@ public class SerializerTest
     @Test
     public void serializeApp()
     {
-        Map<String, CouchAppView> views = new HashMap<String, CouchAppView>();
+        final Map<String, CouchAppView> views = new HashMap<String, CouchAppView>();
         views.put( "test-view", new CouchAppView( "function(doc){emit(doc._id,doc._rev );}" ) );
 
-        System.out.println( new Serializer().toString( new CouchApp(
-                                                                     "test-app",
-                                                                     views,
-                                                                     new SimpleAppDescription(
-                                                                                               "test-app",
-                                                                                               "test-app",
+        System.out.println( new Serializer().toString( new CouchApp( "test-app", views,
+                                                                     new SimpleAppDescription( "test-app", "test-app",
                                                                                                "test-view" ) ) ) );
     }
 
