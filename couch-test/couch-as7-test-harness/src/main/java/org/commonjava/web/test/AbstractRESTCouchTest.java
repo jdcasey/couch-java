@@ -15,12 +15,14 @@
  ******************************************************************************/
 package org.commonjava.web.test;
 
+import static org.commonjava.couch.util.UrlUtils.buildUrl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 
 import javax.inject.Inject;
 
@@ -269,4 +271,16 @@ public abstract class AbstractRESTCouchTest
             request.abort();
         }
     }
+
+    protected String resourceUrl( final String path )
+        throws MalformedURLException
+    {
+        return buildUrl( "http://localhost:8080/test/api/", apiVersion(), path );
+    }
+
+    protected String apiVersion()
+    {
+        return "1.0";
+    }
+
 }

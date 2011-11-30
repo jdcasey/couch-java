@@ -40,8 +40,7 @@ public class CouchShiroSetupListener
     {
         if ( realm == null )
         {
-            throw new RuntimeException(
-                                        "Failed to initialize security. Realm has not been injected!" );
+            throw new RuntimeException( "Failed to initialize security. Realm has not been injected!" );
         }
 
         realm.setupSecurityManager();
@@ -51,6 +50,16 @@ public class CouchShiroSetupListener
     public void contextDestroyed( final ServletContextEvent sce )
     {
         // NOP
+    }
+
+    public void setAutoCreateAuthorizationInfo( final boolean autoCreate )
+    {
+        realm.setAutoCreateAuthorizationInfo( autoCreate );
+    }
+
+    public boolean isAutoCreateAuthorizationInfo()
+    {
+        return realm.isAutoCreateAuthorizationInfo();
     }
 
 }

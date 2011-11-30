@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.commonjava.auth.couch.fixture;
+package org.commonjava.couch.user.fixture;
 
 import org.cjtest.fixture.CouchFixture;
 import org.commonjava.auth.couch.conf.DefaultUserManagerConfig;
@@ -37,13 +37,17 @@ public class CouchUserFixture
 
     public CouchUserFixture()
     {
-        this( UserConfigProvider.DB_URL );
+        this( CouchFixture.DB_URL );
     }
 
     public CouchUserFixture( final String dbUrl )
     {
         super( dbUrl );
-        this.userConfig = new DefaultUserManagerConfig();
+
+        this.userConfig =
+            new DefaultUserManagerConfig( "admin@changeme.com", "password", "Admin", "User", getCouchConfig(),
+                                          "test-user-db" );
+
         this.passwordManager = new PasswordManager();
         this.userDataManager = new UserDataManager( userConfig, passwordManager, getCouchManager() );
 

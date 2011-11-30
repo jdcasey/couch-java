@@ -43,6 +43,9 @@ public class TestAuthenticationFilter
     private final Logger logger = new Logger( getClass() );
 
     @Inject
+    private TestAuthenticationControls controls;
+
+    @Inject
     private CouchRealm realm;
 
     @Inject
@@ -52,6 +55,43 @@ public class TestAuthenticationFilter
     public void init( final FilterConfig filterConfig )
         throws ServletException
     {
+    }
+
+    @Override
+    public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
+        throws IOException, ServletException
+    {
+        if ( controls.isDoAuthentication() )
+        {
+            setupRealm();
+
+            logger.info( "LOGIN: CouchDB Shiro" );
+
+            // Login the user before we test!
+            final Subject subject = SecurityUtils.getSubject();
+
+            final String username = controls.getUser();
+
+            User user;
+            try
+            {
+                user = dataManager.getUser( username );
+            }
+            catch ( final UserDataException e )
+            {
+                throw new ServletException( "Cannot find user: " + username + " to authenticate! Error: "
+                    + e.getMessage(), e );
+            }
+
+            subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
+
+            logger.info( "/LOGIN: CouchDB Shiro" );
+        }
+        chain.doFilter( request, response );
+    }
+
+    private void setupRealm()
+    {
         logger.info( "Initializing CouchDB Shiro authentication/authorization realm..." );
         if ( realm == null )
         {
@@ -59,36 +99,9 @@ public class TestAuthenticationFilter
         }
 
         realm.setupSecurityManager();
+        realm.setAutoCreateAuthorizationInfo( controls.isAutoCreateAuthorizations() );
+
         logger.info( "...done." );
-    }
-
-    @Override
-    public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
-        throws IOException, ServletException
-    {
-        logger.info( "LOGIN: CouchDB Shiro" );
-
-        // Login the user before we test!
-        final Subject subject = SecurityUtils.getSubject();
-
-        final String username = User.ADMIN;
-
-        User user;
-        try
-        {
-            user = dataManager.getUser( username );
-        }
-        catch ( final UserDataException e )
-        {
-            throw new ServletException( "Cannot find user: " + username + " to authenticate! Error: " + e.getMessage(),
-                                        e );
-        }
-
-        subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
-
-        logger.info( "/LOGIN: CouchDB Shiro" );
-
-        chain.doFilter( request, response );
     }
 
     @Override

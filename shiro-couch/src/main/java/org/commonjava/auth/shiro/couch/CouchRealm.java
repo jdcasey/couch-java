@@ -34,6 +34,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -58,8 +59,11 @@ public class CouchRealm
     @Inject
     private CouchPermissionResolver resolver;
 
+    private SecurityManager sm;
+
     CouchRealm()
-    {}
+    {
+    }
 
     public CouchRealm( final UserDataManager dataManager, final CouchPermissionResolver resolver )
     {
@@ -71,17 +75,22 @@ public class CouchRealm
 
     public void setupSecurityManager( final Realm... fallbackRealms )
     {
-        List<Realm> realms = new ArrayList<Realm>();
-        realms.add( this );
-        for ( Realm realm : fallbackRealms )
+        // make indempotent.
+        if ( sm == null )
         {
-            if ( realm != null )
+            final List<Realm> realms = new ArrayList<Realm>();
+            realms.add( this );
+            for ( final Realm realm : fallbackRealms )
             {
-                realms.add( realm );
+                if ( realm != null )
+                {
+                    realms.add( realm );
+                }
             }
-        }
 
-        SecurityUtils.setSecurityManager( new DefaultSecurityManager( realms ) );
+            sm = new DefaultSecurityManager( realms );
+            SecurityUtils.setSecurityManager( sm );
+        }
     }
 
     @PostConstruct
@@ -102,12 +111,11 @@ public class CouchRealm
         {
             user = dataManager.getUser( principal.toString() );
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( "Failed to retrieve user: %s. Reason: %s", e, principal, e.getMessage() );
 
-            throw new AuthenticationException(
-                                               "Cannot retrieve user. System configuration is invalid." );
+            throw new AuthenticationException( "Cannot retrieve user. System configuration is invalid." );
         }
 
         if ( user == null )
@@ -124,13 +132,11 @@ public class CouchRealm
             {
                 roles = dataManager.getRoles( user );
             }
-            catch ( UserDataException e )
+            catch ( final UserDataException e )
             {
-                logger.error( "Failed to retrieve roles for user: %s. Reason: %s", e, principal,
-                              e.getMessage() );
+                logger.error( "Failed to retrieve roles for user: %s. Reason: %s", e, principal, e.getMessage() );
 
-                throw new AuthenticationException(
-                                                   "Cannot retrieve user roles. System configuration is invalid." );
+                throw new AuthenticationException( "Cannot retrieve user roles. System configuration is invalid." );
             }
 
             for ( final Role role : roles )
@@ -142,10 +148,10 @@ public class CouchRealm
                 {
                     permissions = dataManager.getPermissions( role );
                 }
-                catch ( UserDataException e )
+                catch ( final UserDataException e )
                 {
-                    logger.error( "Failed to retrieve permissions for role: %s. Reason: %s", e,
-                                  role.getName(), e.getMessage() );
+                    logger.error( "Failed to retrieve permissions for role: %s. Reason: %s", e, role.getName(),
+                                  e.getMessage() );
 
                     throw new AuthenticationException(
                                                        "Cannot retrieve role permissions. System configuration is invalid." );
@@ -153,7 +159,7 @@ public class CouchRealm
 
                 if ( permissions != null )
                 {
-                    for ( org.commonjava.auth.couch.model.Permission perm : permissions )
+                    for ( final org.commonjava.auth.couch.model.Permission perm : permissions )
                     {
                         perms.add( new ShiroPermission( perm ) );
                     }
@@ -170,8 +176,9 @@ public class CouchRealm
     {
         if ( !( token instanceof UsernamePasswordToken ) )
         {
-            throw new AuthenticationException( "Cannot use authentication token of type: "
-                + token.getClass().getName() + " with this service." );
+            throw new AuthenticationException( "Cannot use authentication token of type: " + token.getClass()
+                                                                                                  .getName()
+                + " with this service." );
         }
 
         final UsernamePasswordToken tok = (UsernamePasswordToken) token;
@@ -180,16 +187,24 @@ public class CouchRealm
         {
             user = dataManager.getUser( tok.getUsername() );
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
-            logger.error( "Failed to retrieve user: %s. Reason: %s", e, tok.getUsername(),
-                          e.getMessage() );
+            logger.error( "Failed to retrieve user: %s. Reason: %s", e, tok.getUsername(), e.getMessage() );
 
-            throw new AuthenticationException(
-                                               "Cannot retrieve user. System configuration is invalid." );
+            throw new AuthenticationException( "Cannot retrieve user. System configuration is invalid." );
         }
 
         return ShiroUserUtils.getAuthenticationInfo( user );
+    }
+
+    public void setAutoCreateAuthorizationInfo( final boolean autoCreate )
+    {
+        resolver.setAutoCreateAuthorizationInfo( autoCreate );
+    }
+
+    public boolean isAutoCreateAuthorizationInfo()
+    {
+        return resolver.isAutoCreateAuthorizationInfo();
     }
 
 }

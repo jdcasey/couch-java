@@ -15,18 +15,22 @@
  ******************************************************************************/
 package org.commonjava.couch.user.web.test;
 
+import static org.commonjava.couch.util.UrlUtils.buildUrl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 
 import javax.inject.Inject;
 
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.ProtocolException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -35,7 +39,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.protocol.HttpContext;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataManager;
@@ -73,6 +79,25 @@ public abstract class AbstractUserRESTCouchTest
 
     protected AbstractUserRESTCouchTest()
     {
+    }
+
+    protected void disableRedirection()
+    {
+        http.setRedirectStrategy( new DefaultRedirectStrategy()
+        {
+            @Override
+            public boolean isRedirected( final HttpRequest request, final HttpResponse response,
+                                         final HttpContext context )
+                throws ProtocolException
+            {
+                return false;
+            }
+        } );
+    }
+
+    protected void enableRedirection()
+    {
+        http.setRedirectStrategy( new DefaultRedirectStrategy() );
     }
 
     protected abstract CouchManager getCouchManager();
@@ -157,6 +182,44 @@ public abstract class AbstractUserRESTCouchTest
                     return null;
                 }
             } );
+        }
+        finally
+        {
+            get.abort();
+        }
+    }
+
+    protected HttpResponse getWithResponse( final String url, final int expectedStatus )
+        throws Exception
+    {
+        final HttpGet get = new HttpGet( url );
+        try
+        {
+            final HttpResponse response = http.execute( get );
+            final StatusLine sl = response.getStatusLine();
+            assertThat( sl.getStatusCode(), equalTo( expectedStatus ) );
+
+            return response;
+        }
+        finally
+        {
+            get.abort();
+        }
+    }
+
+    protected HttpResponse getWithResponse( final String url, final int expectedStatus, final String accept )
+        throws Exception
+    {
+        final HttpGet get = new HttpGet( url );
+        get.setHeader( "Accept", accept );
+
+        try
+        {
+            final HttpResponse response = http.execute( get );
+            final StatusLine sl = response.getStatusLine();
+            assertThat( sl.getStatusCode(), equalTo( expectedStatus ) );
+
+            return response;
         }
         finally
         {
@@ -251,4 +314,16 @@ public abstract class AbstractUserRESTCouchTest
             request.abort();
         }
     }
+
+    protected String resourceUrl( final String path )
+        throws MalformedURLException
+    {
+        return buildUrl( "http://localhost:8080/test/api/", apiVersion(), path );
+    }
+
+    protected String apiVersion()
+    {
+        return "1.0";
+    }
+
 }

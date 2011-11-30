@@ -42,12 +42,25 @@ public class CouchPermissionResolver
     @Inject
     private UserDataManager dataManager;
 
+    private boolean autoCreate;
+
     CouchPermissionResolver()
-    {}
+    {
+    }
 
     public CouchPermissionResolver( final UserDataManager dataManager )
     {
         this.dataManager = dataManager;
+    }
+
+    public void setAutoCreateAuthorizationInfo( final boolean autoCreate )
+    {
+        this.autoCreate = autoCreate;
+    }
+
+    public boolean isAutoCreateAuthorizationInfo()
+    {
+        return autoCreate;
     }
 
     @Override
@@ -55,25 +68,42 @@ public class CouchPermissionResolver
     {
         // logger.info( "Resolving permission: %s", permissionName );
 
+        org.commonjava.auth.couch.model.Permission perm;
         try
         {
-            org.commonjava.auth.couch.model.Permission perm =
-                dataManager.getPermission( permissionName );
-            if ( perm == null )
+            perm = dataManager.getPermission( permissionName );
+        }
+        catch ( final UserDataException e )
+        {
+            logger.error( "Failed to retrieve permission: %s. Reason: %s", e, permissionName, e.getMessage() );
+
+            throw new AuthorizationException( "Cannot retrieve permission. System configuration is invalid." );
+        }
+
+        if ( perm == null )
+        {
+            if ( autoCreate )
+            {
+                perm = new org.commonjava.auth.couch.model.Permission( permissionName );
+
+                try
+                {
+                    dataManager.storePermission( perm );
+                }
+                catch ( final UserDataException e )
+                {
+                    logger.error( "Failed to auto-create permission: %s. Reason: %s", e, permissionName, e.getMessage() );
+
+                    throw new AuthorizationException( "Cannot auto-create permission. System configuration is invalid." );
+                }
+            }
+            else
             {
                 throw new AuthorizationException( "No such permission: " + permissionName );
             }
-
-            return new ShiroPermission( perm );
         }
-        catch ( UserDataException e )
-        {
-            logger.error( "Failed to retrieve permission: %s. Reason: %s", e, permissionName,
-                          e.getMessage() );
 
-            throw new AuthorizationException(
-                                              "Cannot retrieve permission. System configuration is invalid." );
-        }
+        return new ShiroPermission( perm );
     }
 
     @Override
@@ -89,17 +119,34 @@ public class CouchPermissionResolver
             role = dataManager.getRole( roleName );
 
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( "Failed to retrieve role: %s. Reason: %s", e, roleName, e.getMessage() );
 
-            throw new AuthorizationException(
-                                              "Cannot retrieve role. System configuration is invalid." );
+            throw new AuthorizationException( "Cannot retrieve role. System configuration is invalid." );
         }
 
         if ( role == null )
         {
-            throw new AuthorizationException( "No such role: " + roleName );
+            if ( autoCreate )
+            {
+                role = new Role( roleName );
+
+                try
+                {
+                    role = dataManager.createRole( roleName );
+                }
+                catch ( final UserDataException e )
+                {
+                    logger.error( "Failed to auto-create role: %s. Reason: %s", e, roleName, e.getMessage() );
+
+                    throw new AuthorizationException( "Cannot auto-create role. System configuration is invalid." );
+                }
+            }
+            else
+            {
+                throw new AuthorizationException( "No such role: " + roleName );
+            }
         }
 
         if ( role.getPermissions() != null )
@@ -109,10 +156,9 @@ public class CouchPermissionResolver
             {
                 permissions = dataManager.getPermissions( role );
             }
-            catch ( UserDataException e )
+            catch ( final UserDataException e )
             {
-                logger.error( "Failed to retrieve permissions for role: %s. Reason: %s", e,
-                              roleName, e.getMessage() );
+                logger.error( "Failed to retrieve permissions for role: %s. Reason: %s", e, roleName, e.getMessage() );
 
                 throw new AuthorizationException(
                                                   "Cannot retrieve permissions for role. System configuration is invalid." );
