@@ -28,11 +28,7 @@ import java.util.Set;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 
@@ -46,18 +42,18 @@ public class JsonSerializer
 
     private final Logger logger = new Logger( getClass() );
 
-    private final Set<SerializationAdapter> baseAdapters = new HashSet<SerializationAdapter>();
+    private final Set<WebSerializationAdapter> baseAdapters = new HashSet<WebSerializationAdapter>();
 
     JsonSerializer()
     {
     }
 
-    public JsonSerializer( final SerializationAdapter... baseAdapters )
+    public JsonSerializer( final WebSerializationAdapter... baseAdapters )
     {
         this.baseAdapters.addAll( Arrays.asList( baseAdapters ) );
     }
 
-    public void registerSerializationAdapters( final SerializationAdapter... adapters )
+    public void registerSerializationAdapters( final WebSerializationAdapter... adapters )
     {
         this.baseAdapters.addAll( Arrays.asList( adapters ) );
     }
@@ -67,7 +63,7 @@ public class JsonSerializer
         final GsonBuilder builder = new GsonBuilder();
         if ( baseAdapters != null )
         {
-            for ( final SerializationAdapter adapter : baseAdapters )
+            for ( final WebSerializationAdapter adapter : baseAdapters )
             {
                 builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
             }
@@ -102,8 +98,7 @@ public class JsonSerializer
         {
             logger.error( "Failed to deserialize type: %s from HttpServletRequest body. Error: %s", e, type.getName(),
                           e.getMessage() );
-            throw new WebApplicationException( Response.status( Status.INTERNAL_SERVER_ERROR )
-                                                       .build() );
+            throw new RuntimeException( "Cannot read request." );
         }
     }
 
@@ -148,8 +143,7 @@ public class JsonSerializer
         catch ( final UnsupportedEncodingException e )
         {
             logger.error( "Failed to deserialize type: %s. Error: %s", e, type.getName(), e.getMessage() );
-            throw new WebApplicationException( Response.status( Status.INTERNAL_SERVER_ERROR )
-                                                       .build() );
+            throw new RuntimeException( "Cannot read stream." );
         }
     }
 
@@ -187,8 +181,7 @@ public class JsonSerializer
         {
             logger.error( "Failed to deserialize type: %s. Error: %s", e, token.getType(), e.getMessage() );
 
-            throw new WebApplicationException( Response.status( Status.INTERNAL_SERVER_ERROR )
-                                                       .build() );
+            throw new RuntimeException( "Cannot read stream." );
         }
     }
 

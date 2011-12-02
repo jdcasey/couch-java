@@ -186,7 +186,8 @@ public class CouchManager
                 ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
             }
 
-            if ( skipIfExists && documentRevisionExists( doc ) )
+            final boolean revExists = documentRevisionExists( doc );
+            if ( skipIfExists && revExists )
             {
                 continue;
             }
@@ -454,7 +455,8 @@ public class CouchManager
             ( (DenormalizedCouchDoc) doc ).calculateDenormalizedFields();
         }
 
-        if ( skipIfExists && documentRevisionExists( doc ) )
+        final boolean revExists = documentRevisionExists( doc );
+        if ( skipIfExists && revExists )
         {
             return false;
         }

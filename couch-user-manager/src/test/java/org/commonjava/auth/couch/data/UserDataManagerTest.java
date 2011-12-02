@@ -24,9 +24,9 @@ import java.util.Set;
 
 import org.apache.log4j.Level;
 import org.commonjava.auth.couch.fixture.CouchUserFixture;
-import org.commonjava.auth.couch.model.Permission;
-import org.commonjava.auth.couch.model.Role;
-import org.commonjava.auth.couch.model.User;
+import org.commonjava.couch.rbac.Permission;
+import org.commonjava.couch.rbac.Role;
+import org.commonjava.couch.rbac.User;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;

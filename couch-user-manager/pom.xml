@@ -29,6 +29,10 @@
   <dependencies>
     <dependency>
       <groupId>org.commonjava.couch</groupId>
+      <artifactId>rbac-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.couch</groupId>
       <artifactId>couch-app-support</artifactId>
     </dependency>
     

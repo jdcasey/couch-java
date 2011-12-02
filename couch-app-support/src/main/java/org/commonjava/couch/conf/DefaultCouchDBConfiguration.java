@@ -32,7 +32,7 @@ public class DefaultCouchDBConfiguration
 
     private UrlInfo urlInfo;
 
-    private int maxConnections;
+    private int maxConnections = -1;
 
     public DefaultCouchDBConfiguration( final String dbUrl, final int maxConnections )
     {

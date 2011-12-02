@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Level;
-import org.commonjava.auth.couch.model.Permission;
+import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.test.fixture.LoggingFixture;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;

@@ -45,10 +45,10 @@
     	<optional>true</optional>
     </dependency>
     
-    <dependency>
+<!--     <dependency>
     	<groupId>org.commonjava.couch</groupId>
     	<artifactId>couch-app-support</artifactId>
     	<optional>true</optional>
     </dependency>
-  </dependencies>
+ -->  </dependencies>
 </project>

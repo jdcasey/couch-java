@@ -15,18 +15,23 @@
  ******************************************************************************/
 package org.commonjava.auth.couch.model;
 
+import static org.commonjava.auth.couch.model.MetadataKeys.ID_METADATA;
+import static org.commonjava.auth.couch.model.MetadataKeys.REV_METADATA;
 import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.commonjava.couch.model.AbstractCouchDocument;
 import org.commonjava.couch.model.DenormalizedCouchDoc;
+import org.commonjava.couch.rbac.Permission;
+import org.commonjava.couch.rbac.Role;
 
 import com.google.gson.annotations.Expose;
 
-public class Role
+public class RoleDoc
     extends AbstractCouchDocument
     implements DenormalizedCouchDoc
 {
@@ -42,14 +47,15 @@ public class Role
     @Expose( deserialize = false )
     private final String doctype = NAMESPACE;
 
-    Role()
-    {}
+    RoleDoc()
+    {
+    }
 
-    public Role( final String name, final Permission... perms )
+    public RoleDoc( final String name, final Permission... perms )
     {
         setName( name );
         this.permissions = new HashSet<String>( perms.length );
-        for ( Permission perm : perms )
+        for ( final Permission perm : perms )
         {
             this.permissions.add( perm.getName() );
         }
@@ -57,11 +63,20 @@ public class Role
         calculateDenormalizedFields();
     }
 
-    public Role( final String name, final Collection<Permission> perms )
+    public RoleDoc( final Role role )
+    {
+        setName( role.getName() );
+        this.permissions = new HashSet<String>( role.getPermissions() );
+        setCouchDocRev( role.getMetadata( REV_METADATA, String.class ) );
+
+        calculateDenormalizedFields();
+    }
+
+    public RoleDoc( final String name, final Collection<Permission> perms )
     {
         this.name = name;
         this.permissions = new HashSet<String>( perms.size() );
-        for ( Permission perm : perms )
+        for ( final Permission perm : perms )
         {
             this.permissions.add( perm.getName() );
         }
@@ -136,7 +151,7 @@ public class Role
         }
         if ( permissions != null )
         {
-            for ( Permission permission : permissions )
+            for ( final Permission permission : permissions )
             {
                 this.permissions.add( permission.getName() );
             }
@@ -155,7 +170,7 @@ public class Role
         }
         if ( permissions != null )
         {
-            for ( String permission : permissions )
+            for ( final String permission : permissions )
             {
                 this.permissions.add( permission );
             }
@@ -186,7 +201,7 @@ public class Role
         {
             return false;
         }
-        final Role other = (Role) obj;
+        final RoleDoc other = (RoleDoc) obj;
         if ( !name.equals( other.name ) )
         {
             return false;
@@ -202,8 +217,12 @@ public class Role
     @Override
     public String toString()
     {
-        StringBuilder builder = new StringBuilder();
-        builder.append( "Role [name=" ).append( name ).append( "\n\tpermissions=" ).append( permissions ).append( "]" );
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "Role [name=" )
+               .append( name )
+               .append( "\n\tpermissions=" )
+               .append( permissions )
+               .append( "]" );
         return builder.toString();
     }
 
@@ -216,6 +235,34 @@ public class Role
     public void calculateDenormalizedFields()
     {
         setCouchDocId( namespaceId( NAMESPACE, this.name ) );
+    }
+
+    public static Set<Role> toRoleSet( final List<RoleDoc> docs )
+    {
+        final Set<Role> result = new HashSet<Role>();
+        for ( final RoleDoc doc : docs )
+        {
+            result.add( doc.toRole() );
+        }
+        return result;
+    }
+
+    public Role toRole()
+    {
+        final Role r = new Role( name, permissions );
+        r.setMetadata( REV_METADATA, getCouchDocRev() );
+        r.setMetadata( ID_METADATA, getCouchDocId() );
+        return r;
+    }
+
+    public static Collection<RoleDoc> toDocuments( final Collection<Role> roles )
+    {
+        final Set<RoleDoc> docs = new HashSet<RoleDoc>();
+        for ( final Role role : roles )
+        {
+            docs.add( new RoleDoc( role ) );
+        }
+        return docs;
     }
 
 }

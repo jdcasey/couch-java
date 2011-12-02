@@ -19,8 +19,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import org.commonjava.auth.couch.model.Role;
-import org.commonjava.auth.couch.model.User;
+import org.commonjava.couch.rbac.Role;
+import org.commonjava.couch.rbac.User;
 import org.junit.Test;
 
 public class RoleDeletionListenerTest

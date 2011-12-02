@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.commonjava.auth.couch.model;
+package org.commonjava.couch.rbac;
 
 import static org.apache.commons.lang.StringUtils.join;
-import static org.commonjava.couch.util.IdUtils.namespaceId;
-
-import org.commonjava.couch.model.AbstractCouchDocument;
-import org.commonjava.couch.model.DenormalizedCouchDoc;
-
-import com.google.gson.annotations.Expose;
 
 public class Permission
-    extends AbstractCouchDocument
-    implements DenormalizedCouchDoc
+    extends ModelMetadata
 {
 
     public static final String WILDCARD = "*";
@@ -44,16 +37,13 @@ public class Permission
 
     private String name;
 
-    @Expose( deserialize = false )
-    private final String doctype = NAMESPACE;
-
     Permission()
-    {}
+    {
+    }
 
     public Permission( final String firstPart, final String... nameParts )
     {
         setName( name( firstPart, nameParts ) );
-        calculateDenormalizedFields();
     }
 
     public String getName()
@@ -106,19 +96,7 @@ public class Permission
 
     public static String name( final String firstPart, final String... parts )
     {
-        return firstPart
-            + ( ( parts != null && parts.length > 0 ) ? ( ":" + join( parts, ":" ) ) : "" );
-    }
-
-    public String getDoctype()
-    {
-        return doctype;
-    }
-
-    @Override
-    public void calculateDenormalizedFields()
-    {
-        setCouchDocId( namespaceId( NAMESPACE, name ) );
+        return firstPart + ( ( parts != null && parts.length > 0 ) ? ( ":" + join( parts, ":" ) ) : "" );
     }
 
 }

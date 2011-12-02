@@ -19,8 +19,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import org.commonjava.auth.couch.model.Permission;
-import org.commonjava.auth.couch.model.Role;
+import org.commonjava.couch.rbac.Permission;
+import org.commonjava.couch.rbac.Role;
 import org.junit.Test;
 
 public class PermissionDeletionListenerTest
@@ -36,8 +36,13 @@ public class PermissionDeletionListenerTest
         Role admin = getDataManager().getRole( Role.ADMIN );
 
         assertThat( admin.getPermissions(), notNullValue() );
-        assertThat( admin.getPermissions().size(), equalTo( 1 ) );
-        assertThat( admin.getPermissions().iterator().next(), equalTo( Permission.WILDCARD ) );
+        assertThat( admin.getPermissions()
+                         .size(), equalTo( 1 ) );
+        assertThat( admin.getPermissions()
+                         .iterator()
+                         .next(), equalTo( Permission.WILDCARD ) );
+
+        assertThat( getDataManager().getPermission( Permission.WILDCARD ), notNullValue() );
 
         getDataManager().deletePermission( Permission.WILDCARD );
 
@@ -45,14 +50,16 @@ public class PermissionDeletionListenerTest
 
         admin = getDataManager().getRole( Role.ADMIN );
 
-        boolean result = admin.getPermissions() == null || admin.getPermissions().isEmpty();
+        final boolean result = admin.getPermissions() == null || admin.getPermissions()
+                                                                      .isEmpty();
         assertThat( result, equalTo( true ) );
     }
 
     @Override
     protected void setupFixtures()
     {
-        permissionDeletionListener =
-            weld.instance().select( PermissionDeletionListener.class ).get();
+        permissionDeletionListener = weld.instance()
+                                         .select( PermissionDeletionListener.class )
+                                         .get();
     }
 }

@@ -28,8 +28,8 @@ import org.apache.shiro.authz.permission.PermissionResolver;
 import org.apache.shiro.authz.permission.RolePermissionResolver;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.model.Role;
 import org.commonjava.auth.shiro.couch.model.ShiroPermission;
+import org.commonjava.couch.rbac.Role;
 import org.commonjava.util.logging.Logger;
 
 @Singleton
@@ -68,7 +68,7 @@ public class CouchPermissionResolver
     {
         // logger.info( "Resolving permission: %s", permissionName );
 
-        org.commonjava.auth.couch.model.Permission perm;
+        org.commonjava.couch.rbac.Permission perm;
         try
         {
             perm = dataManager.getPermission( permissionName );
@@ -84,7 +84,7 @@ public class CouchPermissionResolver
         {
             if ( autoCreate )
             {
-                perm = new org.commonjava.auth.couch.model.Permission( permissionName );
+                perm = new org.commonjava.couch.rbac.Permission( permissionName );
 
                 try
                 {
@@ -151,7 +151,7 @@ public class CouchPermissionResolver
 
         if ( role.getPermissions() != null )
         {
-            Set<org.commonjava.auth.couch.model.Permission> permissions;
+            Set<org.commonjava.couch.rbac.Permission> permissions;
             try
             {
                 permissions = dataManager.getPermissions( role );
@@ -166,7 +166,7 @@ public class CouchPermissionResolver
 
             if ( permissions != null )
             {
-                for ( final org.commonjava.auth.couch.model.Permission perm : permissions )
+                for ( final org.commonjava.couch.rbac.Permission perm : permissions )
                 {
                     perms.add( new ShiroPermission( perm ) );
                 }

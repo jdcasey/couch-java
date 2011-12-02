@@ -30,9 +30,9 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.model.User;
 import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.auth.shiro.couch.model.ShiroUserUtils;
+import org.commonjava.couch.rbac.User;
 import org.commonjava.util.logging.Logger;
 
 @WebFilter( "/*" )

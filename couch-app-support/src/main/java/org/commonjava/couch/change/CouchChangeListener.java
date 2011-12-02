@@ -102,6 +102,7 @@ public class CouchChangeListener
             metadata = new ChangeListenerMetadata();
         }
 
+        logger.info( "starting change-listener thread..." );
         listenerThread = new Thread( this );
         listenerThread.setDaemon( true );
         listenerThread.start();
@@ -123,6 +124,8 @@ public class CouchChangeListener
                         break;
                     }
                 }
+
+                logger.info( "change-listener is running." );
             }
         }
     }
@@ -196,47 +199,51 @@ public class CouchChangeListener
             String encoding = null;
             try
             {
+                logger.info( "requesting changes..." );
+
                 final HttpResponse response = http.executeHttpWithResponse( get, "Failed to open changes stream." );
 
                 if ( response.getEntity() == null )
                 {
                     logger.error( "Changes stream did not return a response body." );
-                    break;
-                }
-
-                final Header encodingHeader = response.getEntity()
-                                                      .getContentEncoding();
-                if ( encodingHeader == null )
-                {
-                    encoding = "UTF-8";
                 }
                 else
                 {
-                    encoding = encodingHeader.getValue();
-                }
-
-                final InputStream stream = response.getEntity()
-                                                   .getContent();
-
-                running = true;
-                synchronized ( internalLock )
-                {
-                    internalLock.notifyAll();
-                }
-
-                final CouchDocChangeList changes =
-                    serializer.fromJson( stream, encoding, CouchDocChangeList.class, docDeserializer );
-
-                for ( final CouchDocChange change : changes )
-                {
-                    if ( !change.getId()
-                                .equals( CHANGE_LISTENER_DOCID ) )
+                    final Header encodingHeader = response.getEntity()
+                                                          .getContentEncoding();
+                    if ( encodingHeader == null )
                     {
-                        metadata.setLastProcessedSequenceId( change.getSequence() );
-                        dispatcher.documentChanged( change );
+                        encoding = "UTF-8";
+                    }
+                    else
+                    {
+                        encoding = encodingHeader.getValue();
+                    }
+
+                    final InputStream stream = response.getEntity()
+                                                       .getContent();
+
+                    running = true;
+                    synchronized ( internalLock )
+                    {
+                        internalLock.notifyAll();
+                    }
+
+                    final CouchDocChangeList changes =
+                        serializer.fromJson( stream, encoding, CouchDocChangeList.class, docDeserializer );
+
+                    for ( final CouchDocChange change : changes )
+                    {
+                        logger.info( "Processing change: %s", change.getId() );
+
+                        if ( !change.getId()
+                                    .equals( CHANGE_LISTENER_DOCID ) )
+                        {
+                            metadata.setLastProcessedSequenceId( change.getSequence() );
+                            dispatcher.documentChanged( change );
+                        }
                     }
                 }
-
             }
             catch ( final CouchDBException e )
             {

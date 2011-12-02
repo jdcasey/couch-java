@@ -19,9 +19,9 @@ import javax.enterprise.inject.Alternative;
 import javax.inject.Named;
 
 import org.commonjava.auth.couch.data.PasswordManager;
-import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.conf.DefaultCouchDBConfiguration;
+import org.commonjava.couch.rbac.User;
 import org.commonjava.web.config.annotation.ConfigName;
 import org.commonjava.web.config.annotation.SectionName;
 

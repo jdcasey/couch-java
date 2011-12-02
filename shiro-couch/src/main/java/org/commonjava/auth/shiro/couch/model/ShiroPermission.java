@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.commonjava.auth.shiro.couch.model;
 
-import org.commonjava.auth.couch.model.Permission;
+import org.commonjava.couch.rbac.Permission;
 
 public class ShiroPermission
     implements org.apache.shiro.authz.Permission

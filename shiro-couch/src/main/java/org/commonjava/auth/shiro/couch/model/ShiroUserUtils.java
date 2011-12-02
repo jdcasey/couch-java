@@ -19,7 +19,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.commonjava.auth.couch.model.User;
+import org.commonjava.couch.rbac.User;
 
 public class ShiroUserUtils
 {

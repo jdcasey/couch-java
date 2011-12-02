@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.commonjava.auth.couch.model;
-
-import static org.commonjava.couch.util.IdUtils.namespaceId;
+package org.commonjava.couch.rbac;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.commonjava.couch.model.AbstractCouchDocument;
-import org.commonjava.couch.model.DenormalizedCouchDoc;
-
-import com.google.gson.annotations.Expose;
-
 public class User
-    extends AbstractCouchDocument
-    implements DenormalizedCouchDoc
+    extends ModelMetadata
 {
 
     public static final String ADMIN = "admin";
@@ -47,29 +39,25 @@ public class User
 
     private String email;
 
-    @Expose( deserialize = false )
-    private final String doctype = NAMESPACE;
-
     private Set<String> roles;
 
     User()
-    {}
+    {
+    }
 
-    public User( final String username, final String email, final String firstName,
-                 final String lastName, final String passwordDigest )
+    public User( final String username, final String email, final String firstName, final String lastName,
+                 final String passwordDigest )
     {
         setUsername( username );
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.passwordDigest = passwordDigest;
-        calculateDenormalizedFields();
     }
 
     public User( final String username, final Role... roles )
     {
         this.username = username;
-        calculateDenormalizedFields();
         setRoles( new HashSet<Role>( Arrays.asList( roles ) ) );
     }
 
@@ -141,7 +129,7 @@ public class User
 
         if ( roles != null )
         {
-            for ( Role role : roles )
+            for ( final Role role : roles )
             {
                 this.roles.add( role.getName() );
             }
@@ -161,7 +149,7 @@ public class User
 
         if ( roles != null )
         {
-            for ( String role : roles )
+            for ( final String role : roles )
             {
                 this.roles.add( role );
             }
@@ -240,22 +228,11 @@ public class User
         return false;
     }
 
-    public String getDoctype()
-    {
-        return doctype;
-    }
-
     @Override
     public String toString()
     {
         return String.format( "User [\n  username=%s\n  passwordDigest=%s\n  firstName=%s\n  lastName=%s\n  email=%s\n  roles=%s]",
                               username, passwordDigest, firstName, lastName, email, roles );
-    }
-
-    @Override
-    public void calculateDenormalizedFields()
-    {
-        setCouchDocId( namespaceId( NAMESPACE, this.username ) );
     }
 
 }

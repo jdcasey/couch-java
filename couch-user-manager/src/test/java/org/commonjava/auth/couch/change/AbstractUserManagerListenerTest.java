@@ -37,7 +37,7 @@ public abstract class AbstractUserManagerListenerTest
     @BeforeClass
     public static void logging()
     {
-        setupLogging( Level.INFO );
+        setupLogging( Level.DEBUG );
 
     }
 

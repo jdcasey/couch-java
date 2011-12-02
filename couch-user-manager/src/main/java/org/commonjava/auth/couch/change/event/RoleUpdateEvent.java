@@ -17,8 +17,8 @@ package org.commonjava.auth.couch.change.event;
 
 import java.util.Collection;
 
-import org.commonjava.auth.couch.model.Role;
 import org.commonjava.couch.change.j2ee.AbstractUpdateEvent;
+import org.commonjava.couch.rbac.Role;
 
 public final class RoleUpdateEvent
     extends AbstractUpdateEvent<Role>

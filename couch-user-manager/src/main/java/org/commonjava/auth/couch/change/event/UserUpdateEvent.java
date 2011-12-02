@@ -17,8 +17,8 @@ package org.commonjava.auth.couch.change.event;
 
 import java.util.Collection;
 
-import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.change.j2ee.AbstractUpdateEvent;
+import org.commonjava.couch.rbac.User;
 
 public final class UserUpdateEvent
     extends AbstractUpdateEvent<User>

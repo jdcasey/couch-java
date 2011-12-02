@@ -2,7 +2,7 @@ package org.cjtest.fixture;
 
 import javax.inject.Singleton;
 
-import org.commonjava.auth.couch.model.User;
+import org.commonjava.couch.rbac.User;
 
 @Singleton
 public class TestAuthenticationControls

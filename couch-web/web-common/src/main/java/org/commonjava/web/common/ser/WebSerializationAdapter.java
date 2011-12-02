@@ -13,33 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.commonjava.auth.couch.change.event;
+package org.commonjava.web.common.ser;
 
-import java.util.Collection;
+import java.lang.reflect.Type;
 
-import org.commonjava.couch.change.j2ee.AbstractUpdateEvent;
-import org.commonjava.couch.rbac.Permission;
-
-public final class PermissionUpdateEvent
-    extends AbstractUpdateEvent<Permission>
+public interface WebSerializationAdapter
 {
 
-    private final UpdateType type;
+    Type typeLiteral();
 
-    public PermissionUpdateEvent( final UpdateType type, final Collection<Permission> permissions )
-    {
-        super( permissions );
-        this.type = type;
-    }
-
-    public PermissionUpdateEvent( final UpdateType type, final Permission... permissions )
-    {
-        super( permissions );
-        this.type = type;
-    }
-
-    public UpdateType getType()
-    {
-        return type;
-    }
 }

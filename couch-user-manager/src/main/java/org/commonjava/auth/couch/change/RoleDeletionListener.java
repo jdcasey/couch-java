@@ -23,13 +23,15 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.commonjava.auth.couch.change.event.UserManagerDeleteEvent;
+import org.commonjava.auth.couch.change.event.UserManagerDeleteEvent.Type;
 import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
-import org.commonjava.auth.couch.model.Role;
-import org.commonjava.auth.couch.model.User;
 import org.commonjava.couch.change.CouchDocChange;
 import org.commonjava.couch.change.dispatch.CouchChangeJ2EEEvent;
 import org.commonjava.couch.change.dispatch.ThreadableListener;
+import org.commonjava.couch.rbac.Role;
+import org.commonjava.couch.rbac.User;
 import org.commonjava.couch.util.ChangeSynchronizer;
 import org.commonjava.util.logging.Logger;
 
@@ -54,11 +56,16 @@ public class RoleDeletionListener
     @Override
     public void documentChanged( final CouchDocChange change )
     {
-        String role = nonNamespaceId( Role.NAMESPACE, change.getId() );
+        final String role = nonNamespaceId( Role.NAMESPACE, change.getId() );
+        processRemoved( role );
+    }
+
+    private void processRemoved( final String role )
+    {
         try
         {
-            Set<User> users = dataManager.getUsersForRole( role );
-            for ( User user : users )
+            final Set<User> users = dataManager.getUsersForRole( role );
+            for ( final User user : users )
             {
                 user.removeRole( role );
             }
@@ -66,19 +73,30 @@ public class RoleDeletionListener
             dataManager.storeUsers( users );
             changeSync.setChanged();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
-            logger.error( "Failed to update users for deleted role: %s. Error: %s", e, role,
-                          e.getMessage() );
+            logger.error( "Failed to update users for deleted role: %s. Error: %s", e, role, e.getMessage() );
         }
     }
 
     public void roleDeleted( @Observes final CouchChangeJ2EEEvent event )
     {
-        CouchDocChange change = event.getChange();
+        final CouchDocChange change = event.getChange();
         if ( canProcess( change.getId(), change.isDeleted() ) )
         {
             documentChanged( change );
+        }
+    }
+
+    public void roleDeleted( @Observes final UserManagerDeleteEvent event )
+    {
+        final Type type = event.getType();
+        if ( Type.ROLE == type )
+        {
+            for ( final String perm : event )
+            {
+                processRemoved( perm );
+            }
         }
     }
 

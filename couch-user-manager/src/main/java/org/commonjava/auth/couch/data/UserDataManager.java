@@ -19,8 +19,6 @@ import static org.commonjava.couch.util.IdUtils.namespaceId;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,13 +34,16 @@ import org.commonjava.auth.couch.change.event.UserUpdateEvent;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.UserAppDescription.View;
 import org.commonjava.auth.couch.inject.UserData;
-import org.commonjava.auth.couch.model.Permission;
-import org.commonjava.auth.couch.model.Role;
-import org.commonjava.auth.couch.model.User;
+import org.commonjava.auth.couch.model.PermissionDoc;
+import org.commonjava.auth.couch.model.RoleDoc;
+import org.commonjava.auth.couch.model.UserDoc;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.db.model.ViewRequest;
 import org.commonjava.couch.model.CouchDocRef;
+import org.commonjava.couch.rbac.Permission;
+import org.commonjava.couch.rbac.Role;
+import org.commonjava.couch.rbac.User;
 
 @Singleton
 public class UserDataManager
@@ -71,10 +72,11 @@ public class UserDataManager
     private Event<UserManagerDeleteEvent> deleteEvent;
 
     public UserDataManager()
-    {}
+    {
+    }
 
-    public UserDataManager( final UserManagerConfiguration config,
-                            final PasswordManager passwordManager, final CouchManager couch )
+    public UserDataManager( final UserManagerConfiguration config, final PasswordManager passwordManager,
+                            final CouchManager couch )
     {
         this.config = config;
         this.passwordManager = passwordManager;
@@ -84,15 +86,14 @@ public class UserDataManager
     public void install()
         throws UserDataException
     {
-        UserAppDescription description = new UserAppDescription();
+        final UserAppDescription description = new UserAppDescription();
         try
         {
             couch.initialize( description );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException(
-                                         "Failed to initialize user-management database (application: %s). Reason: %s",
+            throw new UserDataException( "Failed to initialize user-management database (application: %s). Reason: %s",
                                          e, description, e.getMessage() );
         }
     }
@@ -105,12 +106,12 @@ public class UserDataManager
         storePermission( new Permission( Role.NAMESPACE, Permission.ADMIN ) );
         storePermission( new Permission( User.NAMESPACE, Permission.ADMIN ) );
 
-        Role role = new Role( Role.ADMIN );
+        final Role role = new Role( Role.ADMIN );
         role.addPermission( Permission.WILDCARD );
 
         storeRole( role, true );
 
-        User user = config.createInitialAdminUser( passwordManager );
+        final User user = config.createInitialAdminUser( passwordManager );
         user.addRole( Role.ADMIN );
 
         storeUser( user, true );
@@ -121,13 +122,11 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ),
-                                      User.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ), User.class );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to retrieve user: %s. Reason: %s", e, username,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to retrieve user: %s. Reason: %s", e, username, e.getMessage() );
         }
     }
 
@@ -136,13 +135,11 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ),
-                                      Permission.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ), Permission.class );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to retrieve permission: %s. Reason: %s", e, name,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to retrieve permission: %s. Reason: %s", e, name, e.getMessage() );
         }
     }
 
@@ -151,43 +148,41 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ),
-                                      Role.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ), Role.class );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to retrieve role: %s. Reason: %s", e, name,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to retrieve role: %s. Reason: %s", e, name, e.getMessage() );
         }
     }
 
     public Set<Role> getRoles( final User user )
         throws UserDataException
     {
-        UserViewRequest req = new UserViewRequest( config, View.USER_ROLES );
+        final UserViewRequest req = new UserViewRequest( config, View.USER_ROLES );
         try
         {
-            return new HashSet<Role>( couch.getViewListing( req, Role.class ) );
+            return RoleDoc.toRoleSet( couch.getViewListing( req, RoleDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to get roles for user: %s. Reason: %s", e,
-                                         user.getUsername(), e.getMessage() );
+            throw new UserDataException( "Failed to get roles for user: %s. Reason: %s", e, user.getUsername(),
+                                         e.getMessage() );
         }
     }
 
     public Set<Permission> getPermissions( final Role role )
         throws UserDataException
     {
-        UserViewRequest req = new UserViewRequest( config, View.ROLE_PERMISSIONS );
+        final UserViewRequest req = new UserViewRequest( config, View.ROLE_PERMISSIONS );
         try
         {
-            return new HashSet<Permission>( couch.getViewListing( req, Permission.class ) );
+            return PermissionDoc.toPermissionSet( couch.getViewListing( req, PermissionDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to get permissions for role: %s. Reason: %s", e,
-                                         role.getName(), e.getMessage() );
+            throw new UserDataException( "Failed to get permissions for role: %s. Reason: %s", e, role.getName(),
+                                         e.getMessage() );
         }
     }
 
@@ -196,13 +191,12 @@ public class UserDataManager
     {
         try
         {
-            couch.store( perms, true, false );
+            couch.store( PermissionDoc.toDocuments( perms ), true, false );
             firePermissionEvent( UpdateType.ADD, perms );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to store %d permissions. Error: %s", e,
-                                         perms.size(), e.getMessage() );
+            throw new UserDataException( "Failed to store %d permissions. Error: %s", e, perms.size(), e.getMessage() );
         }
     }
 
@@ -211,15 +205,14 @@ public class UserDataManager
     {
         try
         {
-            boolean result = couch.store( perm, true );
+            final boolean result = couch.store( new PermissionDoc( perm ), true );
             firePermissionEvent( UpdateType.ADD, perm );
 
             return result;
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to store permission: %s. Reason: %s", e, perm,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to store permission: %s. Reason: %s", e, perm, e.getMessage() );
         }
     }
 
@@ -228,13 +221,12 @@ public class UserDataManager
     {
         try
         {
-            couch.store( roles, false, false );
+            couch.store( RoleDoc.toDocuments( roles ), false, false );
             fireRoleEvent( UpdateType.ADD_OR_UPDATE, roles );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to update %d roles. Error: %s", e, roles.size(),
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to update %d roles. Error: %s", e, roles.size(), e.getMessage() );
         }
     }
 
@@ -249,14 +241,13 @@ public class UserDataManager
     {
         try
         {
-            boolean result = couch.store( role, skipIfExists );
+            final boolean result = couch.store( new RoleDoc( role ), skipIfExists );
             fireRoleEvent( skipIfExists ? UpdateType.ADD : UpdateType.ADD_OR_UPDATE, role );
             return result;
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to store role: %s. Reason: %s", e, role,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to store role: %s. Reason: %s", e, role, e.getMessage() );
         }
     }
 
@@ -265,13 +256,12 @@ public class UserDataManager
     {
         try
         {
-            couch.store( users, false, false );
+            couch.store( UserDoc.toDocuments( users ), false, false );
             fireUserEvent( UpdateType.ADD_OR_UPDATE, users );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to update %d users. Error: %s", e, users.size(),
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to update %d users. Error: %s", e, users.size(), e.getMessage() );
         }
     }
 
@@ -286,23 +276,21 @@ public class UserDataManager
     {
         try
         {
-            boolean result = couch.store( user, skipIfExists );
+            final boolean result = couch.store( new UserDoc( user ), skipIfExists );
             fireUserEvent( skipIfExists ? UpdateType.ADD : UpdateType.ADD_OR_UPDATE, user );
             return result;
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to store user: %s. Reason: %s", e, user,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to store user: %s. Reason: %s", e, user, e.getMessage() );
         }
     }
 
-    public Map<String, Permission> createPermissions( final String namespace, final String name,
-                                                      final String... verbs )
+    public Map<String, Permission> createPermissions( final String namespace, final String name, final String... verbs )
         throws UserDataException
     {
-        Map<String, Permission> result = new HashMap<String, Permission>();
-        for ( String verb : verbs )
+        final Map<String, Permission> result = new HashMap<String, Permission>();
+        for ( final String verb : verbs )
         {
             Permission perm = new Permission( namespace, name, verb );
             if ( !storePermission( perm ) )
@@ -345,15 +333,12 @@ public class UserDataManager
     {
         try
         {
-            List<User> users =
-                couch.getViewListing( new UserViewRequest( config, View.ALL_USERS ), User.class );
-
-            return new HashSet<User>( users );
+            return UserDoc.toUserSet( couch.getViewListing( new UserViewRequest( config, View.ALL_USERS ),
+                                                            UserDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to retrieve full listing of users: %s", e,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to retrieve full listing of users: %s", e, e.getMessage() );
         }
     }
 
@@ -365,10 +350,9 @@ public class UserDataManager
             couch.delete( new CouchDocRef( namespaceId( User.NAMESPACE, name ) ) );
             fireDeleteEvent( UserManagerDeleteEvent.Type.USER, name );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to delete user: %s. Reason: %s", e, name,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to delete user: %s. Reason: %s", e, name, e.getMessage() );
         }
     }
 
@@ -377,15 +361,12 @@ public class UserDataManager
     {
         try
         {
-            List<Role> roles =
-                couch.getViewListing( new UserViewRequest( config, View.ALL_ROLES ), Role.class );
-
-            return new HashSet<Role>( roles );
+            return RoleDoc.toRoleSet( couch.getViewListing( new UserViewRequest( config, View.ALL_ROLES ),
+                                                            RoleDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to retrieve full listing of roles: %s", e,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to retrieve full listing of roles: %s", e, e.getMessage() );
         }
     }
 
@@ -397,10 +378,9 @@ public class UserDataManager
             couch.delete( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ) );
             fireDeleteEvent( UserManagerDeleteEvent.Type.ROLE, name );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to delete role: %s. Reason: %s", e, name,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to delete role: %s. Reason: %s", e, name, e.getMessage() );
         }
     }
 
@@ -409,16 +389,13 @@ public class UserDataManager
     {
         try
         {
-            List<Permission> permissions =
-                couch.getViewListing( new UserViewRequest( config, View.ALL_PERMISSIONS ),
-                                      Permission.class );
-
-            return new HashSet<Permission>( permissions );
+            return PermissionDoc.toPermissionSet( couch.getViewListing( new UserViewRequest( config,
+                                                                                             View.ALL_PERMISSIONS ),
+                                                                        PermissionDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to retrieve full listing of permission: %s", e,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to retrieve full listing of permission: %s", e, e.getMessage() );
         }
     }
 
@@ -430,10 +407,9 @@ public class UserDataManager
             couch.delete( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ) );
             fireDeleteEvent( UserManagerDeleteEvent.Type.PERMISSION, name );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException( "Failed to delete permission: %s. Reason: %s", e, name,
-                                         e.getMessage() );
+            throw new UserDataException( "Failed to delete permission: %s. Reason: %s", e, name, e.getMessage() );
         }
     }
 
@@ -442,18 +418,15 @@ public class UserDataManager
     {
         try
         {
-            UserViewRequest req = new UserViewRequest( config, View.ROLE_USERS );
+            final UserViewRequest req = new UserViewRequest( config, View.ROLE_USERS );
             req.setParameter( ViewRequest.KEY, role );
 
-            List<User> users = couch.getViewListing( req, User.class );
-
-            return new HashSet<User>( users );
+            return UserDoc.toUserSet( couch.getViewListing( req, UserDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException(
-                                         "Failed to lookup users belonging to role: %s. Reason: %s",
-                                         e, role, e.getMessage() );
+            throw new UserDataException( "Failed to lookup users belonging to role: %s. Reason: %s", e, role,
+                                         e.getMessage() );
         }
     }
 
@@ -462,18 +435,15 @@ public class UserDataManager
     {
         try
         {
-            UserViewRequest req = new UserViewRequest( config, View.PERMISSION_ROLES );
+            final UserViewRequest req = new UserViewRequest( config, View.PERMISSION_ROLES );
             req.setParameter( ViewRequest.KEY, permission );
 
-            List<Role> roles = couch.getViewListing( req, Role.class );
-
-            return new HashSet<Role>( roles );
+            return RoleDoc.toRoleSet( couch.getViewListing( req, RoleDoc.class ) );
         }
-        catch ( CouchDBException e )
+        catch ( final CouchDBException e )
         {
-            throw new UserDataException(
-                                         "Failed to lookup roles granting permission: %s. Reason: %s",
-                                         e, permission, e.getMessage() );
+            throw new UserDataException( "Failed to lookup roles granting permission: %s. Reason: %s", e, permission,
+                                         e.getMessage() );
         }
     }
 
