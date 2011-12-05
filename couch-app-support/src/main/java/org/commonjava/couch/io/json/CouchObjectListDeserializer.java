@@ -92,7 +92,11 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
                     + "\nDid you access the view with the '?include_docs=true' query parameter?" );
             }
 
-            items.add( type.cast( context.deserialize( doc, type ) ) );
+            final Object val = context.deserialize( doc, type );
+            if ( val != null )
+            {
+                items.add( type.cast( val ) );
+            }
         }
 
         return new CouchObjectList<T>( items );
