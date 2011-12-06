@@ -55,16 +55,20 @@ public class TestAuthenticationFilter
     public void init( final FilterConfig filterConfig )
         throws ServletException
     {
+        logger.info( "\n\nStarting up TEST LOGIN filter...\nControls:\n\t%s\nRealm:\n\t%s\n\n", controls, realm );
+        if ( controls.isDoAuthentication() )
+        {
+            setupRealm();
+        }
     }
 
     @Override
     public void doFilter( final ServletRequest request, final ServletResponse response, final FilterChain chain )
         throws IOException, ServletException
     {
+        logger.info( "TEST LOGIN FILTER..." );
         if ( controls.isDoAuthentication() )
         {
-            setupRealm();
-
             logger.info( "TEST LOGIN: CouchDB Shiro" );
 
             // Login the user before we test!
@@ -87,7 +91,9 @@ public class TestAuthenticationFilter
 
             logger.info( "/TEST LOGIN: CouchDB Shiro" );
         }
+        logger.info( "/TEST LOGIN FILTER..." );
         chain.doFilter( request, response );
+
     }
 
     private void setupRealm()

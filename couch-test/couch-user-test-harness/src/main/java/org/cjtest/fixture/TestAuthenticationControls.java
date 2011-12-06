@@ -44,4 +44,11 @@ public class TestAuthenticationControls
         this.user = user;
     }
 
+    @Override
+    public String toString()
+    {
+        return String.format( "TestAuthenticationControls [doAuthentication=%s, autoCreateAuthorizations=%s, user=%s]",
+                              doAuthentication, autoCreateAuthorizations, user );
+    }
+
 }
