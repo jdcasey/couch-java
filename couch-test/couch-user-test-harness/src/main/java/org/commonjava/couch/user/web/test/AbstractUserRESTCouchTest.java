@@ -45,6 +45,7 @@ import org.apache.http.protocol.HttpContext;
 import org.commonjava.auth.couch.conf.UserManagerConfiguration;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.auth.couch.data.UserDataManager;
+import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.web.common.model.Listing;
@@ -74,6 +75,10 @@ public abstract class AbstractUserRESTCouchTest
 
     @Inject
     protected CouchRealm realm;
+
+    @Inject
+    @UserData
+    private CouchManager userCouch;
 
     protected DefaultHttpClient http;
 
@@ -107,6 +112,7 @@ public abstract class AbstractUserRESTCouchTest
         throws Exception
     {
         getCouchManager().dropDatabase();
+        userCouch.dropDatabase();
 
         userManager.install();
         userManager.setupAdminInformation();
@@ -124,7 +130,7 @@ public abstract class AbstractUserRESTCouchTest
     public final void teardownRESTCouchTest()
         throws Exception
     {
-        getCouchManager().dropDatabase();
+        // getCouchManager().dropDatabase();
     }
 
     protected void assertLocationHeader( final HttpResponse response, final String value )

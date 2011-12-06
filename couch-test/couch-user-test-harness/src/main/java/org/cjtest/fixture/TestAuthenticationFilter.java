@@ -65,7 +65,7 @@ public class TestAuthenticationFilter
         {
             setupRealm();
 
-            logger.info( "LOGIN: CouchDB Shiro" );
+            logger.info( "TEST LOGIN: CouchDB Shiro" );
 
             // Login the user before we test!
             final Subject subject = SecurityUtils.getSubject();
@@ -85,7 +85,7 @@ public class TestAuthenticationFilter
 
             subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
 
-            logger.info( "/LOGIN: CouchDB Shiro" );
+            logger.info( "/TEST LOGIN: CouchDB Shiro" );
         }
         chain.doFilter( request, response );
     }
