@@ -17,28 +17,16 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.commonjava.couch</groupId>
-    <artifactId>couch-java-parent</artifactId>
+    <groupId>org.commonjava.couch.test</groupId>
+    <artifactId>couch-test</artifactId>
     <version>1.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>couch-app-support</artifactId>
+  <artifactId>web-test-harness</artifactId>
 
-  <name>CouchDB Application Support</name>
+  <name>Web Client Test Harness + Fixtures</name>
 
   <dependencies>
-    <dependency>
-      <groupId>org.commonjava.util</groupId>
-      <artifactId>configuration-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -54,23 +42,15 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>commons-io</groupId>
-    	<artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>commons-lang</groupId>
-    	<artifactId>commons-lang</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>org.jboss.weld.se</groupId>
-    	<artifactId>weld-se-core</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.commonjava.couch.web</groupId>
       <artifactId>web-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
   </dependencies>
-  
 </project>

@@ -38,8 +38,8 @@ import org.commonjava.couch.conf.CouchDBConfiguration;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.handler.ResponseHandlerWithError;
 import org.commonjava.couch.db.handler.SerializedGetHandler;
-import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchError;
+import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 @Named( "dont-use-directly" )
 @Alternative
@@ -61,19 +61,19 @@ public class CouchHttpClient
     @PostConstruct
     private void setupClient()
     {
-        ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
+        final ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
         ccm.setMaxTotal( config.getMaxConnections() );
 
-        DefaultHttpClient c = new DefaultHttpClient( ccm );
+        final DefaultHttpClient c = new DefaultHttpClient( ccm );
 
         if ( config.getDatabaseUser() != null )
         {
-            AuthScope scope = new AuthScope( config.getDatabaseHost(), config.getDatabasePort() );
-            UsernamePasswordCredentials cred =
-                new UsernamePasswordCredentials( config.getDatabaseUser(),
-                                                 config.getDatabasePassword() );
+            final AuthScope scope = new AuthScope( config.getDatabaseHost(), config.getDatabasePort() );
+            final UsernamePasswordCredentials cred =
+                new UsernamePasswordCredentials( config.getDatabaseUser(), config.getDatabasePassword() );
 
-            c.getCredentialsProvider().setCredentials( scope, cred );
+            c.getCredentialsProvider()
+             .setCredentials( scope, cred );
         }
 
         client = c;
@@ -85,38 +85,35 @@ public class CouchHttpClient
         executeHttp( request, null, failureMessage );
     }
 
-    public void executeHttp( final HttpRequestBase request, final Integer expectedStatus,
-                             final Object failureMessage )
+    public void executeHttp( final HttpRequestBase request, final Integer expectedStatus, final Object failureMessage )
         throws CouchDBException
     {
-        String url = request.getURI().toString();
+        final String url = request.getURI()
+                                  .toString();
 
         try
         {
-            HttpResponse response = client.execute( request );
-            StatusLine statusLine = response.getStatusLine();
+            final HttpResponse response = client.execute( request );
+            final StatusLine statusLine = response.getStatusLine();
             if ( expectedStatus != null && statusLine.getStatusCode() != expectedStatus )
             {
-                HttpEntity entity = response.getEntity();
-                CouchError error = serializer.toError( entity );
-                throw new CouchDBException( "%s: %s.\nHTTP Response: %s\nError: %s",
-                                            failureMessage, url, statusLine, error );
+                final HttpEntity entity = response.getEntity();
+                final CouchError error = serializer.toError( entity );
+                throw new CouchDBException( "%s: %s.\nHTTP Response: %s\nError: %s", failureMessage, url, statusLine,
+                                            error );
             }
         }
-        catch ( UnsupportedEncodingException e )
+        catch ( final UnsupportedEncodingException e )
         {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
-        catch ( ClientProtocolException e )
+        catch ( final ClientProtocolException e )
         {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
-        catch ( IOException e )
+        catch ( final IOException e )
         {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
         finally
         {
@@ -124,52 +121,48 @@ public class CouchHttpClient
         }
     }
 
-    public HttpResponse executeHttpWithResponse( final HttpRequestBase request,
-                                                 final String failureMessage )
+    public HttpResponse executeHttpWithResponse( final HttpRequestBase request, final String failureMessage )
         throws CouchDBException
     {
         return executeHttpWithResponse( request, null, failureMessage );
     }
 
-    public HttpResponse executeHttpWithResponse( final HttpRequestBase request,
-                                                 final Integer expectedStatus,
+    public HttpResponse executeHttpWithResponse( final HttpRequestBase request, final Integer expectedStatus,
                                                  final Object failureMessage )
         throws CouchDBException
     {
-        String url = request.getURI().toString();
+        final String url = request.getURI()
+                                  .toString();
 
         boolean failed = false;
         try
         {
-            HttpResponse response = client.execute( request );
-            StatusLine statusLine = response.getStatusLine();
+            final HttpResponse response = client.execute( request );
+            final StatusLine statusLine = response.getStatusLine();
             if ( expectedStatus != null && statusLine.getStatusCode() != expectedStatus )
             {
-                HttpEntity entity = response.getEntity();
-                CouchError error = serializer.toError( entity );
-                throw new CouchDBException( "%s: %s.\nHTTP Response: %s\nError: %s",
-                                            failureMessage, url, statusLine, error );
+                final HttpEntity entity = response.getEntity();
+                final CouchError error = serializer.toError( entity );
+                throw new CouchDBException( "%s: %s.\nHTTP Response: %s\nError: %s", failureMessage, url, statusLine,
+                                            error );
             }
 
             return response;
         }
-        catch ( UnsupportedEncodingException e )
+        catch ( final UnsupportedEncodingException e )
         {
             failed = true;
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
-        catch ( ClientProtocolException e )
+        catch ( final ClientProtocolException e )
         {
             failed = true;
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
-        catch ( IOException e )
+        catch ( final IOException e )
         {
             failed = true;
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
         finally
         {
@@ -180,26 +173,23 @@ public class CouchHttpClient
         }
     }
 
-    public <T> T executeHttpAndReturn( final HttpRequestBase request, final Type type,
-                                       final Object failureMessage,
-                                       final SerializationAdapter... adapters )
+    public <T> T executeHttpAndReturn( final HttpRequestBase request, final Type type, final Object failureMessage,
+                                       final WebSerializationAdapter... adapters )
         throws CouchDBException
     {
-        return executeHttpAndReturn( request, new SerializedGetHandler<T>( serializer, type,
-                                                                           adapters ),
-                                     failureMessage );
+        return executeHttpAndReturn( request, new SerializedGetHandler<T>( serializer, type, adapters ), failureMessage );
     }
 
-    public <T> T executeHttpAndReturn( final HttpRequestBase request,
-                                       final ResponseHandlerWithError<T> handler,
+    public <T> T executeHttpAndReturn( final HttpRequestBase request, final ResponseHandlerWithError<T> handler,
                                        final Object failureMessage )
         throws CouchDBException
     {
-        String url = request.getURI().toString();
+        final String url = request.getURI()
+                                  .toString();
 
         try
         {
-            T result = client.execute( request, handler );
+            final T result = client.execute( request, handler );
             if ( result == null && handler.getError() != null )
             {
                 throw handler.getError();
@@ -207,20 +197,17 @@ public class CouchHttpClient
 
             return result;
         }
-        catch ( UnsupportedEncodingException e )
+        catch ( final UnsupportedEncodingException e )
         {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
-        catch ( ClientProtocolException e )
+        catch ( final ClientProtocolException e )
         {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
-        catch ( IOException e )
+        catch ( final IOException e )
         {
-            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url,
-                                        e.getMessage() );
+            throw new CouchDBException( "%s: %s.\nReason: %s", e, failureMessage, url, e.getMessage() );
         }
         finally
         {
@@ -231,7 +218,9 @@ public class CouchHttpClient
     public void cleanup( final HttpRequestBase request )
     {
         request.abort();
-        client.getConnectionManager().closeExpiredConnections();
-        client.getConnectionManager().closeIdleConnections( 2, TimeUnit.SECONDS );
+        client.getConnectionManager()
+              .closeExpiredConnections();
+        client.getConnectionManager()
+              .closeIdleConnections( 2, TimeUnit.SECONDS );
     }
 }

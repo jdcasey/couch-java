@@ -31,8 +31,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.io.Serializer;
-import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchError;
+import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 public class SerializedGetHandler<T>
     implements ResponseHandlerWithError<T>
@@ -46,17 +46,17 @@ public class SerializedGetHandler<T>
 
     private final Type type;
 
-    private final SerializationAdapter[] adapters;
+    private final WebSerializationAdapter[] adapters;
 
     public SerializedGetHandler( final Serializer serializer, final Class<T> type )
     {
         this.serializer = serializer;
         this.type = type;
-        this.adapters = new SerializationAdapter[] {};
+        this.adapters = new WebSerializationAdapter[] {};
     }
 
     public SerializedGetHandler( final Serializer serializer, final Type type,
-                                 final SerializationAdapter... adapters )
+                                 final WebSerializationAdapter... adapters )
     {
         this.serializer = serializer;
         this.type = type;
@@ -74,7 +74,7 @@ public class SerializedGetHandler<T>
         throws ClientProtocolException, IOException
     {
         // FIXME: Parse content-encoding??
-        HttpEntity entity = response.getEntity();
+        final HttpEntity entity = response.getEntity();
 
         ByteArrayOutputStream out = null;
         InputStream in = null;
@@ -92,25 +92,23 @@ public class SerializedGetHandler<T>
                 }
             }
 
-            StatusLine sl = response.getStatusLine();
+            final StatusLine sl = response.getStatusLine();
             if ( sl.getStatusCode() != HttpStatus.SC_OK )
             {
                 CouchError err = null;
                 if ( out != null )
                 {
                     LOGGER.info( "Body content: '" + new String( out.toByteArray() ) + "'" );
-                    err =
-                        serializer.toError( new ByteArrayInputStream( out.toByteArray() ), "UTF-8" );
+                    err = serializer.toError( new ByteArrayInputStream( out.toByteArray() ), "UTF-8" );
                 }
 
                 error =
-                    new CouchDBException( "Error returned from server: '%s'\nError message: %s",
-                                          sl, err == null ? "-NONE-" : err );
+                    new CouchDBException( "Error returned from server: '%s'\nError message: %s", sl,
+                                          err == null ? "-NONE-" : err );
             }
             else
             {
-                return serializer.fromJson( new ByteArrayInputStream( out.toByteArray() ), "UTF-8",
-                                            type, adapters );
+                return serializer.fromJson( new ByteArrayInputStream( out.toByteArray() ), "UTF-8", type, adapters );
             }
         }
         finally

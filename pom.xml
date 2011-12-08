@@ -78,6 +78,12 @@
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch.test</groupId>
+        <artifactId>web-test-harness</artifactId>
+        <version>1.1-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.couch.test</groupId>
         <artifactId>couch-test-harness</artifactId>
         <version>1.1-SNAPSHOT</version>
         <scope>test</scope>

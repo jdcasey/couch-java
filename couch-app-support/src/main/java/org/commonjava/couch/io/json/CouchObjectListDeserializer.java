@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.model.CouchDocument;
+import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -31,7 +32,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 public class CouchObjectListDeserializer<T extends CouchDocument>
-    implements JsonDeserializer<CouchObjectList<T>>, SerializationAdapter
+    implements JsonDeserializer<CouchObjectList<T>>, WebSerializationAdapter
 {
 
     private static final String ROWS = "rows";

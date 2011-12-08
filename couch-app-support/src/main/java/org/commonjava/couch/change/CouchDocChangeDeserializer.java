@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.commonjava.couch.io.json.SerializationAdapter;
+import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -29,7 +29,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 public class CouchDocChangeDeserializer
-    implements JsonDeserializer<CouchDocChange>, SerializationAdapter
+    implements JsonDeserializer<CouchDocChange>, WebSerializationAdapter
 {
 
     private static final String SEQ = "seq";
@@ -53,18 +53,22 @@ public class CouchDocChangeDeserializer
                                        final JsonDeserializationContext context )
         throws JsonParseException
     {
-        JsonObject record = json.getAsJsonObject();
-        int seq = record.get( SEQ ).getAsInt();
-        String id = record.get( ID ).getAsString();
+        final JsonObject record = json.getAsJsonObject();
+        final int seq = record.get( SEQ )
+                              .getAsInt();
+        final String id = record.get( ID )
+                                .getAsString();
 
-        JsonElement element = record.get( DELETED );
-        boolean deleted = element == null ? false : element.getAsBoolean();
+        final JsonElement element = record.get( DELETED );
+        final boolean deleted = element == null ? false : element.getAsBoolean();
 
-        JsonArray changesArray = record.getAsJsonArray( CHANGES_ARRAY );
-        List<String> revs = new ArrayList<String>( changesArray.size() );
-        for ( JsonElement revRecord : changesArray )
+        final JsonArray changesArray = record.getAsJsonArray( CHANGES_ARRAY );
+        final List<String> revs = new ArrayList<String>( changesArray.size() );
+        for ( final JsonElement revRecord : changesArray )
         {
-            revs.add( revRecord.getAsJsonObject().get( REV ).getAsString() );
+            revs.add( revRecord.getAsJsonObject()
+                               .get( REV )
+                               .getAsString() );
         }
 
         return new CouchDocChange( seq, id, revs, deleted );

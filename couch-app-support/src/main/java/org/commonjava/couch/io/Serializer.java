@@ -32,9 +32,9 @@ import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.model.CouchDocRefSet;
 import org.commonjava.couch.io.json.CouchDocumentActionAdapter;
-import org.commonjava.couch.io.json.SerializationAdapter;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
+import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,58 +43,57 @@ import com.google.gson.GsonBuilder;
 public class Serializer
 {
 
-    private final Set<SerializationAdapter> baseAdapters = new HashSet<SerializationAdapter>();
+    private final Set<WebSerializationAdapter> baseAdapters = new HashSet<WebSerializationAdapter>();
 
     Serializer()
-    {}
+    {
+    }
 
-    public Serializer( final SerializationAdapter... baseAdapters )
+    public Serializer( final WebSerializationAdapter... baseAdapters )
     {
         this.baseAdapters.addAll( Arrays.asList( baseAdapters ) );
     }
 
-    public void registerSerializationAdapters( final SerializationAdapter... adapters )
+    public void registerSerializationAdapters( final WebSerializationAdapter... adapters )
     {
         this.baseAdapters.addAll( Arrays.asList( adapters ) );
     }
 
-    public String toString( final BulkActionHolder actions, final SerializationAdapter... adapters )
+    public String toString( final BulkActionHolder actions, final WebSerializationAdapter... adapters )
     {
         return getGson( adapters ).toJson( actions );
     }
 
-    public String toString( final CouchDocRefSet refSet, final SerializationAdapter... adapters )
+    public String toString( final CouchDocRefSet refSet, final WebSerializationAdapter... adapters )
     {
         return getGson( adapters ).toJson( refSet );
     }
 
-    public String toString( final CouchDocument doc, final SerializationAdapter... adapters )
+    public String toString( final CouchDocument doc, final WebSerializationAdapter... adapters )
     {
         return getGson( adapters ).toJson( doc );
     }
 
     public <D extends CouchDocument> D toDocument( final String src, final Class<D> docType,
-                                                   final SerializationAdapter... adapters )
+                                                   final WebSerializationAdapter... adapters )
     {
         return getGson( adapters ).fromJson( src, docType );
     }
 
     public <D extends CouchDocument> D toDocument( final InputStream src, final String encoding,
-                                                   final Class<D> docType,
-                                                   final SerializationAdapter... adapters )
+                                                   final Class<D> docType, final WebSerializationAdapter... adapters )
         throws UnsupportedEncodingException
     {
         return getGson( adapters ).fromJson( new InputStreamReader( src, encoding ), docType );
     }
 
-    public <T> T fromJson( final String src, final Type type,
-                           final SerializationAdapter... adapters )
+    public <T> T fromJson( final String src, final Type type, final WebSerializationAdapter... adapters )
     {
         return getGson( adapters ).fromJson( src, type );
     }
 
     public <T> T fromJson( final InputStream src, final String encoding, final Type type,
-                           final SerializationAdapter... adapters )
+                           final WebSerializationAdapter... adapters )
         throws UnsupportedEncodingException
     {
         return getGson( adapters ).fromJson( new InputStreamReader( src, encoding ), type );
@@ -103,7 +102,7 @@ public class Serializer
     public CouchError toError( final InputStream in, final String charset )
         throws UnsupportedEncodingException
     {
-        Reader reader = new InputStreamReader( in, charset );
+        final Reader reader = new InputStreamReader( in, charset );
         return getGson().fromJson( reader, CouchError.class );
     }
 
@@ -117,30 +116,30 @@ public class Serializer
 
         if ( entity.getContentEncoding() != null )
         {
-            System.out.printf( "Content-Encoding header: '%s' = '%s'\n",
-                               entity.getContentEncoding().getName(),
-                               entity.getContentEncoding().getValue() );
+            System.out.printf( "Content-Encoding header: '%s' = '%s'\n", entity.getContentEncoding()
+                                                                               .getName(), entity.getContentEncoding()
+                                                                                                 .getValue() );
         }
 
-        Reader reader = new InputStreamReader( entity.getContent() );
+        final Reader reader = new InputStreamReader( entity.getContent() );
         return getGson().fromJson( reader, CouchError.class );
     }
 
     protected GsonBuilder newGsonBuilder()
     {
-        GsonBuilder builder = new GsonBuilder();
+        final GsonBuilder builder = new GsonBuilder();
         // builder.setPrettyPrinting();
         builder.registerTypeAdapter( CouchDocumentAction.class, new CouchDocumentActionAdapter() );
 
         return builder;
     }
 
-    protected final Gson getGson( final SerializationAdapter... adapters )
+    protected final Gson getGson( final WebSerializationAdapter... adapters )
     {
-        GsonBuilder builder = newGsonBuilder();
+        final GsonBuilder builder = newGsonBuilder();
         if ( baseAdapters != null )
         {
-            for ( SerializationAdapter adapter : baseAdapters )
+            for ( final WebSerializationAdapter adapter : baseAdapters )
             {
                 builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
             }
@@ -148,7 +147,7 @@ public class Serializer
 
         if ( adapters != null )
         {
-            for ( SerializationAdapter adapter : adapters )
+            for ( final WebSerializationAdapter adapter : adapters )
             {
                 builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
             }
