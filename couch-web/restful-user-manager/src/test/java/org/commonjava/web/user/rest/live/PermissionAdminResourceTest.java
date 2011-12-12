@@ -107,7 +107,7 @@ public class PermissionAdminResourceTest
 
         assertThat( listing, notNullValue() );
 
-        final List<Permission> items = listing.getItems();
+        final List<? extends Permission> items = listing.getItems();
         Collections.sort( items, new Comparator<Permission>()
         {
             @Override

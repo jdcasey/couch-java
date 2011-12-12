@@ -23,6 +23,7 @@ import java.io.File;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.commonjava.auth.couch.model.RoleDoc;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.rbac.Role;
 import org.commonjava.web.common.model.Listing;
@@ -93,7 +94,7 @@ public class RoleAdminResourceTest
     public void modifyAdminRole()
         throws Exception
     {
-        final Role role = get( BASE_URL + "/admin", Role.class );
+        final RoleDoc role = get( BASE_URL + "/admin", RoleDoc.class );
 
         assertThat( role, notNullValue() );
 

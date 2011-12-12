@@ -15,8 +15,11 @@
  ******************************************************************************/
 package org.commonjava.couch.util;
 
+import javax.inject.Singleton;
+
 import org.commonjava.util.logging.Logger;
 
+@Singleton
 public class ChangeSynchronizer
 {
 
@@ -37,7 +40,7 @@ public class ChangeSynchronizer
 
     public synchronized void waitForChange( final long totalMillis, final long pollMillis )
     {
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         double runningTotal = 0;
 
         while ( !changed )
@@ -56,7 +59,7 @@ public class ChangeSynchronizer
                 logger.debug( "Waiting (%s ms) for changes.", pollMillis );
                 wait( pollMillis );
             }
-            catch ( InterruptedException e )
+            catch ( final InterruptedException e )
             {
                 break;
             }

@@ -111,6 +111,7 @@ public class UserAdminResourceTest
 
         user.removeRole( Role.ADMIN );
 
+        System.out.println( "\n\n\n\n\nPOST: " + user + "\n\n\n\n\n" );
         post( BASE_URL + "/" + User.ADMIN, user, HttpStatus.SC_OK );
     }
 

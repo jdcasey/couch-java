@@ -122,7 +122,8 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ), User.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ), UserDoc.class )
+                        .toUser();
         }
         catch ( final CouchDBException e )
         {
@@ -135,7 +136,8 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ), Permission.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ), PermissionDoc.class )
+                        .toPermission();
         }
         catch ( final CouchDBException e )
         {
@@ -148,7 +150,8 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ), Role.class );
+            return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ), RoleDoc.class )
+                        .toRole();
         }
         catch ( final CouchDBException e )
         {

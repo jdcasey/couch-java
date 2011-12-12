@@ -113,7 +113,7 @@ public class User
 
     public Set<String> getRoles()
     {
-        return roles;
+        return roles == null || roles.isEmpty() ? null : roles;
     }
 
     public synchronized void setRoles( final Set<Role> roles )
@@ -222,7 +222,13 @@ public class User
     {
         if ( roles != null )
         {
-            return roles.remove( roleName );
+            final boolean result = roles.remove( roleName );
+            if ( roles.isEmpty() )
+            {
+                roles = null;
+            }
+
+            return result;
         }
 
         return false;
@@ -231,8 +237,8 @@ public class User
     @Override
     public String toString()
     {
-        return String.format( "User [\n  username=%s\n  passwordDigest=%s\n  firstName=%s\n  lastName=%s\n  email=%s\n  roles=%s]",
-                              username, passwordDigest, firstName, lastName, email, roles );
+        return String.format( "User [\n  username=%s\n  passwordDigest=%s\n  firstName=%s\n  lastName=%s\n  email=%s\n  roles=%s\n  metadata=%s]",
+                              username, passwordDigest, firstName, lastName, email, roles, getMetadata() );
     }
 
 }

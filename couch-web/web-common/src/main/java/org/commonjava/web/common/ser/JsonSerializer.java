@@ -18,6 +18,7 @@ package org.commonjava.web.common.ser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ import java.util.Set;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 
@@ -128,7 +130,11 @@ public class JsonSerializer
 
         try
         {
-            final T result = getGson().fromJson( new InputStreamReader( stream, encoding ), type );
+            final Reader reader = new InputStreamReader( stream, encoding );
+            final String json = IOUtils.toString( reader );
+            logger.info( "JSON:\n\n%s\n\n", json );
+
+            final T result = getGson().fromJson( json, type );
 
             if ( result != null )
             {
@@ -141,6 +147,11 @@ public class JsonSerializer
             return result;
         }
         catch ( final UnsupportedEncodingException e )
+        {
+            logger.error( "Failed to deserialize type: %s. Error: %s", e, type.getName(), e.getMessage() );
+            throw new RuntimeException( "Cannot read stream." );
+        }
+        catch ( final IOException e )
         {
             logger.error( "Failed to deserialize type: %s. Error: %s", e, type.getName(), e.getMessage() );
             throw new RuntimeException( "Cannot read stream." );
@@ -162,11 +173,11 @@ public class JsonSerializer
 
             if ( result != null && result.getItems() != null )
             {
-                final List<T> items = result.getItems();
+                final List<? extends T> items = result.getItems();
                 Collections.reverse( items );
 
                 result = new Listing<T>( items );
-                for ( final T item : result )
+                for ( final T item : result.getItems() )
                 {
                     for ( final DeserializerPostProcessor<T> proc : postProcessors )
                     {
@@ -192,11 +203,11 @@ public class JsonSerializer
 
         if ( result != null && result.getItems() != null )
         {
-            final List<T> items = result.getItems();
+            final List<? extends T> items = result.getItems();
             Collections.reverse( items );
 
             result = new Listing<T>( items );
-            for ( final T item : result )
+            for ( final T item : result.getItems() )
             {
                 for ( final DeserializerPostProcessor<T> proc : postProcessors )
                 {

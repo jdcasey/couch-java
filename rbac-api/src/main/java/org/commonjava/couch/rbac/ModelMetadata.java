@@ -8,9 +8,9 @@ import java.util.Set;
 public class ModelMetadata
 {
 
-    private final Map<String, Object> metadata = new HashMap<String, Object>();
+    private final Map<String, String> metadata = new HashMap<String, String>();
 
-    public void setMetadata( final String key, final Object value )
+    public void setMetadata( final String key, final String value )
     {
         metadata.put( key, value );
     }
@@ -34,6 +34,11 @@ public class ModelMetadata
     public Set<String> getMetadataKeys()
     {
         return Collections.unmodifiableSet( metadata.keySet() );
+    }
+
+    protected Map<String, String> getMetadata()
+    {
+        return metadata;
     }
 
 }

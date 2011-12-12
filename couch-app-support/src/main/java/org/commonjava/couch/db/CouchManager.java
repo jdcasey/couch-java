@@ -424,7 +424,7 @@ public class CouchManager
         return listing.getItems();
     }
 
-    public <T> T getDocument( final CouchDocRef ref, final Class<T> docType )
+    public <T extends CouchDocument> T getDocument( final CouchDocRef ref, final Class<T> docType )
         throws CouchDBException
     {
         if ( !documentRevisionExists( ref ) )

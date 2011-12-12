@@ -18,17 +18,15 @@ package org.commonjava.web.common.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Listing<T>
-    implements Iterable<T>
 {
 
-    private List<T> items;
+    private List<? extends T> items;
 
     public Listing()
     {
@@ -39,25 +37,19 @@ public class Listing<T>
         items = Arrays.asList( elements );
     }
 
-    public Listing( final Collection<T> elements )
+    public Listing( final Collection<? extends T> elements )
     {
         this.items = new ArrayList<T>( elements );
     }
 
-    public List<T> getItems()
+    public List<? extends T> getItems()
     {
         return items;
     }
 
-    public void setItems( final List<T> items )
+    public void setItems( final List<? extends T> items )
     {
         this.items = items;
-    }
-
-    @Override
-    public Iterator<T> iterator()
-    {
-        return items.iterator();
     }
 
 }
