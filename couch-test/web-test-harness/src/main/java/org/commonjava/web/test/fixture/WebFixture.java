@@ -45,7 +45,6 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.protocol.HttpContext;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.JsonSerializer;
-import org.junit.Before;
 import org.junit.rules.ExternalResource;
 
 import com.google.gson.reflect.TypeToken;
@@ -96,8 +95,8 @@ public class WebFixture
         http.setRedirectStrategy( new DefaultRedirectStrategy() );
     }
 
-    @Before
-    public final void setupRESTCouchTest()
+    @Override
+    protected void before()
         throws Exception
     {
         final ThreadSafeClientConnManager ccm = new ThreadSafeClientConnManager();
