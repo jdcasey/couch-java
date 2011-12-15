@@ -27,6 +27,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,6 +48,10 @@ public class JsonSerializer
     private final Logger logger = new Logger( getClass() );
 
     private final Set<WebSerializationAdapter> baseAdapters = new HashSet<WebSerializationAdapter>();
+
+    @Inject
+    @Any
+    Instance<WebSerializationAdapter> adapterInstance;
 
     JsonSerializer()
     {
@@ -70,6 +77,15 @@ public class JsonSerializer
                 builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
             }
         }
+
+        if ( adapterInstance != null )
+        {
+            for ( final WebSerializationAdapter adapter : adapterInstance )
+            {
+                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+            }
+        }
+
         return builder.create();
     }
 
