@@ -189,7 +189,7 @@ public class JsonSerializer
 
             if ( result != null && result.getItems() != null )
             {
-                final List<? extends T> items = result.getItems();
+                final List<T> items = result.getItems();
                 Collections.reverse( items );
 
                 result = new Listing<T>( items );
@@ -219,7 +219,7 @@ public class JsonSerializer
 
         if ( result != null && result.getItems() != null )
         {
-            final List<? extends T> items = result.getItems();
+            final List<T> items = result.getItems();
             Collections.reverse( items );
 
             result = new Listing<T>( items );

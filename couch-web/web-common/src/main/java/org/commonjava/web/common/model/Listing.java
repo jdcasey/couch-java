@@ -20,13 +20,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class Listing<T>
 {
 
-    private List<? extends T> items;
+    private List<T> items;
 
     public Listing()
     {
@@ -37,17 +34,17 @@ public class Listing<T>
         items = Arrays.asList( elements );
     }
 
-    public Listing( final Collection<? extends T> elements )
+    public Listing( final Collection<T> elements )
     {
         this.items = new ArrayList<T>( elements );
     }
 
-    public List<? extends T> getItems()
+    public List<T> getItems()
     {
         return items;
     }
 
-    public void setItems( final List<? extends T> items )
+    public void setItems( final List<T> items )
     {
         this.items = items;
     }
