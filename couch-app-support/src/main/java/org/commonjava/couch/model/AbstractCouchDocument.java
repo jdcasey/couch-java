@@ -73,7 +73,7 @@ public abstract class AbstractCouchDocument
         {
             return false;
         }
-        AbstractCouchDocument other = (AbstractCouchDocument) obj;
+        final AbstractCouchDocument other = (AbstractCouchDocument) obj;
         if ( id == null )
         {
             if ( other.id != null )

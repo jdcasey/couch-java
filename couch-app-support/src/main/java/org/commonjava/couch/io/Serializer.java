@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Singleton;
@@ -31,13 +32,16 @@ import org.apache.http.HttpEntity;
 import org.commonjava.couch.db.action.BulkActionHolder;
 import org.commonjava.couch.db.action.CouchDocumentAction;
 import org.commonjava.couch.db.model.CouchDocRefSet;
+import org.commonjava.couch.io.json.AttachmentInfoListAdapter;
 import org.commonjava.couch.io.json.CouchDocumentActionAdapter;
+import org.commonjava.couch.model.AttachmentInfo;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
 import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 @Singleton
 public class Serializer
@@ -130,6 +134,9 @@ public class Serializer
         final GsonBuilder builder = new GsonBuilder();
         // builder.setPrettyPrinting();
         builder.registerTypeAdapter( CouchDocumentAction.class, new CouchDocumentActionAdapter() );
+        builder.registerTypeAdapter( new TypeToken<List<AttachmentInfo>>()
+        {
+        }.getType(), new AttachmentInfoListAdapter() );
 
         return builder;
     }

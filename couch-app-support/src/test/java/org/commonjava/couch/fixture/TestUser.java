@@ -15,10 +15,10 @@
  ******************************************************************************/
 package org.commonjava.couch.fixture;
 
-import org.commonjava.couch.model.AbstractCouchDocument;
+import org.commonjava.couch.model.AbstractCouchDocWithAttachments;
 
 public class TestUser
-    extends AbstractCouchDocument
+    extends AbstractCouchDocWithAttachments
 {
 
     private String username;
@@ -29,8 +29,7 @@ public class TestUser
 
     private String email;
 
-    public TestUser( final String username, final String first, final String last,
-                     final String email )
+    public TestUser( final String username, final String first, final String last, final String email )
     {
         this.username = username;
         this.first = first;
@@ -40,7 +39,8 @@ public class TestUser
     }
 
     TestUser()
-    {}
+    {
+    }
 
     public String getUsername()
     {
@@ -85,8 +85,8 @@ public class TestUser
     @Override
     public String toString()
     {
-        return String.format( "TestUser [_id=%s, _rev=%s, username=%s, first=%s, last=%s, email=%s]",
-                              getCouchDocId(), getCouchDocRev(), username, first, last, email );
+        return String.format( "TestUser [_id=%s, _rev=%s, username=%s, first=%s, last=%s, email=%s]", getCouchDocId(),
+                              getCouchDocRev(), username, first, last, email );
     }
 
     @Override
@@ -116,7 +116,7 @@ public class TestUser
         {
             return false;
         }
-        TestUser other = (TestUser) obj;
+        final TestUser other = (TestUser) obj;
         if ( email == null )
         {
             if ( other.email != null )

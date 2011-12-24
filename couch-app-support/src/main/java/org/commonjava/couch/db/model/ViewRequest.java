@@ -52,6 +52,11 @@ public class ViewRequest
         this.view = view;
     }
 
+    public void setKey( final Object key )
+    {
+        setParameter( KEY, key );
+    }
+
     public void setFullRangeForBaseKey( final Object baseKey )
     {
         setParameterArray( START_KEY, baseKey );
@@ -72,10 +77,10 @@ public class ViewRequest
 
     public void setParameterArray( final String key, final Object... values )
     {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         sb.append( "[" );
-        for ( Object val : values )
+        for ( final Object val : values )
         {
             if ( sb.length() > 1 )
             {
@@ -124,8 +129,8 @@ public class ViewRequest
     @Override
     public String toString()
     {
-        return String.format( "ViewRequest [application=%s, view=%s, parameters=%s]", application,
-                              view, requestParameters );
+        return String.format( "ViewRequest [application=%s, view=%s, parameters=%s]", application, view,
+                              requestParameters );
     }
 
     public Map<String, String> getRequestParameters()

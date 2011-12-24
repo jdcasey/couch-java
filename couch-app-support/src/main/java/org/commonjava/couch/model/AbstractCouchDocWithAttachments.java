@@ -15,14 +15,28 @@
  ******************************************************************************/
 package org.commonjava.couch.model;
 
+import java.util.List;
 
-public interface CouchDocument
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public abstract class AbstractCouchDocWithAttachments
+    extends AbstractCouchDocument
+    implements CouchDocument, DocWithAttachments
 {
+    @Expose( serialize = false, deserialize = true )
+    @SerializedName( "_attachments" )
+    private List<AttachmentInfo> attachments;
 
-    String getCouchDocId();
+    @Override
+    public List<AttachmentInfo> getAttachments()
+    {
+        return attachments;
+    }
 
-    String getCouchDocRev();
-
-    void setCouchDocRev( String revision );
+    void setAttachments( final List<AttachmentInfo> attachments )
+    {
+        this.attachments = attachments;
+    }
 
 }
