@@ -66,7 +66,7 @@ public class CouchPermissionResolver
     @Override
     public Permission resolvePermission( final String permissionName )
     {
-        // logger.info( "Resolving permission: %s", permissionName );
+        logger.info( "Resolving permission: %s from datamanager: %s", permissionName, dataManager );
 
         org.commonjava.couch.rbac.Permission perm;
         try

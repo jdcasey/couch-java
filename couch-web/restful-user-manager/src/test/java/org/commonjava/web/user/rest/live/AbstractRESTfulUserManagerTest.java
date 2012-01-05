@@ -20,6 +20,8 @@ import javax.inject.Inject;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
+import org.commonjava.web.test.fixture.WebFixture;
+import org.junit.Rule;
 
 public abstract class AbstractRESTfulUserManagerTest
     extends AbstractUserRESTCouchTest
@@ -28,6 +30,9 @@ public abstract class AbstractRESTfulUserManagerTest
     @Inject
     @UserData
     private CouchManager couch;
+
+    @Rule
+    public WebFixture fixture = new WebFixture();
 
     protected AbstractRESTfulUserManagerTest()
     {

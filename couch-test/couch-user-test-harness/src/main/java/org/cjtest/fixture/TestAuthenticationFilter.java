@@ -71,10 +71,17 @@ public class TestAuthenticationFilter
         {
             logger.info( "TEST LOGIN: CouchDB Shiro" );
 
-            // Login the user before we test!
             final Subject subject = SecurityUtils.getSubject();
 
+            // if there is already a user logged in, log them out.
+            if ( subject.isAuthenticated() )
+            {
+                subject.logout();
+            }
+
             final String username = controls.getUser();
+
+            logger.info( "TEST LOGIN: User is '" + username + "'" );
 
             User user;
             try
@@ -87,6 +94,12 @@ public class TestAuthenticationFilter
                     + e.getMessage(), e );
             }
 
+            if ( user == null )
+            {
+                throw new ServletException( "Cannot find user: " + username + " to authenticate!" );
+            }
+
+            // Login the user before we test!
             subject.login( ShiroUserUtils.getAuthenticationToken( user ) );
 
             logger.info( "/TEST LOGIN: CouchDB Shiro" );

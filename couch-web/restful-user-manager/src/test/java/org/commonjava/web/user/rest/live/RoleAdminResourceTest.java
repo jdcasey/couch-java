@@ -61,7 +61,7 @@ public class RoleAdminResourceTest
     public void getAdminRole()
         throws Exception
     {
-        final Role role = get( BASE_URL + "/admin", Role.class );
+        final Role role = fixture.get( BASE_URL + "/admin", Role.class );
 
         assertThat( role, notNullValue() );
         assertThat( role.getName(), equalTo( "admin" ) );
@@ -77,7 +77,7 @@ public class RoleAdminResourceTest
     public void deleteAdminRole()
         throws Exception
     {
-        delete( BASE_URL + "/admin" );
+        fixture.delete( BASE_URL + "/admin" );
     }
 
     @Test
@@ -86,20 +86,20 @@ public class RoleAdminResourceTest
     {
         final Role r = new Role( "test", new Permission( Permission.WILDCARD ) );
 
-        final HttpResponse response = post( BASE_URL, r, HttpStatus.SC_CREATED );
-        assertLocationHeader( response, BASE_URL + "/test" );
+        final HttpResponse response = fixture.post( BASE_URL, r, HttpStatus.SC_CREATED );
+        fixture.assertLocationHeader( response, BASE_URL + "/test" );
     }
 
     @Test
     public void modifyAdminRole()
         throws Exception
     {
-        final RoleDoc role = get( BASE_URL + "/admin", RoleDoc.class );
+        final RoleDoc role = fixture.get( BASE_URL + "/admin", RoleDoc.class );
 
         assertThat( role, notNullValue() );
 
         role.removePermission( Permission.WILDCARD );
-        post( BASE_URL + "/admin", role, HttpStatus.SC_OK );
+        fixture.post( BASE_URL + "/admin", role, HttpStatus.SC_OK );
     }
 
     @Test
@@ -107,11 +107,11 @@ public class RoleAdminResourceTest
         throws Exception
     {
         final HttpResponse response =
-            post( BASE_URL, new Role( "test", new Permission( Permission.WILDCARD ) ), HttpStatus.SC_CREATED );
+            fixture.post( BASE_URL, new Role( "test", new Permission( Permission.WILDCARD ) ), HttpStatus.SC_CREATED );
 
-        assertLocationHeader( response, BASE_URL + "/test" );
+        fixture.assertLocationHeader( response, BASE_URL + "/test" );
 
-        final Listing<Role> roles = getListing( BASE_URL + "/list", new TypeToken<Listing<Role>>()
+        final Listing<Role> roles = fixture.getListing( BASE_URL + "/list", new TypeToken<Listing<Role>>()
         {
         } );
 

@@ -33,11 +33,16 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolException;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -65,6 +70,10 @@ public class WebFixture
     private String host = DEFAULT_HOST;
 
     private String apiVersion = "1.0";
+
+    private String user;
+
+    private String pass;
 
     public WebFixture()
     {
@@ -103,6 +112,30 @@ public class WebFixture
         ccm.setMaxTotal( 20 );
 
         http = new DefaultHttpClient( ccm );
+        http.setCredentialsProvider( new CredentialsProvider()
+        {
+
+            @Override
+            public void setCredentials( final AuthScope authscope, final Credentials credentials )
+            {
+            }
+
+            @Override
+            public Credentials getCredentials( final AuthScope authscope )
+            {
+                if ( user != null )
+                {
+                    return new UsernamePasswordCredentials( user, pass );
+                }
+
+                return null;
+            }
+
+            @Override
+            public void clear()
+            {
+            }
+        } );
     }
 
     public void assertLocationHeader( final HttpResponse response, final String value )
@@ -238,6 +271,50 @@ public class WebFixture
 
             assertThat( response.getStatusLine()
                                 .getStatusCode(), equalTo( HttpStatus.SC_OK ) );
+
+            return response;
+        }
+        finally
+        {
+            request.abort();
+        }
+    }
+
+    public HttpResponse put( final String url, final int status )
+        throws Exception
+    {
+        final HttpPut request = new HttpPut( url );
+
+        try
+        {
+            final HttpResponse response = http.execute( request );
+
+            assertThat( response.getStatusLine()
+                                .getStatusCode(), equalTo( status ) );
+
+            return response;
+        }
+        finally
+        {
+            request.abort();
+        }
+    }
+
+    public HttpResponse put( final String url, final Object value, final int status )
+        throws Exception
+    {
+        final HttpPut request = new HttpPut( url );
+        if ( value != null )
+        {
+            request.setEntity( new StringEntity( serializer.toString( value ), "application/json", "UTF-8" ) );
+        }
+
+        try
+        {
+            final HttpResponse response = http.execute( request );
+
+            assertThat( response.getStatusLine()
+                                .getStatusCode(), equalTo( status ) );
 
             return response;
         }
@@ -402,5 +479,11 @@ public class WebFixture
     public void setHost( final String host )
     {
         this.host = host;
+    }
+
+    public void setCredentials( final String user, final String pass )
+    {
+        this.user = user;
+        this.pass = pass;
     }
 }

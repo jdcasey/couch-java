@@ -29,4 +29,11 @@ public class UserViewRequest
         setParameter( INCLUDE_DOCS, true );
     }
 
+    public UserViewRequest( final UserManagerConfiguration config, final View view, final String key )
+    {
+        super( UserAppDescription.APP_NAME, view.viewName() );
+        setParameter( INCLUDE_DOCS, true );
+        setParameter( KEY, key );
+    }
+
 }

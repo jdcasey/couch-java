@@ -29,13 +29,13 @@ public class ShiroUserUtils
     public static AuthenticationInfo getAuthenticationInfo( final User user )
     {
         // TODO: make the user able to store properties, so we can set different realms...?
-        String realm = DEFAULT_REALM;
+        final String realm = DEFAULT_REALM;
         return new SimpleAuthenticationInfo( user.getUsername(), user.getPasswordDigest(), realm );
     }
 
     public static AuthenticationToken getAuthenticationToken( final User user )
     {
-        return new UsernamePasswordToken( user.getUsername(), user.getPasswordDigest() );
+        return user == null ? null : new UsernamePasswordToken( user.getUsername(), user.getPasswordDigest() );
     }
 
 }

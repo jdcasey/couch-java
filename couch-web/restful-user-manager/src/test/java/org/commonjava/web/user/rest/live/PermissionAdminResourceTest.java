@@ -73,7 +73,7 @@ public class PermissionAdminResourceTest
     public void getGodPermission()
         throws Exception
     {
-        final Permission perm = get( BASE_URL + "/*", Permission.class );
+        final Permission perm = fixture.get( BASE_URL + "/*", Permission.class );
 
         assertThat( perm, notNullValue() );
         assertThat( perm.getName(), equalTo( "*" ) );
@@ -83,27 +83,29 @@ public class PermissionAdminResourceTest
     public void deleteGodPermission()
         throws Exception
     {
-        delete( BASE_URL + "/*" );
+        fixture.delete( BASE_URL + "/*" );
     }
 
     @Test
     public void createPermission()
         throws Exception
     {
-        final HttpResponse response = post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
+        final HttpResponse response =
+            fixture.post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
 
-        assertLocationHeader( response, BASE_URL + "/test:read" );
+        fixture.assertLocationHeader( response, BASE_URL + "/test:read" );
     }
 
     @Test
     public void createPermissionThenReadGodAndNewPermissions()
         throws Exception
     {
-        post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
+        fixture.post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
 
-        final Listing<Permission> listing = getListing( BASE_URL + "/list", new TypeToken<Listing<Permission>>()
-        {
-        } );
+        final Listing<Permission> listing =
+            fixture.getListing( BASE_URL + "/list", new TypeToken<Listing<Permission>>()
+            {
+            } );
 
         assertThat( listing, notNullValue() );
 

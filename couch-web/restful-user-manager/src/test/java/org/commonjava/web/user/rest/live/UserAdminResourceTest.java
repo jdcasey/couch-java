@@ -66,7 +66,7 @@ public class UserAdminResourceTest
     public void getAdminUser()
         throws Exception
     {
-        final User user = get( BASE_URL + "/" + User.ADMIN, User.class );
+        final User user = fixture.get( BASE_URL + "/" + User.ADMIN, User.class );
 
         assertThat( user, notNullValue() );
         assertThat( user.getUsername(), equalTo( User.ADMIN ) );
@@ -88,7 +88,7 @@ public class UserAdminResourceTest
     public void deleteAdminUser()
         throws Exception
     {
-        delete( BASE_URL + "/" + User.ADMIN );
+        fixture.delete( BASE_URL + "/" + User.ADMIN );
     }
 
     @Test
@@ -97,22 +97,22 @@ public class UserAdminResourceTest
     {
         final User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
 
-        final HttpResponse response = post( BASE_URL, user, HttpStatus.SC_CREATED );
-        assertLocationHeader( response, BASE_URL + "/test" );
+        final HttpResponse response = fixture.post( BASE_URL, user, HttpStatus.SC_CREATED );
+        fixture.assertLocationHeader( response, BASE_URL + "/test" );
     }
 
     @Test
     public void modifyAdminUser()
         throws Exception
     {
-        final User user = get( BASE_URL + "/" + User.ADMIN, User.class );
+        final User user = fixture.get( BASE_URL + "/" + User.ADMIN, User.class );
 
         assertThat( user, notNullValue() );
 
         user.removeRole( Role.ADMIN );
 
         System.out.println( "\n\n\n\n\nPOST: " + user + "\n\n\n\n\n" );
-        post( BASE_URL + "/" + User.ADMIN, user, HttpStatus.SC_OK );
+        fixture.post( BASE_URL + "/" + User.ADMIN, user, HttpStatus.SC_OK );
     }
 
     @Test
@@ -120,9 +120,9 @@ public class UserAdminResourceTest
         throws Exception
     {
         final User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
-        post( BASE_URL, user, HttpStatus.SC_CREATED );
+        fixture.post( BASE_URL, user, HttpStatus.SC_CREATED );
 
-        final Listing<User> users = getListing( BASE_URL + "/list", new TypeToken<Listing<User>>()
+        final Listing<User> users = fixture.getListing( BASE_URL + "/list", new TypeToken<Listing<User>>()
         {
         } );
 

@@ -44,10 +44,13 @@ import org.commonjava.couch.model.CouchDocRef;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.rbac.Role;
 import org.commonjava.couch.rbac.User;
+import org.commonjava.util.logging.Logger;
 
 @Singleton
 public class UserDataManager
 {
+
+    private final Logger logger = new Logger( getClass() );
 
     @Inject
     @UserData
@@ -122,8 +125,9 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ), UserDoc.class )
-                        .toUser();
+            final UserDoc user =
+                couch.getDocument( new CouchDocRef( namespaceId( User.NAMESPACE, username ) ), UserDoc.class );
+            return user == null ? null : user.toUser();
         }
         catch ( final CouchDBException e )
         {
@@ -136,8 +140,17 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ), PermissionDoc.class )
-                        .toPermission();
+            logger.info( "Retrieving permission: %s from database: %s", name, couch );
+            final PermissionDoc perm =
+                couch.getDocument( new CouchDocRef( namespaceId( Permission.NAMESPACE, name ) ), PermissionDoc.class );
+            if ( perm == null )
+            {
+                return null;
+            }
+            else
+            {
+                return perm.toPermission();
+            }
         }
         catch ( final CouchDBException e )
         {
@@ -150,8 +163,9 @@ public class UserDataManager
     {
         try
         {
-            return couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ), RoleDoc.class )
-                        .toRole();
+            final RoleDoc role =
+                couch.getDocument( new CouchDocRef( namespaceId( Role.NAMESPACE, name ) ), RoleDoc.class );
+            return role == null ? null : role.toRole();
         }
         catch ( final CouchDBException e )
         {
@@ -162,7 +176,7 @@ public class UserDataManager
     public Set<Role> getRoles( final User user )
         throws UserDataException
     {
-        final UserViewRequest req = new UserViewRequest( config, View.USER_ROLES );
+        final UserViewRequest req = new UserViewRequest( config, View.USER_ROLES, user.getUsername() );
         try
         {
             return RoleDoc.toRoleSet( couch.getViewListing( req, RoleDoc.class ) );
@@ -177,7 +191,7 @@ public class UserDataManager
     public Set<Permission> getPermissions( final Role role )
         throws UserDataException
     {
-        final UserViewRequest req = new UserViewRequest( config, View.ROLE_PERMISSIONS );
+        final UserViewRequest req = new UserViewRequest( config, View.ROLE_PERMISSIONS, role.getName() );
         try
         {
             return PermissionDoc.toPermissionSet( couch.getViewListing( req, PermissionDoc.class ) );
@@ -421,7 +435,7 @@ public class UserDataManager
     {
         try
         {
-            final UserViewRequest req = new UserViewRequest( config, View.ROLE_USERS );
+            final UserViewRequest req = new UserViewRequest( config, View.ROLE_USERS, role );
             req.setParameter( ViewRequest.KEY, role );
 
             return UserDoc.toUserSet( couch.getViewListing( req, UserDoc.class ) );
@@ -438,7 +452,7 @@ public class UserDataManager
     {
         try
         {
-            final UserViewRequest req = new UserViewRequest( config, View.PERMISSION_ROLES );
+            final UserViewRequest req = new UserViewRequest( config, View.PERMISSION_ROLES, permission );
             req.setParameter( ViewRequest.KEY, permission );
 
             return RoleDoc.toRoleSet( couch.getViewListing( req, RoleDoc.class ) );

@@ -41,7 +41,13 @@ public class TestAuthenticationControls
 
     public void setUser( final String user )
     {
+        System.out.println( "\n\n\nSetting user: '" + user + "' in test-login controls" );
         this.user = user;
+    }
+
+    public void resetUser()
+    {
+        this.user = User.ADMIN;
     }
 
     @Override
