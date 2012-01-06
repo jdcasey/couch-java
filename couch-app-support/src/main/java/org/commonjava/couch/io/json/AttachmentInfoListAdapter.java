@@ -6,15 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.commonjava.couch.model.AttachmentInfo;
+import org.commonjava.web.common.ser.WebSerializationAdapter;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 public class AttachmentInfoListAdapter
-    implements JsonDeserializer<List<AttachmentInfo>>
+    implements WebSerializationAdapter, JsonDeserializer<List<AttachmentInfo>>
 {
 
     @Override
@@ -44,4 +46,11 @@ public class AttachmentInfoListAdapter
         return attachments;
     }
 
+    @Override
+    public Type typeLiteral()
+    {
+        return new TypeToken<List<AttachmentInfo>>()
+        {
+        }.getType();
+    }
 }

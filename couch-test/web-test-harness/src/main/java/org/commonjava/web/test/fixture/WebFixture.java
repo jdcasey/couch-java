@@ -21,6 +21,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -28,6 +29,7 @@ import java.net.URL;
 import java.util.Map;
 
 import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -43,6 +45,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -140,7 +143,7 @@ public class WebFixture
 
     public void assertLocationHeader( final HttpResponse response, final String value )
     {
-        final Header[] headers = response.getHeaders( "Location" );
+        final Header[] headers = response.getHeaders( HttpHeaders.LOCATION );
         assertThat( headers, notNullValue() );
         assertThat( headers.length, equalTo( 1 ) );
 
@@ -152,6 +155,7 @@ public class WebFixture
         throws Exception
     {
         final HttpGet get = new HttpGet( url );
+        get.setHeader( HttpHeaders.ACCEPT, "application/json" );
         try
         {
             return http.execute( get, new ResponseHandler<T>()
@@ -308,6 +312,29 @@ public class WebFixture
         {
             request.setEntity( new StringEntity( serializer.toString( value ), "application/json", "UTF-8" ) );
         }
+
+        try
+        {
+            final HttpResponse response = http.execute( request );
+
+            assertThat( response.getStatusLine()
+                                .getStatusCode(), equalTo( status ) );
+
+            return response;
+        }
+        finally
+        {
+            request.abort();
+        }
+    }
+
+    public HttpResponse put( final String url, final int status, final InputStream stream, final String contentType,
+                             final int contentLength )
+        throws Exception
+    {
+        final HttpPut request = new HttpPut( url );
+        request.setHeader( HttpHeaders.CONTENT_TYPE, contentType );
+        request.setEntity( new InputStreamEntity( stream, contentLength ) );
 
         try
         {
