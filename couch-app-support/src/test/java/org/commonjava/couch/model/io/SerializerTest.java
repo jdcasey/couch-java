@@ -41,6 +41,7 @@ import org.commonjava.couch.model.CouchDocument;
 import org.junit.Test;
 
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 
 public class SerializerTest
 {
@@ -65,10 +66,13 @@ public class SerializerTest
                 + "{\"key\":\"username2\",\"value\":\"3-bdefca34567216\",\"doc\":{\"username\":\"username2\",\"first\":\"first2\",\"last\":\"last2\",\"email\":\"email2@nowhere.com\",\"_id\":\"username2\"}}"
                 + "]}";
 
-        final CouchObjectListDeserializer<TestUser> deser =
-            new CouchObjectListDeserializer<TestUser>( TestUser.class, false );
+        final TypeToken<CouchObjectList<TestUser>> tt = new TypeToken<CouchObjectList<TestUser>>()
+        {
+        };
 
-        final CouchObjectList<TestUser> listing = new Serializer().fromJson( src, deser.typeLiteral(), deser );
+        final CouchObjectList<TestUser> listing =
+            new Serializer( new CouchObjectListDeserializer<TestUser>( tt, TestUser.class, false ) ).fromJson( src,
+                                                                                                               tt.getType() );
 
         assertThat( listing, notNullValue() );
 

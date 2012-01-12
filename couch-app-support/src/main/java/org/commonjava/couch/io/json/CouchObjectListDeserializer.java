@@ -23,6 +23,7 @@ import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.web.common.ser.WebSerializationAdapter;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -43,24 +44,21 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
 
     private final boolean allowMissing;
 
-    public CouchObjectListDeserializer( final Class<T> type )
+    private final TypeToken<CouchObjectList<T>> serType;
+
+    public CouchObjectListDeserializer( final TypeToken<CouchObjectList<T>> serType, final Class<T> type )
     {
+        this.serType = serType;
         this.type = type;
         this.allowMissing = false;
     }
 
-    public CouchObjectListDeserializer( final Class<T> type, final boolean allowMissing )
+    public CouchObjectListDeserializer( final TypeToken<CouchObjectList<T>> serType, final Class<T> type,
+                                        final boolean allowMissing )
     {
+        this.serType = serType;
         this.type = type;
         this.allowMissing = allowMissing;
-    }
-
-    @Override
-    public Type typeLiteral()
-    {
-        return new TypeToken<CouchObjectList<T>>()
-        {
-        }.getType();
     }
 
     @Override
@@ -101,6 +99,12 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
         }
 
         return new CouchObjectList<T>( items );
+    }
+
+    @Override
+    public void register( final GsonBuilder gsonBuilder )
+    {
+        gsonBuilder.registerTypeAdapter( serType.getType(), this );
     }
 
 }

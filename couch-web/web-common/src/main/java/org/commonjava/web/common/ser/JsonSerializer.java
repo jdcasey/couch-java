@@ -74,7 +74,7 @@ public class JsonSerializer
         {
             for ( final WebSerializationAdapter adapter : baseAdapters )
             {
-                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+                adapter.register( builder );
             }
         }
 
@@ -82,7 +82,7 @@ public class JsonSerializer
         {
             for ( final WebSerializationAdapter adapter : adapterInstance )
             {
-                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+                adapter.register( builder );
             }
         }
 

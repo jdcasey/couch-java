@@ -148,7 +148,7 @@ public class Serializer
         {
             for ( final WebSerializationAdapter adapter : baseAdapters )
             {
-                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+                adapter.register( builder );
             }
         }
 
@@ -156,7 +156,7 @@ public class Serializer
         {
             for ( final WebSerializationAdapter adapter : adapters )
             {
-                builder.registerTypeAdapter( adapter.typeLiteral(), adapter );
+                adapter.register( builder );
             }
         }
 

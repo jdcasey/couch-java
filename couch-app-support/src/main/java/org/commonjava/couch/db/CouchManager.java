@@ -81,6 +81,8 @@ import org.commonjava.couch.model.CouchError;
 import org.commonjava.couch.model.DenormalizedCouchDoc;
 import org.commonjava.couch.util.ToString;
 
+import com.google.gson.reflect.TypeToken;
+
 @Named( "dont-use-directly" )
 @Alternative
 public class CouchManager
@@ -314,11 +316,15 @@ public class CouchManager
 
         final HttpGet request = new HttpGet( url );
 
-        final CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( itemType, false );
+        final TypeToken<CouchObjectList<T>> tt = new TypeToken<CouchObjectList<T>>()
+        {
+        };
 
-        final CouchObjectList<T> listing =
-            client.executeHttpAndReturn( request, deser.typeLiteral(),
-                                         new ToString( "Failed to retrieve contents for view request: %s", req ), deser );
+        final CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( tt, itemType, false );
+
+        final CouchObjectList<T> listing = client.executeHttpAndReturn( request, new TypeToken<CouchObjectList<T>>()
+        {
+        }.getType(), new ToString( "Failed to retrieve contents for view request: %s", req ), deser );
 
         for ( final T t : listing )
         {
@@ -406,11 +412,15 @@ public class CouchManager
                                         e.getMessage() );
         }
 
-        final CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( docType, allowMissing );
+        final TypeToken<CouchObjectList<T>> tt = new TypeToken<CouchObjectList<T>>()
+        {
+        };
 
-        final CouchObjectList<T> listing =
-            client.executeHttpAndReturn( request, deser.typeLiteral(),
-                                         new ToString( "Failed to retrieve documents for: %s", refSet ), deser );
+        final CouchObjectListDeserializer<T> deser = new CouchObjectListDeserializer<T>( tt, docType, allowMissing );
+
+        final CouchObjectList<T> listing = client.executeHttpAndReturn( request, new TypeToken<CouchObjectList<T>>()
+        {
+        }.getType(), new ToString( "Failed to retrieve documents for: %s", refSet ), deser );
 
         for ( final T t : listing )
         {

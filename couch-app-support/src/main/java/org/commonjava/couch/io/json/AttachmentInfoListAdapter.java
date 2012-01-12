@@ -8,6 +8,7 @@ import java.util.Map;
 import org.commonjava.couch.model.AttachmentInfo;
 import org.commonjava.web.common.ser.WebSerializationAdapter;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -47,10 +48,11 @@ public class AttachmentInfoListAdapter
     }
 
     @Override
-    public Type typeLiteral()
+    public void register( final GsonBuilder gsonBuilder )
     {
-        return new TypeToken<List<AttachmentInfo>>()
+        gsonBuilder.registerTypeAdapter( new TypeToken<List<AttachmentInfo>>()
         {
-        }.getType();
+        }.getType(), this );
     }
+
 }

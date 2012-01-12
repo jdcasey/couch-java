@@ -15,11 +15,11 @@
  ******************************************************************************/
 package org.commonjava.web.common.ser;
 
-import java.lang.reflect.Type;
+import com.google.gson.GsonBuilder;
 
 public interface WebSerializationAdapter
 {
 
-    Type typeLiteral();
+    void register( GsonBuilder gsonBuilder );
 
 }

@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.commonjava.web.common.ser.WebSerializationAdapter;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -41,12 +42,6 @@ public class CouchDocChangeDeserializer
     private static final String REV = "rev";
 
     private static final String DELETED = "deleted";
-
-    @Override
-    public Type typeLiteral()
-    {
-        return CouchDocChange.class;
-    }
 
     @Override
     public CouchDocChange deserialize( final JsonElement json, final Type typeOfT,
@@ -72,6 +67,12 @@ public class CouchDocChangeDeserializer
         }
 
         return new CouchDocChange( seq, id, revs, deleted );
+    }
+
+    @Override
+    public void register( final GsonBuilder gsonBuilder )
+    {
+        gsonBuilder.registerTypeAdapter( CouchDocChange.class, this );
     }
 
 }
