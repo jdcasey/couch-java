@@ -199,7 +199,7 @@ public class CouchChangeListener
             String encoding = null;
             try
             {
-                logger.info( "requesting changes..." );
+                // logger.info( "requesting changes..." );
 
                 final HttpResponse response = http.executeHttpWithResponse( get, "Failed to open changes stream." );
 

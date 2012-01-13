@@ -21,9 +21,12 @@ import javax.inject.Named;
 import org.commonjava.couch.util.UrlInfo;
 import org.commonjava.couch.util.UrlUtils;
 import org.commonjava.web.config.annotation.ConfigName;
+import org.commonjava.web.config.annotation.SectionName;
+import org.commonjava.web.config.section.ConfigurationSectionListener;
 
 @Alternative
 @Named( "do-not-use-directly" )
+@SectionName( ConfigurationSectionListener.DEFAULT_SECTION )
 public class DefaultCouchDBConfiguration
     implements CouchDBConfiguration
 {
