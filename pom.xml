@@ -38,6 +38,10 @@
     <module>rbac-api</module>
   </modules>
   
+  <properties>
+    <jbossHome>${env.JBOSS_HOME}</jbossHome>
+  </properties>
+  
   <scm>
     <connection>scm:git:http://jdcasey@github.com/jdcasey/couch-java.git</connection>
     <developerConnection>scm:git:git@github.com:jdcasey/couch-java.git</developerConnection>
@@ -401,7 +405,7 @@
           <version>2.10</version>
           <configuration>
             <systemPropertyVariables>
-              <JBOSS_HOME>${env.JBOSS_HOME}</JBOSS_HOME>
+              <JBOSS_HOME>${jbossHome}</JBOSS_HOME>
             </systemPropertyVariables>
             <excludes>
               <exclude>**/fixture/*.java</exclude>
