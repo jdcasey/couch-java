@@ -90,6 +90,10 @@ public class TestWarArchiveBuilder
 
     private final Map<String, JarKnockouts> knockouts = new HashMap<String, JarKnockouts>();
 
+    private boolean beansXmlIncluded;
+
+    private boolean webXmlIncluded;
+
     public TestWarArchiveBuilder( final Class<?> testClass )
     {
         this( testClass, new File( "target/classes" ) );
@@ -98,9 +102,7 @@ public class TestWarArchiveBuilder
     public TestWarArchiveBuilder( final Class<?> testClass, final File buildOutput )
     {
         this.buildOutput = buildOutput.getAbsoluteFile();
-        war = ShrinkWrap.create( WebArchive.class, "test.war" )
-                        .addAsWebInfResource( new ClassLoaderAsset( "beans.xml.test" ), "beans.xml" )
-                        .addAsWebInfResource( new ClassLoaderAsset( "test.web.xml" ), "web.xml" );
+        war = ShrinkWrap.create( WebArchive.class, "test.war" );
 
         war.addClass( testClass );
     }
@@ -194,8 +196,32 @@ public class TestWarArchiveBuilder
         return this;
     }
 
+    public TestWarArchiveBuilder withBeansXml( final String beansXmlResource )
+    {
+        war.addAsWebInfResource( new ClassLoaderAsset( beansXmlResource ), "beans.xml" );
+        beansXmlIncluded = true;
+        return this;
+    }
+
+    public TestWarArchiveBuilder withWebXml( final String webXmlResource )
+    {
+        war.addAsWebInfResource( new ClassLoaderAsset( webXmlResource ), "web.xml" );
+        webXmlIncluded = true;
+        return this;
+    }
+
     public WebArchive build()
     {
+        if ( !beansXmlIncluded )
+        {
+            war.addAsWebInfResource( new ClassLoaderAsset( "beans.xml.test" ), "beans.xml" );
+        }
+
+        if ( !webXmlIncluded )
+        {
+            war.addAsWebInfResource( new ClassLoaderAsset( "test.web.xml" ), "web.xml" );
+        }
+
         if ( librariesDir != null )
         {
             libs: for ( final File file : librariesDir.listFiles() )
