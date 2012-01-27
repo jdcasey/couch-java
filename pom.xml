@@ -463,6 +463,7 @@
                 <clientKey>couch</clientKey>
                 <configurators>reservation</configurators>
                 <useDefaultConfigurators>false</useDefaultConfigurators>
+                <output>${session.executionRootDirectory}/target/jbossas</output>
                 <configProperties>
                   <reservationBaseUrl>http://localhost:9080/qarqas/api/1.0/reservation/</reservationBaseUrl>
                 </configProperties>
