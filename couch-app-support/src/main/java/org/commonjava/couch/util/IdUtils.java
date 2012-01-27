@@ -19,7 +19,8 @@ public final class IdUtils
 {
 
     private IdUtils()
-    {}
+    {
+    }
 
     public static String nonNamespaceId( final String namespace, final String namespaceId )
     {
@@ -31,13 +32,14 @@ public final class IdUtils
         return namespaceId.substring( namespace.length() + 1 );
     }
 
-    public static String namespaceId( final String namespace, final String... parts )
+    public static String namespaceId( final String namespace, final Object... parts )
     {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append( namespace );
-        for ( String part : parts )
+        for ( final Object part : parts )
         {
-            sb.append( ":" ).append( part );
+            sb.append( ":" )
+              .append( part );
         }
 
         return sb.toString();
