@@ -400,9 +400,9 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.10</version>
           <configuration>
-            <systemPropertyVariables>
+            <!-- <systemPropertyVariables>
               <JBOSS_HOME>${jbossHome}</JBOSS_HOME>
-            </systemPropertyVariables>
+            </systemPropertyVariables> -->
             <excludes>
               <exclude>**/fixture/*.java</exclude>
               <exclude>**/live/*.java</exclude>
@@ -447,6 +447,28 @@
           <configuration>
             <detectOfflineLinks>false</detectOfflineLinks>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.commonjava.maven.plugins</groupId>
+          <artifactId>qarqas-maven-plugin</artifactId>
+          <version>0.1-SNAPSHOT</version>
+          <executions>
+            <execution>
+              <id>infra</id>
+              <goals>
+                <goal>setup</goal>
+                <goal>teardown</goal>
+              </goals>
+              <configuration>
+                <clientKey>couch</clientKey>
+                <configurators>reservation</configurators>
+                <useDefaultConfigurators>false</useDefaultConfigurators>
+                <configProperties>
+                  <reservationBaseUrl>http://localhost:9080/qarqas/api/1.0/reservation/</reservationBaseUrl>
+                </configProperties>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

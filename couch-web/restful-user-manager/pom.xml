@@ -105,6 +105,10 @@
         <artifactId>maven-dependency-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.commonjava.maven.plugins</groupId>
+        <artifactId>qarqas-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
     </plugins>
