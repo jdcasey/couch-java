@@ -419,6 +419,9 @@
             <includes>
               <include>**/live/*.java</include>
             </includes>
+            <!-- <systemPropertyVariables>
+              <HTTP_PORT>${qarqas.export.http}</HTTP_PORT>
+            </systemPropertyVariables> -->
           </configuration>
           <executions>
             <execution>

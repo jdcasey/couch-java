@@ -37,6 +37,7 @@ import org.commonjava.web.user.rest.fixture.TestUserManagerConfigProducer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,12 +49,17 @@ public class PermissionAdminResourceTest
     extends AbstractRESTfulUserManagerTest
 {
 
-    private static final String BASE_URL = "http://" + HOST + ":" + PORT + "/test/admin/permission";
-
     @BeforeClass
     public static void setup()
     {
         createWar();
+    }
+
+    @Before
+    public void setupTest()
+    {
+        fixture.setBasePath( "/test/admin/permission" );
+        // controls.setDoAuthentication( false );
     }
 
     @Deployment
@@ -73,7 +79,7 @@ public class PermissionAdminResourceTest
     public void getGodPermission()
         throws Exception
     {
-        final Permission perm = fixture.get( BASE_URL + "/*", Permission.class );
+        final Permission perm = fixture.get( fixture.resourceUrl( "/*" ), Permission.class );
 
         assertThat( perm, notNullValue() );
         assertThat( perm.getName(), equalTo( "*" ) );
@@ -83,7 +89,7 @@ public class PermissionAdminResourceTest
     public void deleteGodPermission()
         throws Exception
     {
-        fixture.delete( BASE_URL + "/*" );
+        fixture.delete( fixture.resourceUrl( "/*" ) );
     }
 
     @Test
@@ -91,19 +97,19 @@ public class PermissionAdminResourceTest
         throws Exception
     {
         final HttpResponse response =
-            fixture.post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
+            fixture.post( fixture.resourceUrl(), new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
 
-        fixture.assertLocationHeader( response, BASE_URL + "/test:read" );
+        fixture.assertLocationHeader( response, fixture.resourceUrl( "/test:read" ) );
     }
 
     @Test
     public void createPermissionThenReadGodAndNewPermissions()
         throws Exception
     {
-        fixture.post( BASE_URL, new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
+        fixture.post( fixture.resourceUrl(), new Permission( "test", Permission.READ ), HttpStatus.SC_CREATED );
 
         final Listing<Permission> listing =
-            fixture.getListing( BASE_URL + "/list", new TypeToken<Listing<Permission>>()
+            fixture.getListing( fixture.resourceUrl( "/list" ), new TypeToken<Listing<Permission>>()
             {
             } );
 

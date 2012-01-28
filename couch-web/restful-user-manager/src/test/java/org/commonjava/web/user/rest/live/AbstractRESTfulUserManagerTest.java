@@ -17,6 +17,7 @@ package org.commonjava.web.user.rest.live;
 
 import javax.inject.Inject;
 
+import org.cjtest.fixture.TestAuthenticationControls;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
@@ -30,6 +31,9 @@ public abstract class AbstractRESTfulUserManagerTest
     @Inject
     @UserData
     private CouchManager couch;
+
+    @Inject
+    protected TestAuthenticationControls controls;
 
     @Rule
     public WebFixture fixture = new WebFixture();

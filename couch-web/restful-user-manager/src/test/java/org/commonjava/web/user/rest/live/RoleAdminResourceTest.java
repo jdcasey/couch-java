@@ -34,6 +34,7 @@ import org.commonjava.web.user.rest.fixture.TestUserManagerConfigProducer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,8 +44,6 @@ import com.google.gson.reflect.TypeToken;
 public class RoleAdminResourceTest
     extends AbstractRESTfulUserManagerTest
 {
-
-    private static final String BASE_URL = "http://localhost:8080/test/admin/role";
 
     @Deployment
     public static WebArchive createWar()
@@ -57,11 +56,18 @@ public class RoleAdminResourceTest
                                                                    .build();
     }
 
+    @Before
+    public void setupTest()
+    {
+        fixture.setBasePath( "/test/admin/role" );
+        // controls.setDoAuthentication( false );
+    }
+
     @Test
     public void getAdminRole()
         throws Exception
     {
-        final Role role = fixture.get( BASE_URL + "/admin", Role.class );
+        final Role role = fixture.get( fixture.resourceUrl( "/admin" ), Role.class );
 
         assertThat( role, notNullValue() );
         assertThat( role.getName(), equalTo( "admin" ) );
@@ -77,7 +83,7 @@ public class RoleAdminResourceTest
     public void deleteAdminRole()
         throws Exception
     {
-        fixture.delete( BASE_URL + "/admin" );
+        fixture.delete( fixture.resourceUrl( "/admin" ) );
     }
 
     @Test
@@ -86,20 +92,20 @@ public class RoleAdminResourceTest
     {
         final Role r = new Role( "test", new Permission( Permission.WILDCARD ) );
 
-        final HttpResponse response = fixture.post( BASE_URL, r, HttpStatus.SC_CREATED );
-        fixture.assertLocationHeader( response, BASE_URL + "/test" );
+        final HttpResponse response = fixture.post( fixture.resourceUrl(), r, HttpStatus.SC_CREATED );
+        fixture.assertLocationHeader( response, fixture.resourceUrl( "/test" ) );
     }
 
     @Test
     public void modifyAdminRole()
         throws Exception
     {
-        final RoleDoc role = fixture.get( BASE_URL + "/admin", RoleDoc.class );
+        final RoleDoc role = fixture.get( fixture.resourceUrl( "/admin" ), RoleDoc.class );
 
         assertThat( role, notNullValue() );
 
         role.removePermission( Permission.WILDCARD );
-        fixture.post( BASE_URL + "/admin", role, HttpStatus.SC_OK );
+        fixture.post( fixture.resourceUrl( "/admin" ), role, HttpStatus.SC_OK );
     }
 
     @Test
@@ -107,11 +113,12 @@ public class RoleAdminResourceTest
         throws Exception
     {
         final HttpResponse response =
-            fixture.post( BASE_URL, new Role( "test", new Permission( Permission.WILDCARD ) ), HttpStatus.SC_CREATED );
+            fixture.post( fixture.resourceUrl(), new Role( "test", new Permission( Permission.WILDCARD ) ),
+                          HttpStatus.SC_CREATED );
 
-        fixture.assertLocationHeader( response, BASE_URL + "/test" );
+        fixture.assertLocationHeader( response, fixture.resourceUrl( "/test" ) );
 
-        final Listing<Role> roles = fixture.getListing( BASE_URL + "/list", new TypeToken<Listing<Role>>()
+        final Listing<Role> roles = fixture.getListing( fixture.resourceUrl( "/list" ), new TypeToken<Listing<Role>>()
         {
         } );
 

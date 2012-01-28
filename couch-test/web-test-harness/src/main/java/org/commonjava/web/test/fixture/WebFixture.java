@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.commonjava.web.test.fixture;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -22,11 +23,13 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -51,6 +54,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.protocol.HttpContext;
+import org.commonjava.util.logging.Logger;
 import org.commonjava.web.common.model.Listing;
 import org.commonjava.web.common.ser.JsonSerializer;
 import org.junit.rules.ExternalResource;
@@ -60,15 +64,25 @@ import com.google.gson.reflect.TypeToken;
 public class WebFixture
     extends ExternalResource
 {
+    private final Logger logger = new Logger( getClass() );
+
     public static final String DEFAULT_HOST = "localhost";
 
-    public static final int DEFAULT_PORT = 8080;
+    public static final String DEFAULT_PORT = "8080";
+
+    private static final String QARQAS_PROPERTIES = "qarqas.properties";
+
+    private static final String QARQAS_HTTP_PROP = "qarqas.export.http";
+
+    private static final String HTTP_PROP = "HTTP_PORT";
+
+    private static final String DEFAULT_BASE = "/test/api";
 
     private JsonSerializer serializer;
 
     private DefaultHttpClient http;
 
-    private int port = DEFAULT_PORT;
+    private int port;
 
     private String host = DEFAULT_HOST;
 
@@ -78,14 +92,54 @@ public class WebFixture
 
     private String pass;
 
+    private String basePath;
+
     public WebFixture()
     {
         this.serializer = new JsonSerializer();
+        initPort();
     }
 
     public WebFixture( final JsonSerializer serializer )
     {
         this.serializer = serializer;
+        initPort();
+    }
+
+    private void initPort()
+    {
+        final InputStream stream = Thread.currentThread()
+                                         .getContextClassLoader()
+                                         .getResourceAsStream( QARQAS_PROPERTIES );
+
+        final Properties props = new Properties();
+        if ( stream != null )
+        {
+            try
+            {
+                props.load( stream );
+            }
+            catch ( final IOException e )
+            {
+            }
+            finally
+            {
+                closeQuietly( stream );
+            }
+
+            final StringWriter sw = new StringWriter();
+            props.list( new PrintWriter( sw ) );
+            logger.info( "Loaded properties from: %s\n\n%s", QARQAS_PROPERTIES, sw.toString() );
+        }
+
+        String portStr = props.getProperty( QARQAS_HTTP_PROP );
+        if ( portStr == null )
+        {
+            portStr = System.getProperty( HTTP_PROP, DEFAULT_PORT );
+        }
+
+        logger.info( "HTTP port: %s", portStr );
+        this.port = Integer.parseInt( portStr );
     }
 
     public void disableRedirection()
@@ -396,11 +450,7 @@ public class WebFixture
     public String resourceUrl( final String... path )
         throws MalformedURLException
     {
-        final String[] parts = new String[path.length + 1];
-        parts[0] = getApiVersion();
-        System.arraycopy( path, 0, parts, 1, path.length );
-
-        return buildUrl( "http://" + host + ( port == 80 ? "" : ":" + port ) + "/test/api/", parts );
+        return buildUrl( "http://" + host + ( port == 80 ? "" : ":" + port ) + getResourceBase(), path );
     }
 
     public String getApiVersion()
@@ -512,5 +562,20 @@ public class WebFixture
     {
         this.user = user;
         this.pass = pass;
+    }
+
+    public String getResourceBase()
+    {
+        return basePath == null ? DEFAULT_BASE + "/" + getApiVersion() : basePath;
+    }
+
+    public String getBasePath()
+    {
+        return basePath;
+    }
+
+    public void setBasePath( final String basePath )
+    {
+        this.basePath = basePath;
     }
 }

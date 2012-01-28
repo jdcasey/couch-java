@@ -36,6 +36,7 @@ import org.commonjava.web.user.rest.fixture.TestUserManagerConfigProducer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,8 +46,6 @@ import com.google.gson.reflect.TypeToken;
 public class UserAdminResourceTest
     extends AbstractRESTfulUserManagerTest
 {
-
-    private static final String BASE_URL = "http://localhost:8080/test/admin/user";
 
     @Deployment
     public static WebArchive createWar()
@@ -62,11 +61,18 @@ public class UserAdminResourceTest
     @Inject
     private PasswordManager passwordManager;
 
+    @Before
+    public void setupTest()
+    {
+        fixture.setBasePath( "/test/admin/user" );
+        // controls.setDoAuthentication( false );
+    }
+
     @Test
     public void getAdminUser()
         throws Exception
     {
-        final User user = fixture.get( BASE_URL + "/" + User.ADMIN, User.class );
+        final User user = fixture.get( fixture.resourceUrl( User.ADMIN ), User.class );
 
         assertThat( user, notNullValue() );
         assertThat( user.getUsername(), equalTo( User.ADMIN ) );
@@ -88,7 +94,7 @@ public class UserAdminResourceTest
     public void deleteAdminUser()
         throws Exception
     {
-        fixture.delete( BASE_URL + "/" + User.ADMIN );
+        fixture.delete( fixture.resourceUrl( User.ADMIN ) );
     }
 
     @Test
@@ -97,22 +103,22 @@ public class UserAdminResourceTest
     {
         final User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
 
-        final HttpResponse response = fixture.post( BASE_URL, user, HttpStatus.SC_CREATED );
-        fixture.assertLocationHeader( response, BASE_URL + "/test" );
+        final HttpResponse response = fixture.post( fixture.resourceUrl(), user, HttpStatus.SC_CREATED );
+        fixture.assertLocationHeader( response, fixture.resourceUrl( "/test" ) );
     }
 
     @Test
     public void modifyAdminUser()
         throws Exception
     {
-        final User user = fixture.get( BASE_URL + "/" + User.ADMIN, User.class );
+        final User user = fixture.get( fixture.resourceUrl( User.ADMIN ), User.class );
 
         assertThat( user, notNullValue() );
 
         user.removeRole( Role.ADMIN );
 
         System.out.println( "\n\n\n\n\nPOST: " + user + "\n\n\n\n\n" );
-        fixture.post( BASE_URL + "/" + User.ADMIN, user, HttpStatus.SC_OK );
+        fixture.post( fixture.resourceUrl( User.ADMIN ), user, HttpStatus.SC_OK );
     }
 
     @Test
@@ -120,9 +126,9 @@ public class UserAdminResourceTest
         throws Exception
     {
         final User user = new User( "test", "test@nowhere.com", "Test", "User", "testPassword" );
-        fixture.post( BASE_URL, user, HttpStatus.SC_CREATED );
+        fixture.post( fixture.resourceUrl(), user, HttpStatus.SC_CREATED );
 
-        final Listing<User> users = fixture.getListing( BASE_URL + "/list", new TypeToken<Listing<User>>()
+        final Listing<User> users = fixture.getListing( fixture.resourceUrl( "/list" ), new TypeToken<Listing<User>>()
         {
         } );
 

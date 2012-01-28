@@ -18,6 +18,7 @@ package org.commonjava.web.test.fixture;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -93,6 +94,16 @@ public class TestWarArchiveBuilder
     private boolean beansXmlIncluded;
 
     private boolean webXmlIncluded;
+
+    private final Set<String> classloaderResources = new HashSet<String>()
+    {
+        private static final long serialVersionUID = 1L;
+
+        {
+            add( "log4j.properties" );
+            add( "qarqas.properties" );
+        }
+    };
 
     public TestWarArchiveBuilder( final Class<?> testClass )
     {
@@ -183,16 +194,20 @@ public class TestWarArchiveBuilder
         return this;
     }
 
+    public TestWarArchiveBuilder withClassloaderResources( final String... resources )
+    {
+        classloaderResources.addAll( Arrays.asList( resources ) );
+        return this;
+    }
+
+    public TestWarArchiveBuilder withoutClassloaderResources( final String... resources )
+    {
+        classloaderResources.removeAll( Arrays.asList( resources ) );
+        return this;
+    }
+
     public TestWarArchiveBuilder withLog4jProperties()
     {
-        final ClassLoader cloader = Thread.currentThread()
-                                          .getContextClassLoader();
-
-        final URL resource = cloader.getResource( "log4j.properties" );
-        if ( resource != null )
-        {
-            war.addAsWebInfResource( new UrlAsset( resource ), "classes/log4j.properties" );
-        }
         return this;
     }
 
@@ -220,6 +235,18 @@ public class TestWarArchiveBuilder
         if ( !webXmlIncluded )
         {
             war.addAsWebInfResource( new ClassLoaderAsset( "test.web.xml" ), "web.xml" );
+        }
+
+        for ( final String resource : classloaderResources )
+        {
+            final ClassLoader cloader = Thread.currentThread()
+                                              .getContextClassLoader();
+
+            final URL u = cloader.getResource( resource );
+            if ( u != null )
+            {
+                war.addAsWebInfResource( new UrlAsset( u ), "classes/" + resource );
+            }
         }
 
         if ( librariesDir != null )
