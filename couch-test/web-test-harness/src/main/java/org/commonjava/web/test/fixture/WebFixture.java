@@ -292,6 +292,26 @@ public class WebFixture
         }
     }
 
+    public HttpResponse getWithResponse( final String url, final int expectedStatus, final String accept )
+        throws Exception
+    {
+        final HttpGet get = new HttpGet( url );
+        get.setHeader( "Accept", accept );
+
+        try
+        {
+            final HttpResponse response = http.execute( get );
+            final StatusLine sl = response.getStatusLine();
+            assertThat( sl.getStatusCode(), equalTo( expectedStatus ) );
+
+            return response;
+        }
+        finally
+        {
+            get.abort();
+        }
+    }
+
     public <T> Listing<T> getListing( final String url, final TypeToken<Listing<T>> token )
         throws Exception
     {
