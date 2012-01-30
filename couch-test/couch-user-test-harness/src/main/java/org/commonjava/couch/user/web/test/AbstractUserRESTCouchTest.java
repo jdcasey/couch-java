@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.commonjava.couch.user.web.test;
 
-import static org.commonjava.couch.util.UrlUtils.buildUrl;
-
 import java.net.MalformedURLException;
 
 import javax.inject.Inject;
@@ -28,8 +26,10 @@ import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.auth.shiro.couch.CouchRealm;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.web.common.ser.JsonSerializer;
+import org.commonjava.web.test.fixture.WebFixture;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 
 public abstract class AbstractUserRESTCouchTest
 {
@@ -55,6 +55,9 @@ public abstract class AbstractUserRESTCouchTest
     @Inject
     @UserData
     private CouchManager userCouch;
+
+    @Rule
+    public WebFixture http = new WebFixture();
 
     protected AbstractUserRESTCouchTest()
     {
@@ -83,15 +86,15 @@ public abstract class AbstractUserRESTCouchTest
         // getCouchManager().dropDatabase();
     }
 
-    protected String resourceUrl( final String path )
+    protected String resourceUrl( final String... path )
         throws MalformedURLException
     {
-        return buildUrl( "http://localhost:8080/test/api/", apiVersion(), path );
+        return http.resourceUrl( path );
     }
 
     protected String apiVersion()
     {
-        return "1.0";
+        return http.getApiVersion();
     }
 
 }

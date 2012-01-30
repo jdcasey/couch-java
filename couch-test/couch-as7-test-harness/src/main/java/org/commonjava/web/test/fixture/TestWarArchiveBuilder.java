@@ -118,6 +118,19 @@ public class TestWarArchiveBuilder
         war.addClass( testClass );
     }
 
+    public TestWarArchiveBuilder( final File baseWar, final Class<?> testClass )
+    {
+        this( baseWar, testClass, new File( "target/classes" ) );
+    }
+
+    public TestWarArchiveBuilder( final File baseWar, final Class<?> testClass, final File buildOutput )
+    {
+        this.buildOutput = buildOutput.getAbsoluteFile();
+        war = ShrinkWrap.createFromZipFile( WebArchive.class, baseWar );
+
+        war.addClass( testClass );
+    }
+
     public TestWarArchiveBuilder withKnockoutRewritesDir( final File directory )
     {
         this.knockoutRewritesDir = directory;
@@ -251,51 +264,55 @@ public class TestWarArchiveBuilder
 
         if ( librariesDir != null )
         {
-            libs: for ( final File file : librariesDir.listFiles() )
+            final File[] files = librariesDir.listFiles();
+            if ( files != null )
             {
-                File f = file;
-
-                if ( f.isDirectory() )
+                libs: for ( final File file : files )
                 {
-                    logger.info( "Adding classes from exploded library directory: %s", f );
-                    addDirectoryClasses( f );
-                }
-                else
-                {
-                    final String fname = f.getName();
+                    File f = file;
 
-                    for ( final String pattern : libraryFilters )
+                    if ( f.isDirectory() )
                     {
-                        if ( fname.matches( pattern ) )
-                        {
-                            continue libs;
-                        }
+                        logger.info( "Adding classes from exploded library directory: %s", f );
+                        addDirectoryClasses( f );
                     }
-
-                    final Set<JarKnockouts> jks = new HashSet<JarKnockouts>();
-                    for ( final Map.Entry<String, JarKnockouts> entry : this.knockouts.entrySet() )
+                    else
                     {
-                        if ( fname.matches( entry.getKey() ) )
-                        {
-                            jks.add( entry.getValue() );
-                        }
-                    }
+                        final String fname = f.getName();
 
-                    if ( !jks.isEmpty() )
-                    {
-                        try
+                        for ( final String pattern : libraryFilters )
                         {
-                            f = JarKnockouts.rewriteJar( f, knockoutRewritesDir, jks );
+                            if ( fname.matches( pattern ) )
+                            {
+                                continue libs;
+                            }
                         }
-                        catch ( final IOException e )
-                        {
-                            throw new RuntimeException( "Failed to rewrite jar: " + fname + " with knock-outs. Error: "
-                                + e.getMessage(), e );
-                        }
-                    }
 
-                    logger.info( "Adding library: %s", f );
-                    war.addAsLibrary( f );
+                        final Set<JarKnockouts> jks = new HashSet<JarKnockouts>();
+                        for ( final Map.Entry<String, JarKnockouts> entry : this.knockouts.entrySet() )
+                        {
+                            if ( fname.matches( entry.getKey() ) )
+                            {
+                                jks.add( entry.getValue() );
+                            }
+                        }
+
+                        if ( !jks.isEmpty() )
+                        {
+                            try
+                            {
+                                f = JarKnockouts.rewriteJar( f, knockoutRewritesDir, jks );
+                            }
+                            catch ( final IOException e )
+                            {
+                                throw new RuntimeException( "Failed to rewrite jar: " + fname
+                                    + " with knock-outs. Error: " + e.getMessage(), e );
+                            }
+                        }
+
+                        logger.info( "Adding library: %s", f );
+                        war.addAsLibrary( f );
+                    }
                 }
             }
         }

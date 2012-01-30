@@ -88,5 +88,10 @@
         	<artifactId>couch-as7-test-harness</artifactId>
         	<scope>compile</scope>
         </dependency>
+        <dependency>
+          <groupId>org.commonjava.couch.test</groupId>
+          <artifactId>web-test-harness</artifactId>
+          <scope>compile</scope>
+        </dependency>
   </dependencies>
 </project>

@@ -486,7 +486,7 @@ public class WebFixture
     public static String buildUrl( final String baseUrl, final String... parts )
         throws MalformedURLException
     {
-        return buildUrl( baseUrl, null, parts );
+        return buildUrl( baseUrl, (Map<String, String>) null, parts );
     }
 
     public static String buildUrl( final String baseUrl, final Map<String, String> params, final String... parts )
