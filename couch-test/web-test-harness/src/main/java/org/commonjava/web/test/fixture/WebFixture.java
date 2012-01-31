@@ -208,6 +208,7 @@ public class WebFixture
     public <T> T get( final String url, final Class<T> type )
         throws Exception
     {
+        logger.info( "WebFixture: GET '%s', expecting: 200, return-type: %s", url, type.getName() );
         final HttpGet get = new HttpGet( url );
         get.setHeader( HttpHeaders.ACCEPT, "application/json" );
         try
@@ -236,6 +237,7 @@ public class WebFixture
     public void get( final String url, final int expectedStatus )
         throws Exception
     {
+        logger.info( "WebFixture: GET '%s', expecting: %s", url, expectedStatus );
         final HttpGet get = new HttpGet( url );
         try
         {
