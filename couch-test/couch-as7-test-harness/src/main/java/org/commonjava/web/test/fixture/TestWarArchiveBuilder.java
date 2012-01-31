@@ -125,10 +125,8 @@ public class TestWarArchiveBuilder
 
     public TestWarArchiveBuilder( final File baseWar, final Class<?> testClass, final File buildOutput )
     {
-        this.buildOutput = buildOutput.getAbsoluteFile();
-        war = ShrinkWrap.createFromZipFile( WebArchive.class, baseWar );
-
-        war.addClass( testClass );
+        this( testClass, buildOutput );
+        war.merge( ShrinkWrap.createFromZipFile( WebArchive.class, baseWar ) );
     }
 
     public TestWarArchiveBuilder withKnockoutRewritesDir( final File directory )
