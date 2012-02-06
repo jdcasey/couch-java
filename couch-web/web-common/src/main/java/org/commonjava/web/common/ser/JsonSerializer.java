@@ -47,6 +47,8 @@ public class JsonSerializer
 
     private final Logger logger = new Logger( getClass() );
 
+    private static final WebSerializationAdapter[] DEFAULT_ADAPTERS = { new ListingAdapter() };
+
     private final Set<WebSerializationAdapter> baseAdapters = new HashSet<WebSerializationAdapter>();
 
     @Inject
@@ -70,6 +72,11 @@ public class JsonSerializer
     private Gson getGson()
     {
         final GsonBuilder builder = new GsonBuilder();
+        for ( final WebSerializationAdapter adapter : DEFAULT_ADAPTERS )
+        {
+            adapter.register( builder );
+        }
+
         if ( baseAdapters != null )
         {
             for ( final WebSerializationAdapter adapter : baseAdapters )

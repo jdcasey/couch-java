@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.commonjava.web.common.model;
 
+import static org.apache.commons.lang.StringUtils.join;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,6 +49,12 @@ public class Listing<T>
     public void setItems( final List<T> items )
     {
         this.items = items;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Listing: [items:\n\t" + join( items, "\n\t" ) + "\n]";
     }
 
 }
