@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.commonjava.couch.model.AttachmentInfo;
-import org.commonjava.web.common.ser.WebSerializationAdapter;
+import org.commonjava.web.json.ser.WebSerializationAdapter;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;

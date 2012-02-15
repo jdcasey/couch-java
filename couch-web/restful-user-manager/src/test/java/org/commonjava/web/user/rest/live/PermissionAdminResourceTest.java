@@ -29,7 +29,7 @@ import org.apache.http.HttpStatus;
 import org.apache.log4j.Level;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.test.fixture.LoggingFixture;
-import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.PermissionAdminResource;
 import org.commonjava.web.user.rest.fixture.TestRESTApplication;

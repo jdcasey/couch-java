@@ -39,8 +39,8 @@ import org.commonjava.auth.couch.data.UserDataException;
 import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.common.model.Listing;
-import org.commonjava.web.common.ser.JsonSerializer;
+import org.commonjava.web.json.model.Listing;
+import org.commonjava.web.json.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -68,11 +68,11 @@ public class PermissionAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
-                                                                 Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Permission.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
-        Permission permission = jsonSerializer.fromRequestBody( request, Permission.class );
+        final Permission permission = jsonSerializer.fromRequestBody( request, Permission.class );
 
         logger.info( "\n\nGot permission: %s\n\n", permission );
 
@@ -80,10 +80,11 @@ public class PermissionAdminResource
         try
         {
             dataManager.storePermission( permission );
-            builder =
-                Response.created( uriInfo.getAbsolutePathBuilder().path( permission.getName() ).build() );
+            builder = Response.created( uriInfo.getAbsolutePathBuilder()
+                                               .path( permission.getName() )
+                                               .build() );
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( "Failed to create proxy: %s. Reason: %s", e, e.getMessage() );
             builder = Response.status( Status.INTERNAL_SERVER_ERROR );
@@ -97,18 +98,21 @@ public class PermissionAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
-                                                                 Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Permission.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
-            Listing<Permission> listing = new Listing<Permission>( dataManager.getAllPermissions() );
-            TypeToken<Listing<Permission>> tt = new TypeToken<Listing<Permission>>()
-            {};
+            final Listing<Permission> listing = new Listing<Permission>( dataManager.getAllPermissions() );
+            final TypeToken<Listing<Permission>> tt = new TypeToken<Listing<Permission>>()
+            {
+            };
 
-            return Response.ok().entity( jsonSerializer.toString( listing, tt.getType() ) ).build();
+            return Response.ok()
+                           .entity( jsonSerializer.toString( listing, tt.getType() ) )
+                           .build();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( e.getMessage(), e );
             throw new WebApplicationException( Status.INTERNAL_SERVER_ERROR );
@@ -119,17 +123,19 @@ public class PermissionAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
-                                                                 Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Permission.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
-            Permission permission = dataManager.getPermission( name );
+            final Permission permission = dataManager.getPermission( name );
             logger.info( "Returning permission: %s for name: '%s'", permission, name );
 
-            return Response.ok().entity( jsonSerializer.toString( permission ) ).build();
+            return Response.ok()
+                           .entity( jsonSerializer.toString( permission ) )
+                           .build();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( e.getMessage(), e );
             throw new WebApplicationException( Status.INTERNAL_SERVER_ERROR );
@@ -140,8 +146,8 @@ public class PermissionAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Permission.NAMESPACE,
-                                                                 Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Permission.NAMESPACE, Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try
@@ -149,7 +155,7 @@ public class PermissionAdminResource
             dataManager.deletePermission( name );
             builder = Response.ok();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( e.getMessage(), e );
             builder = Response.status( Status.INTERNAL_SERVER_ERROR );

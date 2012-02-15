@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.commonjava.web.common.ser.WebSerializationAdapter;
+import org.commonjava.web.json.ser.WebSerializationAdapter;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;

@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.commonjava.couch.db.model.CouchObjectList;
 import org.commonjava.couch.model.CouchDocument;
-import org.commonjava.web.common.ser.WebSerializationAdapter;
+import org.commonjava.web.json.ser.WebSerializationAdapter;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;

@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.io.Serializer;
 import org.commonjava.couch.model.CouchError;
-import org.commonjava.web.common.ser.WebSerializationAdapter;
+import org.commonjava.web.json.ser.WebSerializationAdapter;
 
 public class SerializedGetHandler<T>
     implements ResponseHandlerWithError<T>

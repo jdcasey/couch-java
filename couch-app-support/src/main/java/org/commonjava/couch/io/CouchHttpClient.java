@@ -39,7 +39,7 @@ import org.commonjava.couch.db.CouchDBException;
 import org.commonjava.couch.db.handler.ResponseHandlerWithError;
 import org.commonjava.couch.db.handler.SerializedGetHandler;
 import org.commonjava.couch.model.CouchError;
-import org.commonjava.web.common.ser.WebSerializationAdapter;
+import org.commonjava.web.json.ser.WebSerializationAdapter;
 
 @Named( "dont-use-directly" )
 @Alternative

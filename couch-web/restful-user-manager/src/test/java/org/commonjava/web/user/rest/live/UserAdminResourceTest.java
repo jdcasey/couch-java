@@ -28,7 +28,7 @@ import org.apache.http.HttpStatus;
 import org.commonjava.auth.couch.data.PasswordManager;
 import org.commonjava.couch.rbac.Role;
 import org.commonjava.couch.rbac.User;
-import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.UserAdminResource;
 import org.commonjava.web.user.rest.fixture.TestRESTApplication;

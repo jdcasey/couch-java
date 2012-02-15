@@ -41,8 +41,8 @@ import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.rbac.User;
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.common.model.Listing;
-import org.commonjava.web.common.ser.JsonSerializer;
+import org.commonjava.web.json.model.Listing;
+import org.commonjava.web.json.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
 

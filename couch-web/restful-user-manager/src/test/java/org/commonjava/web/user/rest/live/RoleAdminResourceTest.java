@@ -26,7 +26,7 @@ import org.apache.http.HttpStatus;
 import org.commonjava.auth.couch.model.RoleDoc;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.rbac.Role;
-import org.commonjava.web.common.model.Listing;
+import org.commonjava.web.json.model.Listing;
 import org.commonjava.web.test.fixture.TestWarArchiveBuilder;
 import org.commonjava.web.user.rest.RoleAdminResource;
 import org.commonjava.web.user.rest.fixture.TestRESTApplication;

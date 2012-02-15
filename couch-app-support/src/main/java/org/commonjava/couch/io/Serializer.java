@@ -37,7 +37,7 @@ import org.commonjava.couch.io.json.CouchDocumentActionAdapter;
 import org.commonjava.couch.model.AttachmentInfo;
 import org.commonjava.couch.model.CouchDocument;
 import org.commonjava.couch.model.CouchError;
-import org.commonjava.web.common.ser.WebSerializationAdapter;
+import org.commonjava.web.json.ser.WebSerializationAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

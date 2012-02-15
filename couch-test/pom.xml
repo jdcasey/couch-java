@@ -30,9 +30,7 @@
   <name>CouchDB Test Harnesses :: Parent</name>
   
   <modules>
-    <module>web-test-harness</module>
     <module>couch-test-harness</module>
-    <module>couch-as7-test-harness</module>
     <module>couch-user-test-harness</module>
   </modules>
   

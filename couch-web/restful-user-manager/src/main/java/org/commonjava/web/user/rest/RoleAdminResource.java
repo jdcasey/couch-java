@@ -40,8 +40,8 @@ import org.commonjava.auth.couch.data.UserDataManager;
 import org.commonjava.couch.rbac.Permission;
 import org.commonjava.couch.rbac.Role;
 import org.commonjava.util.logging.Logger;
-import org.commonjava.web.common.model.Listing;
-import org.commonjava.web.common.ser.JsonSerializer;
+import org.commonjava.web.json.model.Listing;
+import org.commonjava.web.json.ser.JsonSerializer;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -69,10 +69,11 @@ public class RoleAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response create()
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
-        Role role = jsonSerializer.fromRequestBody( request, Role.class );
+        final Role role = jsonSerializer.fromRequestBody( request, Role.class );
 
         logger.info( "\n\nGot role: %s\n\n", role );
 
@@ -80,10 +81,11 @@ public class RoleAdminResource
         try
         {
             dataManager.storeRole( role );
-            builder =
-                Response.created( uriInfo.getAbsolutePathBuilder().path( role.getName() ).build() );
+            builder = Response.created( uriInfo.getAbsolutePathBuilder()
+                                               .path( role.getName() )
+                                               .build() );
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( "Failed to create proxy: %s. Reason: %s", e, e.getMessage() );
             builder = Response.status( Status.INTERNAL_SERVER_ERROR );
@@ -97,10 +99,11 @@ public class RoleAdminResource
     @Consumes( { MediaType.APPLICATION_JSON } )
     public Response store( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         @SuppressWarnings( "unchecked" )
-        Role role = jsonSerializer.fromRequestBody( request, Role.class );
+        final Role role = jsonSerializer.fromRequestBody( request, Role.class );
 
         logger.info( "\n\nGot role: %s\n\n", role );
 
@@ -118,9 +121,10 @@ public class RoleAdminResource
             }
 
             dataManager.storeRole( toUpdate );
-            builder = Response.ok( uriInfo.getAbsolutePathBuilder().build() );
+            builder = Response.ok( uriInfo.getAbsolutePathBuilder()
+                                          .build() );
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( "Failed to save proxy: %s. Reason: %s", e, e.getMessage() );
             builder = Response.status( Status.INTERNAL_SERVER_ERROR );
@@ -134,17 +138,21 @@ public class RoleAdminResource
     @Produces( { MediaType.APPLICATION_JSON } )
     public Response getAll()
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
-            Listing<Role> listing = new Listing<Role>( dataManager.getAllRoles() );
-            TypeToken<Listing<Role>> tt = new TypeToken<Listing<Role>>()
-            {};
+            final Listing<Role> listing = new Listing<Role>( dataManager.getAllRoles() );
+            final TypeToken<Listing<Role>> tt = new TypeToken<Listing<Role>>()
+            {
+            };
 
-            return Response.ok().entity( jsonSerializer.toString( listing, tt.getType() ) ).build();
+            return Response.ok()
+                           .entity( jsonSerializer.toString( listing, tt.getType() ) )
+                           .build();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( e.getMessage(), e );
             throw new WebApplicationException( Status.INTERNAL_SERVER_ERROR );
@@ -155,16 +163,19 @@ public class RoleAdminResource
     @Path( "/{name}" )
     public Response get( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         try
         {
-            Role role = dataManager.getRole( name );
+            final Role role = dataManager.getRole( name );
             logger.info( "Returning role: %s", role );
 
-            return Response.ok().entity( jsonSerializer.toString( role ) ).build();
+            return Response.ok()
+                           .entity( jsonSerializer.toString( role ) )
+                           .build();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( e.getMessage(), e );
             throw new WebApplicationException( Status.INTERNAL_SERVER_ERROR );
@@ -175,7 +186,8 @@ public class RoleAdminResource
     @Path( "/{name}" )
     public Response delete( @PathParam( "name" ) final String name )
     {
-        SecurityUtils.getSubject().isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
+        SecurityUtils.getSubject()
+                     .isPermitted( Permission.name( Role.NAMESPACE, Permission.ADMIN ) );
 
         ResponseBuilder builder;
         try
@@ -183,7 +195,7 @@ public class RoleAdminResource
             dataManager.deleteRole( name );
             builder = Response.ok();
         }
-        catch ( UserDataException e )
+        catch ( final UserDataException e )
         {
             logger.error( e.getMessage(), e );
             builder = Response.status( Status.INTERNAL_SERVER_ERROR );

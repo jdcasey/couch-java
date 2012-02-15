@@ -30,7 +30,6 @@
   <name>CouchDB Web Applications :: Parent</name>
   
   <modules>
-    <module>web-common</module>
     <module>restful-user-manager</module>
   </modules>
   

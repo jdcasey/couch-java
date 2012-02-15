@@ -67,9 +67,9 @@
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.couch.web</groupId>
-        <artifactId>web-common</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <groupId>org.commonjava.web</groupId>
+        <artifactId>json-serialization</artifactId>
+        <version>0.1</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch.web</groupId>
@@ -77,9 +77,9 @@
         <version>1.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.couch.test</groupId>
-        <artifactId>web-test-harness</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <groupId>org.commonjava.web</groupId>
+        <artifactId>json-test-harness</artifactId>
+        <version>0.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -95,9 +95,9 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.couch.test</groupId>
-        <artifactId>couch-as7-test-harness</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <groupId>org.commonjava.qarqas</groupId>
+        <artifactId>qarqas-test-harness</artifactId>
+        <version>0.2</version>
         <scope>test</scope>
       </dependency>
       

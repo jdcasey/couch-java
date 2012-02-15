@@ -21,7 +21,7 @@ import org.cjtest.fixture.TestAuthenticationControls;
 import org.commonjava.auth.couch.inject.UserData;
 import org.commonjava.couch.db.CouchManager;
 import org.commonjava.couch.user.web.test.AbstractUserRESTCouchTest;
-import org.commonjava.web.test.fixture.WebFixture;
+import org.commonjava.web.json.test.WebFixture;
 import org.junit.Rule;
 
 public abstract class AbstractRESTfulUserManagerTest
