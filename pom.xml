@@ -454,7 +454,7 @@
         <plugin>
           <groupId>org.commonjava.maven.plugins</groupId>
           <artifactId>qarqas-maven-plugin</artifactId>
-          <version>0.1-SNAPSHOT</version>
+          <version>0.2</version>
           <executions>
             <execution>
               <id>infra</id>
@@ -481,7 +481,7 @@
   <properties>
     <jbossHome>${env.JBOSS_HOME}</jbossHome>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <configurationVersion>0.2-SNAPSHOT</configurationVersion>
+    <configurationVersion>0.2</configurationVersion>
     <slf4jVersion>1.6.2</slf4jVersion>
     <shiroVersion>1.1.0</shiroVersion>
   </properties>
