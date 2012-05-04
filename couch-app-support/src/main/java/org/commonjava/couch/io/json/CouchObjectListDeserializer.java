@@ -32,7 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
-public class CouchObjectListDeserializer<T extends CouchDocument>
+public class CouchObjectListDeserializer<T>
     implements JsonDeserializer<CouchObjectList<T>>, WebSerializationAdapter
 {
 
@@ -66,6 +66,8 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
                                            final JsonDeserializationContext context )
         throws JsonParseException
     {
+        final boolean useDocElement = CouchDocument.class.isAssignableFrom( type );
+
         final List<T> items = new ArrayList<T>();
 
         final JsonElement rowsRaw = json.getAsJsonObject()
@@ -79,19 +81,23 @@ public class CouchObjectListDeserializer<T extends CouchDocument>
         for ( final JsonElement row : rows )
         {
             final JsonObject rowObj = row.getAsJsonObject();
-            final JsonElement doc = rowObj.get( DOC_ELEMENT );
-            if ( doc == null )
+            JsonElement data = rowObj;
+            if ( useDocElement )
             {
-                if ( allowMissing )
+                data = rowObj.get( DOC_ELEMENT );
+                if ( data == null )
                 {
-                    continue;
-                }
+                    if ( allowMissing )
+                    {
+                        continue;
+                    }
 
-                throw new JsonParseException( "Cannot find " + DOC_ELEMENT + " field within row: " + row
-                    + "\nDid you access the view with the '?include_docs=true' query parameter?" );
+                    throw new JsonParseException( "Cannot find " + DOC_ELEMENT + " field within row: " + row
+                        + "\nDid you access the view with the '?include_docs=true' query parameter?" );
+                }
             }
 
-            final Object val = context.deserialize( doc, type );
+            final Object val = context.deserialize( data, type );
             if ( val != null )
             {
                 items.add( type.cast( val ) );

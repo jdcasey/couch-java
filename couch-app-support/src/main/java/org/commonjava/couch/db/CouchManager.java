@@ -302,10 +302,13 @@ public class CouchManager
         // threadedExecute( new HashSet<CouchDocumentAction>( actions ), dbUrl );
     }
 
-    public <T extends CouchDocument> List<T> getViewListing( final ViewRequest req, final Class<T> itemType )
+    public <T> List<T> getViewListing( final ViewRequest req, final Class<T> itemType )
         throws CouchDBException
     {
-        req.setParameter( ViewRequest.INCLUDE_DOCS, true );
+        if ( CouchDocument.class.isAssignableFrom( itemType ) )
+        {
+            req.setParameter( ViewRequest.INCLUDE_DOCS, true );
+        }
 
         final String url = buildViewUrl( req );
 

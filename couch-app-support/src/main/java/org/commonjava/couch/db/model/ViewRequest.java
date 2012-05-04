@@ -37,6 +37,8 @@ public class ViewRequest
 
     public static final String INCLUDE_DOCS = "include_docs";
 
+    public static final String LIMIT = "limit";
+
     private final String application;
 
     private final String view;
