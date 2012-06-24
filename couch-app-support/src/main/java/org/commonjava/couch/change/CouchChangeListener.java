@@ -156,7 +156,7 @@ public class CouchChangeListener
 
         if ( metadata != null )
         {
-            if ( metadata.getLastProcessedSequenceId() < 1 )
+            if ( metadata.getLastProcessedSequenceId() > 0 )
             {
                 couch.store( metadata, false );
             }
