@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.commonjava.couch.test</groupId>
     <artifactId>couch-test</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>couch-test-harness</artifactId>
