@@ -24,7 +24,7 @@
   
   <groupId>org.commonjava.couch</groupId>
   <artifactId>couch-java-parent</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>pom</packaging>
   
   <name>CouchDB Applications :: Parent</name>
@@ -49,22 +49,22 @@
       <dependency>
         <groupId>org.commonjava.couch</groupId>
         <artifactId>shiro-couch</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch</groupId>
         <artifactId>couch-user-manager</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch</groupId>
         <artifactId>rbac-api</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch</groupId>
         <artifactId>couch-app-support</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.web</groupId>
@@ -74,7 +74,7 @@
       <dependency>
         <groupId>org.commonjava.couch.web</groupId>
         <artifactId>restful-user-manager</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.web</groupId>
@@ -85,13 +85,13 @@
       <dependency>
         <groupId>org.commonjava.couch.test</groupId>
         <artifactId>couch-test-harness</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.commonjava.couch.test</groupId>
         <artifactId>couch-user-test-harness</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
         <scope>test</scope>
       </dependency>
       <dependency>

@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.commonjava.couch.web</groupId>
     <artifactId>couch-web</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
   </parent>
   
   <artifactId>restful-user-manager</artifactId>
